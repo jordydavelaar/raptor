@@ -29,13 +29,13 @@ for line in f:
     # Pixel coordinates
     x = float(columns[0])
     y = float(columns[1])
-    
+
     # Set image pixel
     imgI[int(x)][int(y)] = float(columns[2])
     imgQ[int(x)][int(y)] = float(columns[3])
     imgU[int(x)][int(y)] = float(columns[4])
     imgV[int(x)][int(y)] = float(columns[5])
-    
+
     fluxI += float(columns[2])
     fluxQ += float(columns[3])
     fluxU += float(columns[4])
@@ -105,4 +105,3 @@ print('flux V')
 print(fluxV)
 
 pl.savefig('figures/IQUV_plot.pdf', transparent=False)
-

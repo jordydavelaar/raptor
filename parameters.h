@@ -36,7 +36,7 @@ extern double Thetae_unit;
 #define MKS2 (9) // Proper MKS coords
 #define DM (5)
 //#define a        (0.0)    // Black hole spin (range: [0,1]), only for
-//BL,MBL,KS,MKS #define R0       (0.0)      // Parameter for MKS coordinates.
+// BL,MBL,KS,MKS #define R0       (0.0)      // Parameter for MKS coordinates.
 extern double a;
 extern double R0;
 
@@ -63,7 +63,7 @@ char OUTPUT_FILE[256];
 
 int SPHERICAL_ACC;
 //#define SPHERICAL_ACCRETION (1) // Indicate whether or not to use the
-//spherical accretion model for the B field
+// spherical accretion model for the B field
 char TEMP_MODEL[100];
 //#define DISK_MODEL          (0) // DOES NOTHING RIGHT NOW, TODO DEPRECATED
 
@@ -71,10 +71,10 @@ char TEMP_MODEL[100];
 int ABSORPTION;
 //#define ABSORPTION          (1)
 #define LIGHT_TRANSPORT                                                        \
-  (1) // Toggle light transport calculation on/off for integration debugging
+    (1) // Toggle light transport calculation on/off for integration debugging
 
 #define RT_OUTER_CUTOFF                                                        \
-  (40.) // Outer boundary of radiative transfer computation
+    (40.) // Outer boundary of radiative transfer computation
 
 // Black hole mass
 double MBH;
@@ -119,7 +119,7 @@ int IMG_HEIGHT;
 double CAM_SIZE_X;
 double CAM_SIZE_Y;
 #define max_order                                                              \
-  (100) // Maximimum order of lensed image computed (0 = direct only)
+    (100) // Maximimum order of lensed image computed (0 = direct only)
 
 // INTEGRATOR PARAMETERS
 ////////////////////////
@@ -140,19 +140,19 @@ double STEPSIZE;
 #define DIM 4
 #define LOOP_i for (i = 0; i < DIM; i++)
 #define LOOP_ij                                                                \
-  for (i = 0; i < DIM; i++)                                                    \
-    for (j = 0; j < DIM; j++)
+    for (i = 0; i < DIM; i++)                                                  \
+        for (j = 0; j < DIM; j++)
 #define LOOP_kl                                                                \
-  for (k = 0; k < DIM; k++)                                                    \
-    for (l = 0; l < DIM; l++)
-#define LOOP_ijk                                                               \
-  for (i = 0; i < DIM; i++)                                                    \
-    for (j = 0; j < DIM; j++)                                                  \
-      for (k = 0; k < DIM; k++)
-#define LOOP_ijkl                                                              \
-  for (i = 0; i < DIM; i++)                                                    \
-    for (j = 0; j < DIM; j++)                                                  \
-      for (k = 0; k < DIM; k++)                                                \
+    for (k = 0; k < DIM; k++)                                                  \
         for (l = 0; l < DIM; l++)
+#define LOOP_ijk                                                               \
+    for (i = 0; i < DIM; i++)                                                  \
+        for (j = 0; j < DIM; j++)                                              \
+            for (k = 0; k < DIM; k++)
+#define LOOP_ijkl                                                              \
+    for (i = 0; i < DIM; i++)                                                  \
+        for (j = 0; j < DIM; j++)                                              \
+            for (k = 0; k < DIM; k++)                                          \
+                for (l = 0; l < DIM; l++)
 
 #endif // PARAMETERS_H

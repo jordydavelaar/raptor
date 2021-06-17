@@ -34,38 +34,38 @@ static int carrybit = 0;
 // Generate a random number between 0 and 1 (inclusive?)
 // WARNING: MUST CALL THE init FUNCTION BEFORE USING genrand!
 double genrand_RCARRY() {
-  int y = 0;
-  int xn = 0;
+    int y = 0;
+    int xn = 0;
 
-  // Compute new number
-  y = reg[s - 1] - reg[r - 1] - carrybit;
+    // Compute new number
+    y = reg[s - 1] - reg[r - 1] - carrybit;
 
-  // Possibly offset the new number, compute carry bit
-  if (y >= 0) {
-    xn = y;
-    carrybit = 0;
-  } else {
-    xn = y + B;
-    carrybit = 1;
-  }
+    // Possibly offset the new number, compute carry bit
+    if (y >= 0) {
+        xn = y;
+        carrybit = 0;
+    } else {
+        xn = y + B;
+        carrybit = 1;
+    }
 
-  // Shift the register
-  for (int j = r - 1; j > 0; j--) {
-    reg[j] = reg[j - 1];
-  }
-  reg[0] = xn;
+    // Shift the register
+    for (int j = r - 1; j > 0; j--) {
+        reg[j] = reg[j - 1];
+    }
+    reg[0] = xn;
 
-  return (double)xn / (double)B;
+    return (double)xn / (double)B;
 }
 
 void init_RCARRY(int seed_) {
-  // Initialize the register & variables
-  for (int i = 0; i < r; i++) {
-    reg[i] = seed_;
-  }
-  // Generate a few hundred numbers to get through the start-up
-  double temp;
-  for (int k = 0; k < STARTUP; k++) {
-    temp = genrand_RCARRY();
-  }
+    // Initialize the register & variables
+    for (int i = 0; i < r; i++) {
+        reg[i] = seed_;
+    }
+    // Generate a few hundred numbers to get through the start-up
+    double temp;
+    for (int k = 0; k < STARTUP; k++) {
+        temp = genrand_RCARRY();
+    }
 }
