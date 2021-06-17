@@ -1,0 +1,8 @@
+*.o
+*.out
+*.dat
+output*
+figures
+*.png
+slurm*
+RAPTOR
