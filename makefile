@@ -25,4 +25,3 @@ $(OBJ): makefile functions.h constants.h parameters.h raptor_harm_model.h
 
 clean:
 	rm *.o
-	make img
