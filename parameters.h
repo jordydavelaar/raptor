@@ -42,7 +42,7 @@ extern double a;
 extern double R0;
 
 // Metric
-#define metric   (MBL)
+#define metric   (MKS2)
 #if(metric == BL || metric == KS || metric == DM)
     #define logscale (0)    // Standard BL/KS coordinates; no logarithmic radius
 #elif(metric == MBL || metric == MKS || metric == MKS2)
@@ -86,8 +86,8 @@ double M_UNIT;
 //#define M_unit    (2.3e28) // M87, for Michael's run
 //#define M_unit  (4.543e-7) // For spherical accretion
 
-#define source_dist    (1.54e17) // Distance to Sgr A* (cm)
-//#define source_dist    (5.061e25) // Distance to M87 (cm)
+//#define source_dist    (2.47e22) // Distance to Sgr A* (cm)
+#define source_dist    (5.061e25) // Distance to M87 (cm)
 
 // These are for simple analytical model - move to different .c file!!
 #define n_e0           (4.5e6)   // Electron density normalization
@@ -110,7 +110,7 @@ int    FREQS_PER_DEC;
 double FREQ_MIN;
 double FREQ_MAX;
 
-#define rcam         (1.e4)//(500.)    // Camera distance from the sing.(units of Rg)
+#define rcam         (1e4)//(500.)    // Camera distance from the sing.(units of Rg)
 
 int IMG_WIDTH;
 int IMG_HEIGHT;
@@ -147,6 +147,5 @@ double STEPSIZE;
                   for(j = 0; j < DIM; j++) \
                   for(k = 0; k < DIM; k++) \
                   for(l = 0; l < DIM; l++)
-
 
 #endif // PARAMETERS_H

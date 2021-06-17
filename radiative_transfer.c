@@ -11,7 +11,6 @@
 #include "parameters.h"
 #include <stdio.h>
 #include "gsl/gsl_sf_hyperg.h"
-#include <gsl/gsl_sf_bessel.h>
 
 //kappa distribution function
 
@@ -724,8 +723,19 @@ double emissivity_thindisk(double *X_u){
 
 // Planck function
 double planck_function(double nu, double THETA_e){
-    double T = THETA_e;// * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT / BOLTZMANN_CONSTANT;
+    double T = THETA_e * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT / BOLTZMANN_CONSTANT;
     return 2. * PLANCK_CONSTANT * nu * nu * nu / (SPEED_OF_LIGHT * SPEED_OF_LIGHT) * 1. / (exp(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T)) - 1.);
+}
+
+double planck_function2(double nu, double Thetae)
+{
+    double X = PLANCK_CONSTANT * nu / (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT * Thetae);
+
+    if (X < 2.e-3)
+        return ((2. * PLANCK_CONSTANT / (SPEED_OF_LIGHT * SPEED_OF_LIGHT)) /
+        (X / 24. * (24. + X * (12. + X * (4. + X)))));
+
+    return ((2. * PLANCK_CONSTANT / (SPEED_OF_LIGHT * SPEED_OF_LIGHT)) / (exp(X) - 1.));
 }
 
 // Return absorption coefficient - assume local thermodynamical equilibrium so that Kirchoff's Law applies
@@ -742,18 +752,8 @@ double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]){
     nu_plasmaframe *= -(ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
                        PLANCK_CONSTANT;
 
-    return nu_plasmaframe;
-}
-
-// Compute the photon frequency in the plasma frame:
-double freq_in_plasma_frame_natural_units(double Uplasma_u[4], double k_d[4]){
-    double nu_plasmaframe = 0.;
-    int i;
-    LOOP_i nu_plasmaframe += Uplasma_u[i] * k_d[i];
-    nu_plasmaframe *= -1;
-//    nu_plasmaframe *= -(ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
-  //                     PLANCK_CONSTANT;
-
+    if(isnan(nu_plasmaframe))
+	fprintf(stderr,"NAN in plasma frame %e %e %e %e %e\n",nu_plasmaframe,Uplasma_u[0],Uplasma_u[1],Uplasma_u[2],Uplasma_u[3]);  
     return nu_plasmaframe;
 }
 
@@ -767,8 +767,30 @@ double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u){
     double result = acos(b_dot_k / (-k_dot_u * sqrt(fabs(b_dot_b) + 1.e-15)));
     result = fmax(fmin(result, M_PI), 0.);
 
-    return result;
+//    return result;
+
+//NEW VERSION
+    double B, k, mu;
+
+
+    B = sqrt(fabs(inner_product(X_u, B_u, B_u)));
+
+    if (B == 0.)
+        return (M_PI / 2.);
+
+    k = fabs(inner_product(X_u, k_u, Uplasma_u));
+
+    mu = inner_product(X_u, k_u, B_u) / (k * B);
+
+    if (fabs(mu) > 1.)
+    mu /= fabs(mu);
+
+    if (isnan(mu))
+    fprintf(stderr, "isnan get_bk_angle\n");
+
+    return (acos(mu));
 }
+
 /*
 double radiative_transfer(double *lightpath, int steps, double frequency){
     int IN_VOLUME, path_counter;
@@ -780,7 +802,11 @@ double radiative_transfer(double *lightpath, int steps, double frequency){
     double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
 
+    double tau = 0.;
+
     double a_nu = 0.;
+
+    double K_inv_old = 0, j_inv_old=0, dtau_old=0;
 
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--){
@@ -799,7 +825,6 @@ double radiative_transfer(double *lightpath, int steps, double frequency){
         if(IN_VOLUME){
             // Obtain pitch angle: still no units (geometric)
             pitch_ang = pitch_angle(X_u, k_u, B_u, Uplasma_u);
-	  // pitch_ang = 3.1415/3.;
 
             // CGS UNITS USED FROM HERE ON OUT
             //////////////////////////////////
@@ -815,7 +840,6 @@ double radiative_transfer(double *lightpath, int steps, double frequency){
             lower_index(X_u, k_u, k_d);
 
             // Compute the photon frequency in the plasma frame:
-            //nu_p = CAM_FREQ;
             nu_p = freq_in_plasma_frame(Uplasma_u, k_d);
             nu_p2 = nu_p * nu_p;
 
@@ -824,19 +848,33 @@ double radiative_transfer(double *lightpath, int steps, double frequency){
 
 	    // Obtain absorption coefficient
             if (ABSORPTION){
-	        a_nu = absorption_coeff_TH(j_nu, nu_p, THETA_e);
+    	        a_nu = absorption_coeff_TH(j_nu, nu_p, THETA_e);
 	    }
 
             // Constant used in integration (to produce correct units)
             double C = Rg * PLANCK_CONSTANT / (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
-            // Solve the transport equation with emission and self-absoprtion
-            dI = (j_nu / nu_p2 - nu_p * a_nu * I_current) * dl_current * C;
+            double redshift = frequency / nu_p;
+
+            double dtau  = (nu_p * a_nu * dl_current * C + dtau_old);
+            double K_inv = (nu_p * a_nu);
+            double j_inv = (j_nu / nu_p2);
 
             // Only add I_current if it is not NaN
             if(j_nu == j_nu && exp(X_u[1]) < RT_OUTER_CUTOFF){ // I_current += exp(-tau) * j_nu / nu_p / nu_p * dl_current * C;
-                I_current += dI; // Old way of integrating
+       //         I_current += dI; // Old way of integrating
+       		double Ii=I_current;
+		double S = j_inv/K_inv; 
+		if(K_inv == 0 )
+			I_current = Ii;
+		else if(dtau < 1.e-5)
+                	I_current = Ii - (Ii - S) * ( 0.166666667*dtau * (6. - dtau * (3. - dtau)));
+		else{
+                	double efac = exp(-dtau);
+                	I_current = Ii*efac + S*(1. - efac);
+        	}
 	     }
+
         }
     }
 

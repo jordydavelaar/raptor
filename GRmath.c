@@ -115,7 +115,6 @@ void normalize_null(double X_u[4], double k_u[4]){
 
     k_u[0] = k_u0;
 }
-
 // Returns the norm of U_u, which is the scalar g_dd[a][b] * U_u[a] * U_u[b]
 //MO is this just a dot product?why such a weird name?
 double four_velocity_norm(double X_u[4], double U_u[4]){

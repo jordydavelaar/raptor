@@ -71,8 +71,10 @@ void f_geodesic(double *y, double *fvector);
 
 // Integrate the null geodesic specified by alpha and beta, store results
 // in lightpath
-double integrate_geodesic(double alpha, double beta, double *photon_u,
-                          double *lightpath, int *steps, double cutoff_inner, double *f_x, double *f_y, double *p, double *IQUV);
+void integrate_geodesic(double alpha, double beta, double *photon_u,
+                        double *lightpath, int *steps, double cutoff_inner);
+
+double radiative_transfer_polarized(double *lightpath, int steps, double frequency, double *f_x, double *f_y, double *p, int PRINT_POLAR, double *IQUV);
 
 // METRIC.C
 ///////////
@@ -92,13 +94,18 @@ void connection_udd(const double X_u[4], double gamma_udd[4][4][4]);
 // This function initializes a single 'superphoton' or light ray.
 void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
 
-void initialize_photon_parallel(double alpha, double beta, double photon_u[8], double t_init);
-
 // PLASMA.C
 ///////////
 
+// Return the plasma parameters: electron density, dimensionless temperature,
+// magnetic field strength, contravariant plasma four-velocity
+void get_plasma_parameters(double X_u[4], double *n_e, double *THETA_e_,
+                           double *B, double Uplasma_u[4]);
 
-void disk_velocity(double *X_u, double *Uplasma_u);
+// Return electron density at position X_u
+double electron_density(double X_u[4], double u_u[4]);
+
+void hotspot_velocity(double *X_u, double *Uplasma_u);
 
 // Return the value (or VECTOR?!) for B at position X_u
 double B_fun(double X_u[4],double ne);
@@ -153,12 +160,9 @@ double absorption_coeff_TH(double j_nu, double nu, double THETA_e);
 // Return the photon frequency in the co-moving frame of the plasma
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
 
-// Return the photon frequency in the co-moving frame of the plasma in natural units c=G=1
-double freq_in_plasma_frame_natural_units(double Uplasma_u[4], double k_d[4]);
-
 // Planck function
 double planck_function(double nu, double THETA_e);
-
+double planck_function2(double nu, double THETA_e);
 // Angle between k_u and B_u in the plasma frame
 double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 
@@ -174,12 +178,14 @@ double backward_transfer(double alpha, double beta, double *photon_u, int *steps
 void set_constants();
 
 // Write the array "intensityfield" (scaled by "scalefactor") to the file "imgfile"
-void write_image(FILE *imgfile, double *intensityfield, double *f_x_field, double *f_y_field, double *p_field, double scalefactor);
+void write_image(FILE *imgfile, double *intensityfield, double scalefactor);
+
+void write_image_polarized(FILE *imgfile, double *intensityfield, double *f_x_field, double *f_y_field, double *p_field, double scalefactor);
+
+void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield, double *Ufield, double *Vfield, double scalefactor);
 
 // Write the arrays "intensityfield" (scaled by "scalefactor") and "lambdafield" to a VTK file
 void write_VTK_image(FILE *imgfile, double *intensityfield, double *lambdafield, double scalefactor);
-
-void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield, double *Ufield, double *Vfield, double scalefactor);
 
 // RAPTOR_HARM_MODEL.C
 //////////////////////
@@ -188,11 +194,11 @@ void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield, double *Ufi
 // HARM model internal utilities
 void init_model();
 void set_units(double);
-void init_harm_data(char *fname);
+void init_harm3d_data(char *fname);
 void init_storage();
 
-double interp_scalar(double **var, int i, int j, double coeff[4]);
-void Xtoij(double *X, int *i, int *j, double *del);
+double interp_scalar(double ***var, int i, int j,int k, double coeff[4]);
+void Xtoijk(double *X, int *i, int *j,int *k, double *del);
 void get_fluid_params(double X[4], double *Ne,
                       double *Thetae, double *B, double *B_u, double Ucon[4], int *IN_VOLUME);
 double Xg2_approx_rand(double Xr2);

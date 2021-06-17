@@ -1,16 +1,16 @@
 
-CC = gcc
-CFLAGS = -g -openmp -std=c99 -I/usr/include
-LDFLAGS = -lm -lgsl -lcblas
+CC = h5cc
+CFLAGS = -fopenmp -std=c99 -I/usr/include -Wall
+LDFLAGS = -lm -lgsl -lcblas -g
 
-SRC=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c RCARRY.c
-OBJ=orbit_tracer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o RCARRY.o
+SRC=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c
+OBJ=orbit_tracer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o
 
-SRC1=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c 
+SRC1=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c
 OBJ1=orbit_tracer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o
 
-SRC2=img_renderer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c raptor_harm_model.c utilities.c RCARRY.c
-OBJ2=img_renderer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o raptor_harm_model.o utilities.o RCARRY.o
+SRC2=img_renderer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c raptor_harm3d_model.c RCARRY.c utilities.c
+OBJ2=img_renderer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o raptor_harm3d_model.o RCARRY.o utilities.o
 
 run: $(OBJ) makefile
 	$(CC) $(CFLAGS) -o RAPTOR $(OBJ) $(LDFLAGS)
@@ -21,7 +21,8 @@ orbit: $(OBJ1) makefile
 img: $(OBJ2) makefile
 	$(CC) $(CFLAGS) -o RAPTOR $(OBJ2) $(LDFLAGS)
 
-$(OBJ): makefile functions.h constants.h parameters.h raptor_harm_model.h
+$(OBJ): makefile functions.h constants.h parameters.h raptor_harm3d_model.h
 
 clean:
 	rm *.o
+	make img

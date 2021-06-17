@@ -54,7 +54,6 @@ int main(int argc, char *argv[]){
     // Initialize RNG
     init_RCARRY(13242834);
 
-
     // INPUT FILE
     /////////////
 
@@ -127,9 +126,6 @@ int main(int argc, char *argv[]){
     // These depend on the black hole spin
     set_constants();
 
-printf("\n L_UNIT = %+.15e", L_unit);
-printf("\n T_UNIT = %+.15e", T_unit);
-
     // INITIALIZE VARIABLES
     ///////////////////////
 
@@ -162,10 +158,12 @@ printf("\n T_UNIT = %+.15e", T_unit);
     double f_x_field[IMG_WIDTH * IMG_HEIGHT];
     double f_y_field[IMG_WIDTH * IMG_HEIGHT];
     double p_field[IMG_WIDTH * IMG_HEIGHT];
+    double IQUV_field[IMG_WIDTH * IMG_HEIGHT * 4];
     double I_field[IMG_WIDTH * IMG_HEIGHT];
     double Q_field[IMG_WIDTH * IMG_HEIGHT];
     double U_field[IMG_WIDTH * IMG_HEIGHT];
     double V_field[IMG_WIDTH * IMG_HEIGHT];
+
 
     for(f = 0; f < num_indices; f++){ // For all frequencies...
         frequencies[f] = FREQ_MIN * pow(10., (double) f / (double) FREQS_PER_DEC);
@@ -174,35 +172,49 @@ printf("\n T_UNIT = %+.15e", T_unit);
     }
 
     for(x = 0; x < IMG_WIDTH; x++){ // For all pixel columns...
-        #pragma omp parallel for default(none) private(f,steps,alpha,beta,photon_u) shared(num_indices,energy_spectrum,frequencies,intensityfield,f_x_field,f_y_field,p_field,lambdafield,I_field, Q_field, U_field, V_field,x,stepx,stepy,CUTOFF_INNER, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static,1)
+        #pragma omp parallel for default(none) private(f,steps,alpha,beta,photon_u) shared(num_indices,energy_spectrum,frequencies,intensityfield,f_x_field,f_y_field,I_field, Q_field, U_field, V_field, IQUV_field,p_field,lambdafield,x,stepx,stepy,CUTOFF_INNER, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static,1)
         for(y = 0; y < IMG_HEIGHT; y++){ // For all pixel rows (distributed over threads)...
-		fprintf(stderr,"%d %d\n",x,y);
+
             double *lightpath2 = malloc(9 * max_steps * sizeof(double));
-            double *IQUV = malloc(4 * sizeof(double));
-            double f_x, f_y, p;
+
+	    double *IQUV = malloc(4 * sizeof(double));
 
             // Compute impact parameters for this pixel
             alpha = -CAM_SIZE_X * 0.5 + (x + 0.5) * stepx;
             beta  = -CAM_SIZE_Y * 0.5 + (y + 0.5) * stepy;
 
+	    double f_x = 0.;
+	    double f_y = 0.;
+            double p   = 0.;
+
             // INTEGRATE THIS PIXEL'S GEODESIC
 
-            intensityfield[0][y * IMG_WIDTH + x] = integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps, CUTOFF_INNER, &f_x, &f_y, &p, IQUV);
-            f_x_field[y * IMG_WIDTH + x] = f_x;
-            f_y_field[y * IMG_WIDTH + x] = f_y;
-            p_field[y * IMG_WIDTH + x] = p;
+
+            int PRINT_POLAR = 1;
+            if (x == 50, y == 50)
+                PRINT_POLAR = 1;
+	    if(PRINT_POLAR)
+                integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps, CUTOFF_INNER);
+
 
             // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
+            if(PRINT_POLAR)
             for(f = 0; f < num_indices; f++){
-//                intensityfield[f][y * IMG_WIDTH + x] = radiative_transfer(lightpath2, steps, frequencies[f]);
+                intensityfield[f][y * IMG_WIDTH + x] = radiative_transfer_polarized(lightpath2, steps, frequencies[f], &f_x, &f_y, &p, PRINT_POLAR, IQUV);
                 energy_spectrum[f] += intensityfield[f][y * IMG_WIDTH + x];
             }
 
+            f_x_field[y * IMG_WIDTH + x] = f_x;
+            f_y_field[y * IMG_WIDTH + x] = f_y;
+            p_field[y * IMG_WIDTH + x] = p;
+            IQUV_field[y * IMG_WIDTH + 4 * x + 0] = IQUV[0];
+            IQUV_field[y * IMG_WIDTH + 4 * x + 1] = IQUV[1];
+            IQUV_field[y * IMG_WIDTH + 4 * x + 2] = IQUV[2];
+            IQUV_field[y * IMG_WIDTH + 4 * x + 3] = IQUV[3];
             I_field[y * IMG_WIDTH + x] = IQUV[0];
             Q_field[y * IMG_WIDTH + x] = IQUV[1];
             U_field[y * IMG_WIDTH + x] = IQUV[2];
             V_field[y * IMG_WIDTH + x] = IQUV[3];
-
             free(lightpath2);
 	    free(IQUV);
         }
@@ -222,12 +234,13 @@ printf("\n T_UNIT = %+.15e", T_unit);
         sprintf(dat_filename,"output/img_data_%e_IQUV.dat",frequencies[f]);
         sprintf(vtk_filename,"output/img_data_%e.vtk",frequencies[f]);
         FILE *imgfile     = fopen(dat_filename, "w");
-  //      FILE *fp          = fopen(vtk_filename, "w");
+    //    FILE *fp          = fopen(vtk_filename, "w");
 
         // Write image data to file
-//        write_image(imgfile, intensityfield[f], f_x_field, f_y_field, p_field, JANSKY_FACTOR);
+//        write_image_polarized(imgfile, intensityfield[f], f_x_field, f_y_field, p_field, JANSKY_FACTOR);
         write_image_IQUV(imgfile, I_field, Q_field, U_field, V_field, JANSKY_FACTOR);
-//        write_VTK_image(fp, intensityfield[f], lambdafield, JANSKY_FACTOR);
+//        write_image(imgfile, intensityfield[f], JANSKY_FACTOR);
+    //    write_VTK_image(fp, intensityfield[f], lambdafield, JANSKY_FACTOR);
 
         // Close image files
         fclose(imgfile);
@@ -237,7 +250,7 @@ printf("\n T_UNIT = %+.15e", T_unit);
 //        fprintf(spectrum, "%+.15e\t%+.15e\n", frequencies[f], JANSKY_FACTOR * energy_spectrum[f]);
     }
 
-//    fclose(spectrum);
+  //  fclose(spectrum);
 
     // END OF PROGRAM
     /////////////////

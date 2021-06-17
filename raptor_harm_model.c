@@ -306,13 +306,13 @@ void gcon_func(double *X, double gcon[][NDIM])
 	double r, th;
 	double hfac;
 	/* required by broken math.h */
-	//void sincos(double in, double *sth, double *cth);
+	void sincos(double in, double *sth, double *cth);
 
 	DLOOP gcon[k][l] = 0.;
 
 	bl_coord(X, &r, &th);
 
-	sth=sin(th);//, &sth, &cth);
+	sincos(th, &sth, &cth);
 	sth = fabs(sth) + 1.e-9;
 
 	irho2 = 1. / (r * r + a * a * cth * cth);
@@ -347,7 +347,7 @@ void gcov_func(double *X, double gcov[][NDIM])
 
 	bl_coord(X, &r, &th);
 
-	sth=sin(th);//, &sth, &cth);
+	sincos(th, &sth, &cth);
 	sth = fabs(sth) + 1.e-9;
 	s2 = sth * sth;
 	rho2 = r * r + a * a * cth * cth;
@@ -422,10 +422,8 @@ void get_fluid_params(double X[NDIM], double *Ne,
     X[2] = Xg2_approx_rand(X[2]); // We only transform theta - r is already exponential and R0 = 0
 #endif
 
-//    metric_uu(X, gcon);
-//    metric_dd(X, gcov);
-gcon_func(X, gcon);
-gcov_func(X, gcov); // Gammies metric
+    metric_uu(X, gcon);
+    metric_dd(X, gcov);
 
     *IN_VOLUME = 1;
 
@@ -478,8 +476,8 @@ double smalll = 1.e-20;
     for (i = 1; i < NDIM; i++)
         Ucon[i] = Vcon[i] - Vfac * gcon[0][i];
 
-//    lower_index(X, Ucon, Ucov);
-    lower(Ucon, gcov, Ucov); // Gammie's lowering function
+    lower_index(X, Ucon, Ucov);
+//    lower(Ucon, gcov, Ucov); // Gammie's lowering function
 
     // Get B and Bcov
     UdotBp = 0.;
@@ -578,7 +576,29 @@ printf("Ne = %+.15e\n", *Ne);
 printf("Thetae = %+.15e\n", *Thetae);
 }
 
+/*
+printf("\nU dot U INITIAL = %+.15e", inner_product(X, Ucon, Ucon));
 
+// Renormalize U. It is not very well normalized.
+double g_dd[4][4];
+metric_dd(X, g_dd);
+double A_ = g_dd[0][0];
+double B_ = 0.;
+double C_ = 1.;
+
+LOOP_i{
+    if(i>0)
+        B_ += 2. * g_dd[0][i] * Ucon[i];
+}
+
+LOOP_ij{
+    if(i>0 && j>0)
+        C_ += g_dd[i][j] * Ucon[i] * Ucon[j];
+}
+
+//Ucon[0] = (-B_ + sqrt(B_ * B_ - 4. * A_ * C_)) / (2. * A_);
+printf("\nU dot U RENORMALIZED = %+.15e", inner_product(X, Ucon, Ucon));
+*/
 }
 
 void set_units(double M_unit_)

@@ -24,14 +24,14 @@ void set_constants(){
     // Calibration constant for the spectral irradiance
     // We want Jansky/pixel^2.
     double d_x     = CAM_SIZE_X * R_GRAV; // Size of image in cm
-    double delta_x = atan(d_x / source_dist); // it is far away so just a ratio without tan
+    double delta_x = d_x / source_dist; // it is far away so just a ratio without tan
     double d_y     = CAM_SIZE_Y * R_GRAV; // Size of image in cm
-    double delta_y = atan(d_y / source_dist); // it is far away so just a ratio without tan
+    double delta_y = d_y / source_dist; // it is far away so just a ratio without tan
     double pixsize = (delta_x / (double) IMG_WIDTH) * (delta_y / (double) IMG_HEIGHT); // Pix size in Sr
     JANSKY_FACTOR = 1.e23 * pixsize; // 1.e23 is conversion from Jansky to ergs/Sr Hz s cm2
 }
 
-void write_image(FILE *imgfile, double *intensityfield, double *f_x_field, double *f_y_field, double *p_field, double scalefactor){
+void write_image(FILE *imgfile, double *intensityfield, double scalefactor){
     int i, j;
 
     // Write image to output file
@@ -41,6 +41,18 @@ void write_image(FILE *imgfile, double *intensityfield, double *f_x_field, doubl
 //            double stepy = size / (double) height;
 //            double alpha = -size * 0.5 + (i + 0.5) * stepx;
 //            double beta  = -size * 0.5 + (j + 0.5) * stepy;
+            fprintf(imgfile, "%d\t%d\t%+.15e\n", i, j,
+                    scalefactor * intensityfield[i + j * IMG_WIDTH]);
+        }
+    }
+}
+
+void write_image_polarized(FILE *imgfile, double *intensityfield, double *f_x_field, double *f_y_field, double *p_field, double scalefactor){
+    int i, j;
+
+    // Write image to output file
+    for(i = 0; i < IMG_WIDTH; i++){
+        for(j = 0; j < IMG_HEIGHT; j++){
             fprintf(imgfile, "%d\t%d\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n", i, j,
                     scalefactor * intensityfield[i + j * IMG_WIDTH], f_x_field[i + j * IMG_WIDTH], f_y_field[i + j * IMG_WIDTH], p_field[i + j * IMG_WIDTH]);
         }
@@ -50,24 +62,16 @@ void write_image(FILE *imgfile, double *intensityfield, double *f_x_field, doubl
 void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield, double *Ufield, double *Vfield, double scalefactor){
     int i, j;
 
-/*
-
-CAREFUL: USING A HACKY WAY TO CONFORM TO EHT POLARIZATION CONVENTION, BY MANUALLY SWITCHING SIGNS. SHOULD CONSTRUCT DIFFERENT OBSERVER
-
-Q: SHOULD STOKES V BE MULTIPLIED BY HACKFACTOR TOO?
-A: NO, SEE BEN'S NOTE. THE TRANSFORMATION IS Q -> -Q, U -> -U.
-
-*/
-
-
     // Write image to output file
     for(i = 0; i < IMG_WIDTH; i++){
         for(j = 0; j < IMG_HEIGHT; j++){
+            // Note HACK FIX implementation of weird EHT convention, which demands Q -> -Q and U -> -U w.r.t. IEEE convention
             fprintf(imgfile, "%d\t%d\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n", i, j,
                     scalefactor * Ifield[i + j * IMG_WIDTH], scalefactor * Qfield[i + j * IMG_WIDTH], scalefactor * Ufield[i + j * IMG_WIDTH], scalefactor * Vfield[i + j * IMG_WIDTH]);
         }
     }
 }
+
 
 void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield, double scalefactor){
     int i, j;

@@ -4,11 +4,9 @@
 #SBATCH -N 1 -n 24
 
 # Request maximum time
-#SBATCH --time=10:00:00
+#SBATCH --time=7:59:00
 
 OMP_STACKSIZE=20m
 export OMP_STACKSIZE
 
-./RAPTOR model.in grmhd/dump019 75 0
-
-
+./RAPTOR model.in harm3d.txt 163 0

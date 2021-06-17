@@ -798,156 +798,73 @@ void initialize_photon(double alpha, double beta, double photon_u[8], double t_i
     photon_u[6] = Ug2_approx_rand(photon_u[6], photon_u[2]); // We only transform theta - r is already exponential and R0 = 0
 #endif
 
+LOOP_i Xcam_u[i] = photon_u[i];
+LOOP_i k_u[i] = photon_u[i+4];
 
-    double k_u_[4], X_u_[4];
-    LOOP_i X_u_[i] = photon_u[i];
-    LOOP_i k_u_[i] = photon_u[i + 4];
+//printf("\n INITIAL NORM = %+.15e", inner_product(Xcam_u, k_u, k_u));
 
-//    fprintf(stderr, "\nk dot k = %+.15e", inner_product(X_u_, k_u_, k_u_));
-}
-
-
-
-
-
-
-
-// NOTE: This is a HELPER FUNCTION for the PLANE-PARALLEL CAM,
-// which must always build its rays in BL, no matter which
-// coord system the user has selected.
-void metric_dd_BL(const double X_u[4], double g_dd[4][4]){
-    int i, j;
-    LOOP_ij g_dd[i][j] = 0.;
-
-    double r       = X_u[1];
-    double rfactor = 1.;
-    double theta = X_u[2];
-    double sint  = sin(theta);
-    double cost  = cos(theta);
-    double sigma = r * r + a * a * cost * cost;
-    double delta = r * r + a * a - 2. * r;
-    double A_    = (r * r + a * a) * (r * r + a * a) - delta * a * a *
-                   sint * sint;
-
-    // Covariant metric elements
-    g_dd[0][0] = -(1. - 2. * r / sigma);
-    g_dd[1][1] = sigma / delta * rfactor * rfactor;
-    g_dd[2][2] = sigma ;
-    g_dd[3][3] = A_ / sigma * sint * sint;
-    g_dd[0][3] = -2. * a * r * sint * sint / sigma;
-    g_dd[3][0] = g_dd[0][3];
-}
-
-
-
-
-
-
-//Plane-parallel cam
-void initialize_photon_parallel(double alpha, double beta, double photon_u[8], double t_init){
-
-//	alpha = -15.;
-//        beta = -15.;
-
-
-
-    double r_obs = rcam; // NO logscale stuff here - we do everything in BL coordinates initially.
-    double theta_obs = INCLINATION / 180. * M_PI;
-    double phi_obs = 0.;
-
-    // Note: x,y in image plane are equal to alpha, beta in RAPTOR definition.
-
-    // Find r, theta, phi coordinates of each point (alpha, beta), i.e. the starting point of each ray.
-    double D = sin(theta_obs) * sqrt(r_obs * r_obs + a * a) - beta * cos(theta_obs);
-    double X = D * cos(phi_obs) - alpha * sin(phi_obs);
-    double Y = D * sin(phi_obs) + alpha * cos(phi_obs);
-    double Z = r_obs * cos(theta_obs) + beta * sin(theta_obs);
-    double sigma = (X * X + Y * Y + Z * Z - a * a) / 2.;
-
-    double rPhoton = sqrt(sigma + sqrt(sigma * sigma + a * a * Z * Z));
-    double thetaPhoton = acos(Z / rPhoton);
-    double phiPhoton = atan(Y / X);
-
-    // Find k_u for each point (alpha, beta);
-    double SIGMA = rPhoton * rPhoton + a * a * cos(thetaPhoton) * cos(thetaPhoton);
-    double Rcap = sqrt(rPhoton * rPhoton + a * a);
-    double PHI = phiPhoton - phi_obs;
-
-    // Spatial components of wave vector
-    double k_u1 = -(rPhoton * Rcap * sin(thetaPhoton) * sin(theta_obs) * cos(PHI) + Rcap * Rcap * cos(thetaPhoton) * cos(theta_obs)) / (-SIGMA);
-    double k_u2 = -(Rcap * cos(thetaPhoton) * sin(theta_obs) * cos(PHI) - rPhoton * sin(thetaPhoton) * cos(theta_obs)) / (-SIGMA);
-    double k_u3 = -(sin(theta_obs) * sin(PHI) * 1. / (sin(thetaPhoton))) / Rcap;
-
-    // Photon location
-    double X_u[4] = {t_init, rPhoton, thetaPhoton, phiPhoton};
-
-    // Compute quantities of interest - USING THE BL METRIC (no matter which coordinate system is used by RAPTOR)
-    double g_dd[4][4];
-    metric_dd_BL(X_u, g_dd);
-
-
-    double Betacap = -(g_dd[0][1] * k_u1)/(g_dd[0][0]) - (g_dd[0][2] * k_u2)/(g_dd[0][0]) - (g_dd[0][3] * k_u3)/(g_dd[0][0]);
-
-    double gammaZiri = -(g_dd[1][1] * k_u1 * k_u1) / (g_dd[0][0]) - (g_dd[1][2] * k_u1 * k_u2) / (g_dd[0][0]) - (g_dd[1][3] * k_u1 * k_u3) / (g_dd[0][0])
-                       -(g_dd[2][1] * k_u2 * k_u1) / (g_dd[0][0]) - (g_dd[2][2] * k_u2 * k_u2) / (g_dd[0][0]) - (g_dd[2][3] * k_u2 * k_u3) / (g_dd[0][0])
-                       -(g_dd[3][1] * k_u3 * k_u1) / (g_dd[0][0]) - (g_dd[3][2] * k_u3 * k_u2) / (g_dd[0][0]) - (g_dd[3][3] * k_u3 * k_u3) / (g_dd[0][0]);
-
-    // Temporal component of wave vector
-    double k_u0 = Betacap + sqrt(Betacap * Betacap + gammaZiri);
-
-    // Place results into photon_u
-    photon_u[0] = t_init;
-    photon_u[1] = logscale ? log(rPhoton) : rPhoton; // Covers BL and MBL
-    photon_u[2] = thetaPhoton;
-    photon_u[3] = phiPhoton;
-    photon_u[4] = k_u0;
-    photon_u[5] = (logscale ? 1. / rPhoton * k_u1 : k_u1); // Covers BL and MBL
-    photon_u[6] = k_u2;
-    photon_u[7] = k_u3;
-
-
-//fprintf(stderr, "\nx0 %+.15e", photon_u[0]);
-//fprintf(stderr, "\nx1%+.15e", photon_u[1]);
-//fprintf(stderr, "\nx2%+.15e", photon_u[2]);
-//fprintf(stderr, "\nx3%+.15e", photon_u[3]);
-//fprintf(stderr, "\nk0%+.15e", photon_u[4]);
-//fprintf(stderr, "\nk1%+.15e", photon_u[5]);
-//fprintf(stderr, "\nk2%+.15e", photon_u[6]);
-//fprintf(stderr, "\nk3%+.15e", photon_u[7]);
-
-
-
-int i;
-
-    // Convert k_u to the coordinate system that is currently used
-    #if(metric == KS || metric == MKS || metric == MKS2)
-
-        double KSphoton_u[8];
-        BL_to_KS_u(photon_u, KSphoton_u);
-        LOOP_i{
-            photon_u[i] = KSphoton_u[i];
-            photon_u[i+4] = KSphoton_u[i+4];
-        }
-
-    #endif
-
-    #if(metric == MKS2)
-        photon_u[2] = Xg2_approx_rand(photon_u[2]); // We only transform theta - r is already exponential and R0 = 0
-        photon_u[6] = Ug2_approx_rand(photon_u[6], photon_u[2]); // We only transform theta - r is already exponential and R0 = 0
-    #endif
-
-    double k_u_[4], X_u_[4];
-    LOOP_i X_u_[i] = photon_u[i];
-    LOOP_i k_u_[i] = photon_u[i + 4];
-
-//    fprintf(stderr, "\nk dot k = %+.15e", inner_product(X_u_, k_u_, k_u_));
-
-  //          normalize_null(X_u_, k_u_);
-
-//            fprintf(stderr, "\nk dot k back hom = %+.15e", inner_product(X_u_, k_u_, k_u_));
 
 
 }
 
+// Initialize photon using a simple Euclidean virtual camera consisting of eye point + img plane
+void initialize_photon_perspective(double alpha, double beta, double photon_u[8], double t_init){
 
+    double camdist = 140.;
 
+    double x = (logscale ? log(camdist) : camdist);//rcam;
+    double y = 0.;
+    double z = 0.;
+
+    double plane_dist = 30.;
+
+    double xprime = (logscale ? log(camdist - plane_dist) : camdist - plane_dist);//rcam - 10.;
+    double yprime = alpha;
+    double zprime = beta;
+
+    double ux = xprime - x;
+    double uy = yprime - y;
+    double uz = zprime - z;
+
+    ux /= sqrt (ux * ux + uy * uy + uz * uz);
+    uy /= sqrt (ux * ux + uy * uy + uz * uz);
+    uz /= sqrt (ux * ux + uy * uy + uz * uz);
+
+    double t, r, theta, phi, ut, ur, utheta, uphi;
+
+    t     = 0;
+    r     = sqrt(x*x + y*y + z*z);
+    theta = acos(z / sqrt(x*x + y*y + z*z));//atan(sqrt(x*x + y*y) / z); // abs() hack fix! why is theta negative sometimes?
+    phi   = asin(y / sqrt(x*x + y*y));//atan(y / x);
+
+    double rprime     = sqrt(xprime*xprime + yprime*yprime + zprime*zprime);
+    double thetaprime = acos(zprime / sqrt(xprime*xprime + yprime*yprime + zprime*zprime));//atan(sqrt(x*x + y*y) / z); // abs() hack fix! why is theta negative sometimes?
+    double phiprime   = asin(yprime / sqrt(xprime*xprime + yprime*yprime));//atan(y / x);
+
+    ut     = 0.;
+    ur     = rprime - r;//ux * sin(theta) * cos(phi)  + uy * sin(theta) * sin(phi) + uz * cos(theta);
+    utheta = thetaprime - theta;//ux * cos(theta) * cos(phi) + uy * cos(theta) * sin(phi) - uz * sin(theta);;
+    uphi   = phiprime - phi;//-ux * sin(phi) + uy * cos(phi);
+
+    double X_u[4];
+    double k_u[4];
+    X_u[0] = t;
+    X_u[1] = r;
+    X_u[2] = theta;
+    X_u[3] = phi;
+    k_u[0] = ut;
+    k_u[1] = ur;
+    k_u[2] = utheta;
+    k_u[3] = uphi;
+
+    normalize_null(X_u, k_u);
+
+    photon_u[0] = X_u[0];
+    photon_u[1] = X_u[1];
+    photon_u[2] = X_u[2];
+    photon_u[3] = X_u[3];
+    photon_u[4] = k_u[0];
+    photon_u[5] = -k_u[1];
+    photon_u[6] = k_u[2];
+    photon_u[7] = k_u[3];
+}
