@@ -22,7 +22,6 @@
 #define GGRAV              (6.674e-8)
 #define MSUN               (1.989e33)
 #define MPoME              (PROTON_MASS / ELECTRON_MASS)
-#define M_PI           3.14159265358979323846
 
 
 // Constants that must be evaluated at startup

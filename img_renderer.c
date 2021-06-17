@@ -176,7 +176,7 @@ printf("\n T_UNIT = %+.15e", T_unit);
     for(x = 0; x < IMG_WIDTH; x++){ // For all pixel columns...
         #pragma omp parallel for default(none) private(f,steps,alpha,beta,photon_u) shared(num_indices,energy_spectrum,frequencies,intensityfield,f_x_field,f_y_field,p_field,lambdafield,I_field, Q_field, U_field, V_field,x,stepx,stepy,CUTOFF_INNER, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static,1)
         for(y = 0; y < IMG_HEIGHT; y++){ // For all pixel rows (distributed over threads)...
-
+		fprintf(stderr,"%d %d\n",x,y);
             double *lightpath2 = malloc(9 * max_steps * sizeof(double));
             double *IQUV = malloc(4 * sizeof(double));
             double f_x, f_y, p;
@@ -186,8 +186,8 @@ printf("\n T_UNIT = %+.15e", T_unit);
             beta  = -CAM_SIZE_Y * 0.5 + (y + 0.5) * stepy;
 
             // INTEGRATE THIS PIXEL'S GEODESIC
-            intensityfield[0][y * IMG_WIDTH + x] = integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps, CUTOFF_INNER, &f_x, &f_y, &p, IQUV);
 
+            intensityfield[0][y * IMG_WIDTH + x] = integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps, CUTOFF_INNER, &f_x, &f_y, &p, IQUV);
             f_x_field[y * IMG_WIDTH + x] = f_x;
             f_y_field[y * IMG_WIDTH + x] = f_y;
             p_field[y * IMG_WIDTH + x] = p;
