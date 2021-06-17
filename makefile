@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -fopenmp -std=c99 -I/usr/include
+CFLAGS = -openmp -std=c99 -I/usr/include
 LDFLAGS = -lm -lgsl -lcblas
 
 SRC=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c RCARRY.c

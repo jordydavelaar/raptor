@@ -306,13 +306,13 @@ void gcon_func(double *X, double gcon[][NDIM])
 	double r, th;
 	double hfac;
 	/* required by broken math.h */
-	void sincos(double in, double *sth, double *cth);
+	//void sincos(double in, double *sth, double *cth);
 
 	DLOOP gcon[k][l] = 0.;
 
 	bl_coord(X, &r, &th);
 
-	sincos(th, &sth, &cth);
+	sth=sin(th);//, &sth, &cth);
 	sth = fabs(sth) + 1.e-9;
 
 	irho2 = 1. / (r * r + a * a * cth * cth);
@@ -347,7 +347,7 @@ void gcov_func(double *X, double gcov[][NDIM])
 
 	bl_coord(X, &r, &th);
 
-	sincos(th, &sth, &cth);
+	sth=sin(th);//, &sth, &cth);
 	sth = fabs(sth) + 1.e-9;
 	s2 = sth * sth;
 	rho2 = r * r + a * a * cth * cth;

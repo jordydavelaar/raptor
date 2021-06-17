@@ -92,6 +92,8 @@ void connection_udd(const double X_u[4], double gamma_udd[4][4][4]);
 // This function initializes a single 'superphoton' or light ray.
 void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
 
+void initialize_photon_parallel(double alpha, double beta, double photon_u[8], double t_init);
+
 // PLASMA.C
 ///////////
 
