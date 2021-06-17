@@ -6,7 +6,6 @@
  * A list of all RAPTOR functions.
  */
 
-
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
@@ -57,13 +56,13 @@ void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u);
 double stepsize(double X_u[4], double U_u[4]);
 
 // Updates the vector y (containing position/velocity) by one RK4 step.
-void rk4_step(double *y, void (*f)(double*, double*), double dt);
+void rk4_step(double *y, void (*f)(double *, double *), double dt);
 
 // Updates the vector y (containing position/velocity) by one RK2 step.
-void rk2_step(double *y, void (*f)(double*, double*), double dt);
+void rk2_step(double *y, void (*f)(double *, double *), double dt);
 
 // Updates the vector y (containing position/velocity) by one Verlet step.
-void verlet_step(double *y, void (*f)(double*, double*), double dl);
+void verlet_step(double *y, void (*f)(double *, double *), double dl);
 
 // The function to be used by the integrator - it solves the geodesic eqn.
 // y contains the 4-position and the 4-velocity for one lightray/particle
@@ -74,7 +73,9 @@ void f_geodesic(double *y, double *fvector);
 void integrate_geodesic(double alpha, double beta, double *photon_u,
                         double *lightpath, int *steps, double cutoff_inner);
 
-double radiative_transfer_polarized(double *lightpath, int steps, double frequency, double *f_x, double *f_y, double *p, int PRINT_POLAR, double *IQUV);
+double radiative_transfer_polarized(double *lightpath, int steps,
+                                    double frequency, double *f_x, double *f_y,
+                                    double *p, int PRINT_POLAR, double *IQUV);
 
 // METRIC.C
 ///////////
@@ -108,7 +109,7 @@ double electron_density(double X_u[4], double u_u[4]);
 void hotspot_velocity(double *X_u, double *Uplasma_u);
 
 // Return the value (or VECTOR?!) for B at position X_u
-double B_fun(double X_u[4],double ne);
+double B_fun(double X_u[4], double ne);
 
 // Return the value for Te at position X_u
 double THETA_e(double X_u[4]);
@@ -116,34 +117,41 @@ double THETA_e(double X_u[4]);
 // RADIATIVE_TRANSFER.C
 ///////////////////////
 
-void read_in_table(char* filename);
+void read_in_table(char *filename);
 void init_memory_kappa(void);
-double interpolate_scalar_5d(double *****A, double nu, double Ne, double Thetae, double B, double theta);
+double interpolate_scalar_5d(double *****A, double nu, double Ne, double Thetae,
+                             double B, double theta);
 double interpolate_scalar_2d(double **var, double nuratio, double Thetae);
 
-//TErun emission coeffiencient j_nu for free-free emission
+// TErun emission coeffiencient j_nu for free-free emission
 double jnu_brem_ee(double nu, double ne, double Thetae);
 
 /*calculates e-e spectrum using tables and interpolations*/
-double Gfun(double x,double Thetae);
+double Gfun(double x, double Thetae);
 
 /*Approximation from Maxon 1972*/
 double Ei(double xx);
 
-double absorption_coeff_kappa(double nu,double Ne, double Thetae, double B, double theta);
-double emission_coeff_kappa(double nu,double Ne, double Thetae, double B, double theta);
+double absorption_coeff_kappa(double nu, double Ne, double Thetae, double B,
+                              double theta);
+double emission_coeff_kappa(double nu, double Ne, double Thetae, double B,
+                            double theta);
 
 // Return emission coefficient j_nu for kappa distribution function
-double emission_coeff_kappa_FIT(double nu,double Ne, double Thetae, double B, double theta);
+double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
+                                double theta);
 
 // Return absorption coefficient for kappa distribution function
-double absorption_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B, double theta);
+double absorption_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
+                                  double theta);
 
 // Return emission coefficient j_nu for thermal synchrotron radiation
-double emission_coeff_THSYNCH(double B_, double theta, double THETA_e_, double nu_plasma, double n_e);
+double emission_coeff_THSYNCH(double B_, double theta, double THETA_e_,
+                              double nu_plasma, double n_e);
 
 // Return emission coefficient for angle-averaged thermal synchrotron radiation
-double emission_coeff_THSYNCHAV(double B_, double THETA_e_, double nu_plasma, double n_e);
+double emission_coeff_THSYNCHAV(double B_, double THETA_e_, double nu_plasma,
+                                double n_e);
 
 // Return emission coefficient for thermal free-free radiation
 double emission_coeff_FFTHERMAL(double nu, double n_e, double T);
@@ -170,22 +178,29 @@ double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 double radiative_transfer(double *lightpath, int steps, double frequency);
 
 // Backward transfer
-double backward_transfer(double alpha, double beta, double *photon_u, int *steps);
+double backward_transfer(double alpha, double beta, double *photon_u,
+                         int *steps);
 
 // UTILITIES.C
 //////////////
 
 void set_constants();
 
-// Write the array "intensityfield" (scaled by "scalefactor") to the file "imgfile"
+// Write the array "intensityfield" (scaled by "scalefactor") to the file
+// "imgfile"
 void write_image(FILE *imgfile, double *intensityfield, double scalefactor);
 
-void write_image_polarized(FILE *imgfile, double *intensityfield, double *f_x_field, double *f_y_field, double *p_field, double scalefactor);
+void write_image_polarized(FILE *imgfile, double *intensityfield,
+                           double *f_x_field, double *f_y_field,
+                           double *p_field, double scalefactor);
 
-void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield, double *Ufield, double *Vfield, double scalefactor);
+void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield,
+                      double *Ufield, double *Vfield, double scalefactor);
 
-// Write the arrays "intensityfield" (scaled by "scalefactor") and "lambdafield" to a VTK file
-void write_VTK_image(FILE *imgfile, double *intensityfield, double *lambdafield, double scalefactor);
+// Write the arrays "intensityfield" (scaled by "scalefactor") and "lambdafield"
+// to a VTK file
+void write_VTK_image(FILE *imgfile, double *intensityfield, double *lambdafield,
+                     double scalefactor);
 
 // RAPTOR_HARM_MODEL.C
 //////////////////////
@@ -197,10 +212,10 @@ void set_units(double);
 void init_harm3d_data(char *fname);
 void init_storage();
 
-double interp_scalar(double ***var, int i, int j,int k, double coeff[4]);
-void Xtoijk(double *X, int *i, int *j,int *k, double *del);
-void get_fluid_params(double X[4], double *Ne,
-                      double *Thetae, double *B, double *B_u, double Ucon[4], int *IN_VOLUME);
+double interp_scalar(double ***var, int i, int j, int k, double coeff[4]);
+void Xtoijk(double *X, int *i, int *j, int *k, double *del);
+void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
+                      double *B_u, double Ucon[4], int *IN_VOLUME);
 double Xg2_approx_rand(double Xr2);
 double Ug2_approx_rand(double Ur2, double Xg2);
 #endif // FUNCTIONS_H
