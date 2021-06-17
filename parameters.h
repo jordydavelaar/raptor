@@ -122,7 +122,7 @@ double CAM_SIZE_Y;
 ////////////////////////
 
 #define delta_num    (1.e-6)    // Used for numerical derivatives
-#define max_steps    (1e7)   // Maximum number of integration steps
+#define max_steps    (1e5)   // Maximum number of integration steps
 
 double STEPSIZE;
 #define cutoff_outer (1.1 * rcam)    // Outer cutoff, near flat spacetime, in M

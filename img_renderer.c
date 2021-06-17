@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
 // img[y * IMG_WIDTH + x] = integrate_backward(photon_u);
 
     int num_indices = FREQS_PER_DEC * (int) (log10(FREQ_MAX) - log10(FREQ_MIN)) + 1;
-    printf("\nNumber of frequencies to compute: %d\n", num_indices);
+    fprintf(stderr,"\nNumber of frequencies to compute: %d\n", num_indices);
     double energy_spectrum[num_indices];
     double frequencies[num_indices];
     double intensityfield[num_indices][IMG_WIDTH * IMG_HEIGHT];
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]){
     for(x = 0; x < IMG_WIDTH; x++){ // For all pixel columns...
         #pragma omp parallel for default(none) private(f,steps,alpha,beta,photon_u) shared(num_indices,energy_spectrum,frequencies,intensityfield,f_x_field,f_y_field,I_field, Q_field, U_field, V_field, IQUV_field,p_field,lambdafield,x,stepx,stepy,CUTOFF_INNER, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static,1)
         for(y = 0; y < IMG_HEIGHT; y++){ // For all pixel rows (distributed over threads)...
-
+	    if((y+x*IMG_HEIGHT)%100==0)	fprintf(stderr,"current pixel %d of %d\n",y+x*IMG_HEIGHT,IMG_WIDTH*IMG_HEIGHT);
             double *lightpath2 = malloc(9 * max_steps * sizeof(double));
 
 	    double *IQUV = malloc(4 * sizeof(double));

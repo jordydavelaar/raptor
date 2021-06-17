@@ -9,13 +9,13 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 '''READING THE DATA'''
 
-img_size = 160
+img_size = 256
 
 # 2D array to contain image
-imgI = [[0 for x in xrange(img_size)] for x in xrange(img_size)]
-imgQ = [[0 for x in xrange(img_size)] for x in xrange(img_size)]
-imgU = [[0 for x in xrange(img_size)] for x in xrange(img_size)]
-imgV = [[0 for x in xrange(img_size)] for x in xrange(img_size)]
+imgI = [[0 for x in range(img_size)] for x in range(img_size)]
+imgQ = [[0 for x in range(img_size)] for x in range(img_size)]
+imgU = [[0 for x in range(img_size)] for x in range(img_size)]
+imgV = [[0 for x in range(img_size)] for x in range(img_size)]
 
 fluxI = 0.
 fluxQ = 0.

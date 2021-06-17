@@ -11,6 +11,7 @@
 #include "parameters.h"
 #include <stdio.h>
 #include "gsl/gsl_sf_hyperg.h"
+#include <gsl/gsl_sf_bessel.h>
 
 //kappa distribution function
 

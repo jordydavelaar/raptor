@@ -1,6 +1,6 @@
 
 CC = h5cc
-CFLAGS = -fopenmp -std=c99 -I/usr/include -Wall
+CFLAGS = -fopenmp -lomp -std=c99 -I/usr/include -Wall
 LDFLAGS = -lm -lgsl -lcblas -g
 
 SRC=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c

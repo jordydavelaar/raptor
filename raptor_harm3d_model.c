@@ -254,7 +254,8 @@ void gcon_func(double *X, double gcon[][NDIM])
 
 	bl_coord(X, &r, &th);
 
-	sincos(th, &sth, &cth);
+	sth=sin(th);
+	cth=cos(th);
 	sth = fabs(sth) + 1.e-9;
 
 	irho2 = 1. / (r * r + a * a * cth * cth);
@@ -289,7 +290,9 @@ void gcov_func(double *X, double gcov[][NDIM])
 
 	bl_coord(X, &r, &th);
 
-	sincos(th, &sth, &cth);
+        sth=sin(th);
+        cth=cos(th);
+
 	sth = fabs(sth) + 1.e-9;
 	s2 = sth * sth;
 	rho2 = r * r + a * a * cth * cth;
