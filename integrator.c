@@ -1248,16 +1248,17 @@ double radiative_transfer_polarized(double *lightpath, int steps,
 
             double Iinvt = 0.;
             double Iinv_polt = 0.;
-            double S_Atest[4] = {0., 0., 0., 0.};
-            double f_test[4] = {0., 0., 0., 0.};
+            double complex S_Atest[4] = {0., 0., 0., 0.};
+            double complex f_test[4] = {0., 0., 0., 0.};
             if (Iinv_pol > 1.e-70 && 0) {
-                fprintf(stderr, "\n\nPRE: %g, %g, %g, %g ", creal(S_A[0]), creal(S_A[1]),
-                        creal(S_A[2]), creal(S_A[3]));
+                fprintf(stderr, "\n\nPRE: %g, %g, %g, %g ", creal(S_A[0]), 
+                        creal(S_A[1]), creal(S_A[2]), creal(S_A[3]));
                 stokes_to_f(S_A, &Iinvt, &Iinv_polt, f_test);
                 fprintf(stderr, " Iinvt = %g ", Iinvt);
                 f_to_stokes(Iinvt, Iinv_polt, f_test, S_Atest);
-                fprintf(stderr, "POST: %g, %g, %g, %g \n\n", S_Atest[0],
-                        S_Atest[1], S_Atest[2], S_Atest[3]);
+                fprintf(stderr, "POST: %g, %g, %g, %g \n\n", 
+                        creal(S_Atest[0]), creal(S_Atest[1]), 
+                        creal(S_Atest[2]), creal(S_Atest[3]));
             }
 
             if (Iinv_pol > 1.e-100 && 1) {
@@ -1270,6 +1271,8 @@ double radiative_transfer_polarized(double *lightpath, int steps,
                 // Set POLARIZATION_ACTIVE to true; we are, after all,
                 // in_volume.
                 POLARIZATION_ACTIVE = 1;
+
+                // Ik ben gewoon een geit.
 
             } else {
                 POLARIZATION_ACTIVE = 0;
