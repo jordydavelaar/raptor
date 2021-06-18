@@ -44,8 +44,11 @@ double determ(double matrix[][4], int n) {
     }
 }
 
-// Here we implement Ziri's tetrad
-void create_tetrad_u2(const double X_u[], const double k_u[],
+// Creates a tetrad with a random orientation, i.e., z-axis fixed but XY 
+// axes can have any azimuth.
+// (Useful when we have no orienting vector and just want to express
+// our polarized state in terms of Stokes params.)
+void create_tetrad(const double X_u[], const double k_u[],
                       const double U_u[], double tetrad_u[][4]) {
     // Summation indices:
     int i, j, k, l;
@@ -124,11 +127,6 @@ void create_tetrad_u2(const double X_u[], const double k_u[],
                                (k - l) / 12.);
     }
 
-    // fprintf(stderr, "\n\nU DOT T: %+.15e\n\n", inner_product(X_u, U_u, t_u));
-    // fprintf(stderr, "k DOT T: %+.15e\n\n", inner_product(X_u, k_u, t_u));
-    // fprintf(stderr, "k DOT k: %+.15e\n\n", inner_product(X_u, k_u, k_u));
-    // fprintf(stderr, "U DOT U: %+.15e\n\n", inner_product(X_u, U_u, U_u));
-
     // Need b_d
     double b_d[4];
     lower_index(X_u, b_u, b_d);
@@ -161,8 +159,9 @@ void create_tetrad_u2(const double X_u[], const double k_u[],
     tetrad_u[3][2] = e_u_perp[3];
 }
 
-// Here we implement Ziri's tetrad
-void create_observer_tetrad_u2(const double X_u[], const double k_u[],
+// Creates a tetrad whose Y-axis is aligned with vector b_u
+// (useful when we have such an orienting vector, e.g., observer)
+void create_observer_tetrad(const double X_u[], const double k_u[],
                                const double U_u[], const double b_u[],
                                double tetrad_u[][4]) {
     // Summation indices:
@@ -200,10 +199,6 @@ void create_observer_tetrad_u2(const double X_u[], const double k_u[],
     // Only requirement: b dot b > 0 (i.e., b is spacelike) and b points along Y
     // direction of image.
 
-    //    double b_u[4] = {0., 0., 1., 0.};
-
-    // Now we have b_u s.t. b dot b is spacelike. CHECK!
-
     // First some required quantities:
     double Beta = inner_product(X_u, U_u, b_u);
     double Ccursive = inner_product(X_u, k_u, b_u) / omega - Beta;
@@ -228,11 +223,6 @@ void create_observer_tetrad_u2(const double X_u[], const double k_u[],
             eps[i][j][k][l] = ((i - j) * (i - k) * (i - l) * (j - k) * (j - l) *
                                (k - l) / 12.);
     }
-
-    // fprintf(stderr, "\n\nU DOT T: %+.15e\n\n", inner_product(X_u, U_u, t_u));
-    // fprintf(stderr, "k DOT T: %+.15e\n\n", inner_product(X_u, k_u, t_u));
-    // fprintf(stderr, "k DOT k: %+.15e\n\n", inner_product(X_u, k_u, k_u));
-    // fprintf(stderr, "U DOT U: %+.15e\n\n", inner_product(X_u, U_u, U_u));
 
     // Need b_d
     double b_d[4];
