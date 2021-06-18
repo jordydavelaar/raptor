@@ -1,6 +1,6 @@
 
 CC = h5cc
-CFLAGS = -fopenmp -lomp -std=c99 -I/usr/include -Wall
+CFLAGS = -openmp -lomp -std=c99 -I/usr/include -Wall
 LDFLAGS = -lm -lgsl -lcblas -g
 
 SRC=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c
@@ -9,8 +9,8 @@ OBJ=orbit_tracer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o
 SRC1=orbit_tracer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c
 OBJ1=orbit_tracer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o
 
-SRC2=img_renderer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c raptor_harm3d_model.c RCARRY.c utilities.c
-OBJ2=img_renderer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o raptor_harm3d_model.o RCARRY.o utilities.o
+SRC2=img_renderer.c GRmath.c integrator.c metric.c plasma.c radiative_transfer.c tetrad.c raptor_harm3d_model.c RCARRY.c utilities.c
+OBJ2=img_renderer.o GRmath.o integrator.o metric.o plasma.o radiative_transfer.o tetrad.o raptor_harm3d_model.o RCARRY.o utilities.o
 
 run: $(OBJ) makefile
 	$(CC) $(CFLAGS) -o RAPTOR $(OBJ) $(LDFLAGS)
