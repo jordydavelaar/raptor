@@ -133,8 +133,6 @@ int main(int argc, char *argv[]) {
     //    double t_init = 0.; // MUST BE UPDATED
     //    sscanf(argv[1], "%lf", &t_init);
 
-    // Field of intensity values for output
-    double lambdafield[IMG_WIDTH * IMG_HEIGHT];
     int steps;
 
     // Stepsize for constructing the impact parameters alpha, beta
@@ -176,7 +174,7 @@ int main(int argc, char *argv[]) {
                                                photon_u)                       \
     shared(num_indices, energy_spectrum, frequencies, intensityfield,          \
            f_x_field, f_y_field, I_field, Q_field, U_field, V_field,           \
-           IQUV_field, p_field, lambdafield, x, stepx, stepy, CUTOFF_INNER,    \
+           IQUV_field, p_field, x, stepx, stepy, CUTOFF_INNER,    \
            IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static, 1)
         for (y = 0; y < IMG_HEIGHT;
              y++) { // For all pixel rows (distributed over threads)...
@@ -250,9 +248,7 @@ int main(int argc, char *argv[]) {
         //        f_y_field, p_field, JANSKY_FACTOR);
         write_image_IQUV(imgfile, I_field, Q_field, U_field, V_field,
                          JANSKY_FACTOR);
-        //        write_image(imgfile, intensityfield[f], JANSKY_FACTOR);
-        //    write_VTK_image(fp, intensityfield[f], lambdafield,
-        //    JANSKY_FACTOR);
+
 
         // Close image files
         fclose(imgfile);
