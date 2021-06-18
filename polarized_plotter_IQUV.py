@@ -9,7 +9,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 '''READING THE DATA'''
 
-img_size = 256
+img_size = 80
 
 # 2D array to contain image
 imgI = [[0 for x in range(img_size)] for x in range(img_size)]
@@ -22,7 +22,7 @@ fluxQ = 0.
 fluxU = 0.
 fluxV = 0.
 
-f = open('output/img_data_2.300000e+11_IQUV.dat','r');
+f = open('/Users/thomasbronzwaer/Dropbox/Science/Codes/RAPTOR/backup/RAPTORpp/raptorpp/output/img_data_2.300000e+11_IQUV.dat','r');
 
 for line in f:
     columns=line.split()
@@ -104,4 +104,4 @@ print(fluxU)
 print('flux V')
 print(fluxV)
 
-pl.savefig('figures/IQUV_plot.pdf', transparent=False)
+pl.savefig('/Users/thomasbronzwaer/Dropbox/Science/Codes/RAPTOR/backup/RAPTORpp/raptorpp/output/IQUV_plot.pdf', transparent=False)

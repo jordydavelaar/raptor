@@ -95,6 +95,40 @@ void connection_udd(const double X_u[4], double gamma_udd[4][4][4]);
 // This function initializes a single 'superphoton' or light ray.
 void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
 
+// TETRAD.C
+///////////
+
+double determ(double matrix[][4], int n);
+
+void create_tetrad_u2(const double X_u[], const double k_u[],
+                      const double U_u[], double tetrad_u[][4]);
+
+void create_observer_tetrad_u2(const double X_u[], const double k_u[],
+                               const double U_u[], const double b_u[],
+                               double tetrad_u[][4]);
+
+double tetrad_identity_eta(const double X_u[4], const double tetrad_u[4][4],
+                           const int a, const int b);
+
+double tetrad_identity_g(const double tetrad_u[][4], const int mu,
+                         const int nu);
+
+double tetrad_identity_sum_latin(const double tetrad_u[4][4],
+                                 const double tetrad_d[4][4], const int mu,
+                                 const int nu);
+
+double tetrad_identity_sum_greek(const double tetrad_u[4][4],
+                                 const double tetrad_d[4][4], const int a,
+                                 const int b);
+
+void create_tetrad_d(const double X_u[], const double tetrad_u[][4],
+                     double tetrad_d[][4]);
+
+double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]);
+
+void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
+
+
 // PLASMA.C
 ///////////
 

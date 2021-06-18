@@ -4,8 +4,8 @@ ABSORPTION	(-)		1
 TEMP_MODEL	(-)		NONE
 SPHERICAL_ACC   (-)             0
 
-IMG_WIDTH   	(pixels)	256
-IMG_HEIGHT  	(pixels)	256
+IMG_WIDTH   	(pixels)	80
+IMG_HEIGHT  	(pixels)	80
 CAM_SIZE_X  	(Rg)		20
 CAM_SIZE_Y  	(Rg)		20
 FREQS_PER_DEC	(-)		1

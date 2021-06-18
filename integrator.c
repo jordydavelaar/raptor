@@ -232,6 +232,8 @@ void integrate_geodesic(double alpha, double beta, double *photon_u,
     }
 }
 
+
+/*
 // Recursively calculates the determinant of a matrix.
 // Source: http://ideone.com/fork/92JF0O
 double determ(double matrix[][4], int n) {
@@ -756,6 +758,8 @@ void check_tetrad_identities(const double X_u[], double tetrad_u[][4]) {
 
     printf("\n");
 }
+
+*/
 
 // y contains the 4-position and the 4-velocity for one lightray/particle.
 void f_parallel(const double y[], double complex f_u[], double fvector[],
