@@ -48,8 +48,8 @@ double determ(double matrix[][4], int n) {
 // axes can have any azimuth.
 // (Useful when we have no orienting vector and just want to express
 // our polarized state in terms of Stokes params.)
-void create_tetrad(const double X_u[], const double k_u[],
-                      const double U_u[], double tetrad_u[][4]) {
+void create_tetrad(double X_u[], double k_u[],
+                   double U_u[], double tetrad_u[][4]) {
     // Summation indices:
     int i, j, k, l;
 
@@ -161,9 +161,9 @@ void create_tetrad(const double X_u[], const double k_u[],
 
 // Creates a tetrad whose Y-axis is aligned with vector b_u
 // (useful when we have such an orienting vector, e.g., observer)
-void create_observer_tetrad(const double X_u[], const double k_u[],
-                               const double U_u[], const double b_u[],
-                               double tetrad_u[][4]) {
+void create_observer_tetrad(double X_u[], double k_u[],
+                            double U_u[], double b_u[],
+                            double tetrad_u[][4]) {
     // Summation indices:
     int i, j, k, l;
 
@@ -318,7 +318,7 @@ void create_tetrad_d(const double X_u[], const double tetrad_u[][4],
         {0., 0., 0., 1.},
     };
 
-    int i, j, q, s, k, l;
+    int i, j, k, l;
 
     // Obtain relevant metric terms:
     double g_uu[4][4], g_dd[4][4];

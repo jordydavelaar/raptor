@@ -253,12 +253,12 @@ double emission_coeff_kappa(double nu, double Ne, double Thetae, double B,
                             double theta) {
 
     // emissivity for the kappa distribution function, see Pandya et al. 2016
-    double nus, nuc, sth, x, w, X_c, factor;
+    double nus, nuc, sth, w, X_c, factor;
     double J_s;
 
-    double Rhigh = 100.;
-    double Rlow = 100.;
-    double b2 = pow((B / B_unit) / (Ne / Ne_unit), 2.);
+    //double Rhigh = 100.;
+    //double Rlow = 100.;
+    //double b2 = pow((B / B_unit) / (Ne / Ne_unit), 2.);
     // printf("%g\n", b2);
     // kappa = Rhigh * b2/(1+b2) + Rlow / (1 + b2);
 
@@ -288,7 +288,7 @@ double absorption_coeff_kappa(double nu, double Ne, double Thetae, double B,
                               double theta) {
 
     // emissivity for the kappa distribution function, see Pandya et al. 2016
-    double nus, nuc, sth, x, w, X_c, factor;
+    double nus, nuc, sth, w, X_c, factor;
     double alpha_s;
 
     double Rhigh = 100.;

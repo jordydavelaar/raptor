@@ -32,18 +32,6 @@ void init_model() {
 }
 
 void init_harm3d_data(char *fname) {
-    int nghost;
-    double th_end, th_cutout, two_temp_gam;
-    int i, j, k, l, m;
-    double X[NDIM], UdotU, ufac;
-    double gcov[NDIM][NDIM], gcon[NDIM][NDIM], g;
-    double Ucon[NDIM], Ucov[NDIM];
-    double dV, Thetae, V, Be;
-    double Th_unit;
-    double UdotBp, Bcon[NDIM], Bcov[NDIM], Bp[NDIM];
-    double bsq, beta, beta_trans, b2;
-    double trat;
-
     FILE *fp;
 
     fprintf(stderr, "%s\n", fname);
@@ -331,7 +319,7 @@ void get_fluid_params(double X[NDIM], double *Ne, double *Thetae, double *B,
     double Bp[NDIM], Vcon[NDIM], Vfac, VdotV, UdotBp;
     double gcon[NDIM][NDIM], gcov[NDIM][NDIM], Bcov[NDIM], Ucov[NDIM], coeff[4];
     double bsq, beta, beta_trans, b2, trat, two_temp_gam, Th_unit, Be;
-    double Rlow = 1, Rhigh = 1;
+    //double Rlow = 1, Rhigh = 1;
     if (X[1] < startx[1] || X[1] > stopx[1] || X[2] < startx[2] ||
         X[2] > stopx[2]) {
         *Ne = 0.;

@@ -100,12 +100,12 @@ void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
 
 double determ(double matrix[][4], int n);
 
-void create_tetrad(const double X_u[], const double k_u[],
-                      const double U_u[], double tetrad_u[][4]);
+void create_tetrad(double X_u[], double k_u[],
+                   double U_u[], double tetrad_u[][4]);
 
-void create_observer_tetrad(const double X_u[], const double k_u[],
-                               const double U_u[], const double b_u[],
-                               double tetrad_u[][4]);
+void create_observer_tetrad(double X_u[], double k_u[],
+                            double U_u[], double b_u[],
+                            double tetrad_u[][4]);
 
 double tetrad_identity_eta(const double X_u[4], const double tetrad_u[4][4],
                            const int a, const int b);
