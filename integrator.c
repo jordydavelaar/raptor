@@ -681,22 +681,6 @@ double Je(double Xe) {
 
 // B.4
 double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
-    double nu_B =
-        ELECTRON_CHARGE * B / (2. * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
-                      (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
-                      theta_e +
-                  1.0;
-
-    double X = sqrt(3. / (2. * sqrt(2.)) * 0.001 * nu / nu_c);
-    double x = nu / nu_c;
-
-    //  return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu_B * nu_B *
-    //  sin(theta_B) * sin(theta_B) / (ELECTRON_MASS * SPEED_OF_LIGHT * nu * nu
-    //  * nu) *
-    //       f_m(X,x) * (K_1(1./theta_e) / K_2(1./theta_e) + 6. * theta_e);
-
-    // NEW VERSION
     double wp2 =
         4. * M_PI * n_e * ELECTRON_CHARGE * ELECTRON_CHARGE / ELECTRON_MASS;
     double omega0 = ELECTRON_CHARGE * B / ELECTRON_MASS / SPEED_OF_LIGHT;
@@ -713,21 +697,6 @@ double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 
 // B.14
 double rho_V(double theta_e, double n_e, double nu, double B, double theta_B) {
-    double nu_B =
-        ELECTRON_CHARGE * B / (2. * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
-                      (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
-                      theta_e +
-                  1.0;
-
-    double X = sqrt(3. / (2. * sqrt(2.)) * 0.001 * nu / nu_c);
-
-    //  return 2. * n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu_B /
-    //  (ELECTRON_MASS * SPEED_OF_LIGHT * nu * nu) * K_0(1. / theta_e) -
-    //  DeltaJ_5(X) /
-    //        K_2(1. / theta_e);
-
-    // NEW VERSION
     double wp2 =
         4. * M_PI * n_e * ELECTRON_CHARGE * ELECTRON_CHARGE / ELECTRON_MASS;
     double omega0 = ELECTRON_CHARGE * B / ELECTRON_MASS / SPEED_OF_LIGHT;
@@ -743,16 +712,14 @@ double rho_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 double radiative_transfer(double *lightpath, int steps, double frequency) {
     int IN_VOLUME, path_counter;
     double I_current = 0.;
-    double dI = 0.;
     double j_nu = 0.;
     double B, THETA_e, pitch_ang, nu_p, n_e, nu_p2, dl_current;
     int i;
     double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
 
-    double tau = 0.;
     double a_nu = 0.;
-    double K_inv_old = 0, j_inv_old = 0, dtau_old = 0;
+    double dtau_old = 0;
 
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--) {
@@ -801,8 +768,6 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
             // Constant used in integration (to produce correct units)
             double C = Rg * PLANCK_CONSTANT /
                        (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
-
-            double redshift = frequency / nu_p;
 
             double dtau = (nu_p * a_nu * dl_current * C + dtau_old);
             double K_inv = (nu_p * a_nu);
@@ -903,25 +868,15 @@ double radiative_transfer_polarized(double *lightpath, int steps,
                                     double frequency, double *f_x, double *f_y,
                                     double *p, int PRINT_POLAR, double *IQUV) {
     int IN_VOLUME, path_counter;
-    double I_current = 0.;
-    double dI = 0.;
     double j_nu = 0.;
     double B, THETA_e, pitch_ang, nu_p, n_e, nu_p2, dl_current;
     int i, j;
     double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
-
-    double tau = 0.;
     double a_nu = 0.;
-    double K_inv_old = 0, j_inv_old = 0, dtau_old = 0;
 
     int POLARIZATION_ACTIVE = 0;
-    double S_I_current = 0.;
-    double S_Q_current = 0.;
-    double S_U_current = 0.;
-    double S_V_current = 0.;
-    double S_I_new, S_Q_new, S_U_new, S_V_new;
-    double deg_of_pol = 0.;
+
 
     double tetrad_u[4][4], tetrad_d[4][4];
     LOOP_ij tetrad_u[i][j] = 0.;
@@ -1037,14 +992,8 @@ double radiative_transfer_polarized(double *lightpath, int steps,
             double C = Rg * PLANCK_CONSTANT /
                        (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
-            double redshift = frequency / nu_p;
-
             j_nu = j_I(THETA_e, n_e, nu_p, B, pitch_ang);
             a_nu = absorption_coeff_TH(j_nu, nu_p, THETA_e);
-
-            double K_inv = aI;
-            double dtau = (K_inv * dl_current * C + dtau_old);
-            double j_inv = jI;
 
             // POLARIZED TRANSFER
             /////////////////////
@@ -1302,8 +1251,8 @@ double radiative_transfer_polarized(double *lightpath, int steps,
             double S_Atest[4] = {0., 0., 0., 0.};
             double f_test[4] = {0., 0., 0., 0.};
             if (Iinv_pol > 1.e-70 && 0) {
-                fprintf(stderr, "\n\nPRE: %g, %g, %g, %g ", S_A[0], S_A[1],
-                        S_A[2], S_A[3]);
+                fprintf(stderr, "\n\nPRE: %g, %g, %g, %g ", creal(S_A[0]), creal(S_A[1]),
+                        creal(S_A[2]), creal(S_A[3]));
                 stokes_to_f(S_A, &Iinvt, &Iinv_polt, f_test);
                 fprintf(stderr, " Iinvt = %g ", Iinvt);
                 f_to_stokes(Iinvt, Iinv_polt, f_test, S_Atest);
@@ -1415,16 +1364,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
 
     create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
     create_tetrad_d(X_u, obs_tetrad_u, obs_tetrad_d);
-
-    double tetradCheck = check_tetrad_compact(X_u, obs_tetrad_u);
-
-    // printf("observer handedness: %g\n", check_handedness(X_u, obs_tetrad_u));
-
-    //    printf("\n Observer tetradcheck %+.15e", tetradCheck);
-    //    printf("\n Observer U dot U %+.15e", inner_product(X_u, U_obs_u,
-    //    U_obs_u)); printf("\n Observer k dot k %+.15e", inner_product(X_u,
-    //    k_u, k_u)); printf("\n Observer k_rev dot k_rev %+.15e",
-    //    inner_product(X_u, k_u_reverse, k_u_reverse));
 
     // Convert f_u to f_obs_tetrad_u
     double complex f_obs_tetrad_u[4] = {0., 0., 0., 0.};

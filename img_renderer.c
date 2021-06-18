@@ -198,8 +198,7 @@ int main(int argc, char *argv[]) {
             // INTEGRATE THIS PIXEL'S GEODESIC
 
             int PRINT_POLAR = 1;
-            if (x == 50, y == 50)
-                PRINT_POLAR = 1;
+
             if (PRINT_POLAR)
                 integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps,
                                    CUTOFF_INNER);
