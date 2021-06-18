@@ -151,26 +151,6 @@ double THETA_e(double X_u[4]);
 // RADIATIVE_TRANSFER.C
 ///////////////////////
 
-void read_in_table(char *filename);
-void init_memory_kappa(void);
-double interpolate_scalar_5d(double *****A, double nu, double Ne, double Thetae,
-                             double B, double theta);
-double interpolate_scalar_2d(double **var, double nuratio, double Thetae);
-
-// TErun emission coeffiencient j_nu for free-free emission
-double jnu_brem_ee(double nu, double ne, double Thetae);
-
-/*calculates e-e spectrum using tables and interpolations*/
-double Gfun(double x, double Thetae);
-
-/*Approximation from Maxon 1972*/
-double Ei(double xx);
-
-double absorption_coeff_kappa(double nu, double Ne, double Thetae, double B,
-                              double theta);
-double emission_coeff_kappa(double nu, double Ne, double Thetae, double B,
-                            double theta);
-
 // Return emission coefficient j_nu for kappa distribution function
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
                                 double theta);
