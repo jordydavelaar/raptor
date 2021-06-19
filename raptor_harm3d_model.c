@@ -206,15 +206,6 @@ double Ug2_approx_rand(double Ur2, double Xg2) {
 #define TH 2
 #define PH 3
 
-/* return boyer-lindquist coordinate of point */
-void bl_coord(double *X, double *r, double *th) {
-
-    *r = exp(X[1]) + R0;
-    *th = M_PI * X[2] + ((1. - hslope) / 2.) * sin(2. * M_PI * X[2]);
-
-    return;
-}
-
 #undef TT
 #undef RR
 #undef TH
