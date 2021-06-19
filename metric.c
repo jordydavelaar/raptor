@@ -9,6 +9,7 @@
 #include "parameters.h"
 #include "raptor_harm3d_model.h" // We need hslope from here - ought to move it to constants.h!!
 #include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 // Returns the covariant metric g_dd at location X_u
@@ -951,3 +952,111 @@ void initialize_photon_perspective(double alpha, double beta,
     photon_u[6] = k_u[2];
     photon_u[7] = k_u[3];
 }
+
+// TRANSFORMATION FUNCTIONS
+///////////////////////////
+
+// WARNING: some of these functions are NOT listed in functions.h, and are 
+// only used by other functions in this file.
+
+// Returns the value of f(Xg2) given some value for Xr2. For the correct Xg2,
+// we have f(Xg2) = 0.
+double f_Xg2(double Xg2, double Xr2) {
+    return M_PI * Xg2 + 0.5 * (1. - hslope) * sin(2. * M_PI * Xg2) - Xr2;
+}
+
+// Returns the value of f'(Xg2).
+double f_primed_Xg2(double Xg2) {
+    return M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
+}
+
+// This function does "one Newton-Raphson step", i.e. it returns the NEW,
+// "better" estimate Xg2_1 based on the input estimate Xg2_0.
+double NR_stepX(double Xg2_0, double Xr2) {
+    double fprime = f_primed_Xg2(Xg2_0);
+
+    if (fabs(fprime) < 1.e-9)
+        printf("fprime = %+.15e\n", fprime);
+
+    return Xg2_0 - f_Xg2(Xg2_0, Xr2) / f_primed_Xg2(Xg2_0);
+}
+
+// Returns the value of f(Ug2) given some value for Ur2. For the correct Ug2,
+// we have f(Ug2) = 0.
+double f_Ug2(double Ug2, double Ur2, double Xg2) {
+    return M_PI * Ug2 * (1. + (1. - hslope) * cos(2. * M_PI * Xg2)) - Ur2;
+}
+
+// Returns the value of f'(Ug2).
+double f_primed_Ug2(double Ug2, double Xg2) {
+    return M_PI * (1. + (1. - hslope) * cos(2. * M_PI * Xg2));
+}
+
+// This function does "one Newton-Raphson step", i.e. it returns the NEW,
+// "better" estimate Ug2_1 based on the input estimate Ug2_0.
+double NR_stepU(double Ug2_0, double Ur2, double Xg2) {
+    double fprime = f_primed_Ug2(Ug2_0, Xg2);
+
+    if (fabs(fprime) < 1.e-9)
+        printf("fprime = %+.15e\n", fprime);
+
+    return Ug2_0 - f_Ug2(Ug2_0, Ur2, Xg2) / f_primed_Ug2(Ug2_0, Xg2);
+}
+
+// Given the X2 coordinate in RAPTOR's convention, Xr2, we compute and return
+// an estimate for the corresponding coordinate in HARM2D's convention, Xg2.
+double Xg2_approx_rand(double Xr2) {
+    double Xg2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
+    double Xg2_prev = 1.e-15; // Keeps track of previous estimate to converge
+    double tolerance = 1.e-9; // Maximum error
+    int steps = 0;
+    int maxsteps = 100;
+
+    int count = 0;
+
+    // Main loop
+    while (fabs(Xg2_current - Xg2_prev) > tolerance) {
+        Xg2_current = (double)rand() / (double)RAND_MAX;
+        // Xg2_current = 1.e-16;
+        steps = 0;
+        count++;
+
+        while (steps < maxsteps && fabs(Xg2_current - Xg2_prev) > tolerance) {
+            Xg2_prev = Xg2_current;
+            Xg2_current = NR_stepX(Xg2_current, Xr2);
+            steps++;
+        }
+    }
+
+    // Clamp output value between 0 and 1
+    return fmin(1., fmax(Xg2_current, 0.));
+}
+
+// Given the U2 coordinate in RAPTOR's convention, Ur2, we compute and return
+// an estimate for the corresponding vector component in HARM2D's convention,
+// Ug2.
+double Ug2_approx_rand(double Ur2, double Xg2) {
+    double Ug2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
+    double Ug2_prev = 1.e-15; // Keeps track of previous estimate to converge
+    double tolerance = 1.e-9; // Maximum error
+    int steps = 0;
+    int maxsteps = 100;
+
+    int count = 0;
+
+    // Main loop
+    while (fabs(Ug2_current - Ug2_prev) > tolerance) {
+        Ug2_current = (double)rand() / (double)RAND_MAX;
+        steps = 0;
+        count++;
+
+        while (steps < maxsteps && fabs(Ug2_current - Ug2_prev) > tolerance) {
+            Ug2_prev = Ug2_current;
+            Ug2_current = NR_stepU(Ug2_current, Ur2, Xg2);
+            steps++;
+        }
+    }
+
+    return Ug2_current;
+}
+
