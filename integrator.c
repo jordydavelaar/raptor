@@ -251,7 +251,6 @@ void f_parallel(const double y[], double complex f_u[], double fvector[],
 
     // Obtain the Christoffel symbols at the current location
     connection_udd(X_u, gamma_udd);
-    // connection_num_udd(X_u, gamma_udd);
 
     // Compute 4-acceleration using the geodesic equation
     LOOP_ijk A_u[i] -= gamma_udd[i][j][k] * U_u[j] * U_u[k];
@@ -494,7 +493,7 @@ double bessel_appr(int n, double x) {
     if (n == 2)
         return 2. / x / x;
 
-    exit(1);
+    exit(0);
 }
 
 // B.15:
@@ -633,7 +632,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
     double a_nu = 0.;
 
     int POLARIZATION_ACTIVE = 0;
-
 
     double tetrad_u[4][4], tetrad_d[4][4];
     LOOP_ij tetrad_u[i][j] = 0.;
@@ -1069,23 +1067,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
     IQUV[1] = S_Qf;
     IQUV[2] = S_Uf;
     IQUV[3] = S_Vf;
-
-    if (cabs(S_If) > 1.e-40 && 0) {
-        printf("\nS_If = %+.15e", creal(S_If));
-        printf("\nS_Qf = %+.15e", creal(S_Qf));
-        printf("\nS_Uf = %+.15e", creal(S_Uf));
-        printf("\nS_Vf = %+.15e", creal(S_Vf));
-        *p = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]) / S_A[0];
-        printf("\npf = %+.15e", *p);
-    }
-
-    // Read final polarization variables at observer.
-    *f_x = 0.;
-    *f_y = 0.;
-    *p = 0.;
-    //    *deg_of_pol = 0.;
-
-    // Stokes...
 
     // Store integrated intensity in the image.
     return S_If; // I_current * pow(frequency, 3.);
