@@ -11,12 +11,6 @@
 
 #include <stdio.h>
 
-// RCARRY.C
-///////////
-
-double genrand_RCARRY(void);
-void init_RCARRY(int);
-
 // GRMATH.C
 ///////////
 
@@ -132,7 +126,6 @@ void create_tetrad_d(const double X_u[], const double tetrad_u[][4],
 double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]);
 
 void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
-
 
 // PLASMA.C
 ///////////

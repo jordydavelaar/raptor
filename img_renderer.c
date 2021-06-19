@@ -51,9 +51,6 @@
 
 int main(int argc, char *argv[]) {
 
-    // Initialize RNG
-    init_RCARRY(13242834);
-
     // INPUT FILE
     /////////////
 

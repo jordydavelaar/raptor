@@ -10,7 +10,7 @@
 #include "parameters.h"
 #include <complex.h>
 #include <math.h>
-
+#include <stdlib.h>
 
 // Recursively calculates the determinant of a matrix.
 // Source: http://ideone.com/fork/92JF0O
@@ -89,7 +89,7 @@ void create_tetrad(double X_u[], double k_u[],
     // Strategy for creating b:
 
     // 1. Pick random numbers between 0 and 1.
-    LOOP_i b_u[i] = 1. / sqrt(3.) * genrand_RCARRY();
+    LOOP_i b_u[i] = 1. / sqrt(3.) * (double)rand() / (double)RAND_MAX;
 
     // 2. Check inner product.
     // fprintf(stderr, "\nb dot b = %+.15e", inner_product(X_u, b_u, b_u));
@@ -97,7 +97,7 @@ void create_tetrad(double X_u[], double k_u[],
     // 3. If spacelike, OK.
     // 4. If not, flip sign of b_u[0]? Or just create new b_u?
     while (inner_product(X_u, b_u, b_u) < 0.1) {
-        LOOP_i b_u[i] = 1. / sqrt(3.) * genrand_RCARRY();
+        LOOP_i b_u[i] = 1. / sqrt(3.) * (double)rand() / (double)RAND_MAX;
     }
 
     // Now we have b_u s.t. b dot b is spacelike. CHECK!
