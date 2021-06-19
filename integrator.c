@@ -347,54 +347,6 @@ double complex inner_product_real_complex(const double *X_u, double *A_u,
     return dotproduct;
 }
 
-// TODO WARNING: handle the case when p=0
-void stokes_to_f_tetrad_u(const double complex S_A[4],
-                          double complex f_tetrad_u[4], double *p) {
-
-    *p = 1.;
-    //    if(1 || cabs(S_A[0]) > 1.e-150)
-    //       *p = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]) /
-    //       S_A[0];
-
-    if (cabs(S_A[1] + S_A[2] + S_A[3]) <
-        1.e-100) { // Taylor expand for small values
-        *p = (S_A[1] + S_A[2] + S_A[3]) / S_A[0];
-    } else {
-        *p = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]) / S_A[0];
-    }
-
-    double complex QJones = S_A[1] / (S_A[0] * *p);
-    double complex UJones = S_A[2] / (S_A[0] * *p);
-    double complex VJones = S_A[3] / (S_A[0] * *p);
-
-    // source:
-    // https://physics.stackexchange.com/questions/238957/converting-stokes-parameters-to-jones-vector
-    f_tetrad_u[1] = sqrt((1. + QJones) / 2.);
-
-    if (f_tetrad_u[1] == 0)
-        f_tetrad_u[2] = 1.;
-    else
-        f_tetrad_u[2] =
-            UJones / (2. * f_tetrad_u[1]) - I * VJones / (2. * f_tetrad_u[1]);
-
-    f_tetrad_u[1] *= sqrt(S_A[0] * *p);
-    f_tetrad_u[2] *= sqrt(S_A[0] * *p);
-
-    // A problem can occur where p is zero.
-    // If p is zero, we have no polarization; vector is then irrelevant.
-    if (*p < 1.e-30 || f_tetrad_u[1] != f_tetrad_u[1] ||
-        f_tetrad_u[2] != f_tetrad_u[2]) {
-        f_tetrad_u[1] = 0.;
-        f_tetrad_u[2] = 1.;
-        *p = 1.e-30;
-    }
-
-    if (f_tetrad_u[1] != f_tetrad_u[1] || f_tetrad_u[2] != f_tetrad_u[2]) {
-        printf("PACKING NANS INTO VECTOR.\n");
-        printf("\np = %+.15e", *p);
-    }
-}
-
 void f_to_stokes(double Iinv, double Iinv_pol, double complex f_tetrad_u[],
                  double complex S_A[]) {
     S_A[0] = Iinv;
@@ -428,42 +380,6 @@ void stokes_to_f(double complex S_A[], double *Iinv, double *Iinv_pol,
             Unorm / (2. * f_tetrad_u[1]) - I * Vnorm / (2. * f_tetrad_u[1]);
 }
 
-void f_tetrad_u_to_stokes(const double complex f_tetrad_u[4], const double p,
-                          double complex S_A[4]) {
-    double complex IfromJones = 0.;
-    double complex QfromJones =
-        0.; // cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) -
-            // cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2]);
-    double complex UfromJones = 0.; // conj(f_tetrad_u[1]) * f_tetrad_u[2] +
-                                    // f_tetrad_u[1] * conj(f_tetrad_u[2]);
-    double complex VfromJones = 0.; // I * (conj(f_tetrad_u[1]) * f_tetrad_u[2]
-                                    // - f_tetrad_u[1] * conj(f_tetrad_u[2]));
-
-    IfromJones = (cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) +
-                  cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2])) /
-                 p;
-    QfromJones = cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) -
-                 cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2]);
-    UfromJones = conj(f_tetrad_u[1]) * f_tetrad_u[2] +
-                 f_tetrad_u[1] * conj(f_tetrad_u[2]);
-    VfromJones = I * (conj(f_tetrad_u[1]) * f_tetrad_u[2] -
-                      f_tetrad_u[1] * conj(f_tetrad_u[2]));
-
-    S_A[0] = IfromJones;
-    S_A[1] = QfromJones;
-    S_A[2] = UfromJones;
-    S_A[3] = VfromJones;
-
-    if (S_A[0] != S_A[0] || S_A[1] != S_A[1] || S_A[2] != S_A[2] ||
-        S_A[3] != S_A[3]) {
-        printf("\n AND P IS %+.15e", p);
-        printf("\nf_u[1] = %+.15e, %+.15e; f_u[2] = %+.15e, %+.15e",
-               creal(f_tetrad_u[1]), cimag(f_tetrad_u[1]), creal(f_tetrad_u[2]),
-               cimag(f_tetrad_u[2]));
-        printf("NANS IN DA HOUSE \n NANS IN DA HOUSE \n NANS IN DA HOUSE");
-    }
-}
-
 // NOTE: works only in Kerr metric
 // Ziri's suggestion: construct U vecs
 void construct_U_vector(const double X_u[], double U_u[]) {
@@ -484,57 +400,23 @@ void construct_U_vector(const double X_u[], double U_u[]) {
     int i;
     LOOP_i U_u[i] = 0.;
     raise_index(X_u, U_d, U_u);
-
-    // Check that U dot U = -1 to (near) machine precision:
-    //    printf("\nU dot U: %+.15e", inner_product(X_u, U_u, U_u));
 }
-
-/*
-#define ELECTRON_CHARGE    (4.80320425e-10)
-#define ELECTRON_MASS      (9.1093829e-28)
-#define PROTON_MASS        (1.6726219e-24)
-#define BOLTZMANN_CONSTANT (1.3806488e-16)
-#define SPEED_OF_LIGHT     (2.99792458e10)
-#define PLANCK_CONSTANT    (6.62606885e-27)
-#define MPCL2              (0.0015033)
-#define GGRAV              (6.674e-8)
-#define MSUN               (1.989e33)
-#define MPoME              (PROTON_MASS / ELECTRON_MASS)
-#define M_PI           3.14159265358979323846
-*/
 
 // Dexter (2016) A.18
 double I_I(double x) {
-    return 2.5651 * (1. + 1.92 * pow(x, -1. / 3.) + 0.9977 * pow(x, -2. / 3.)) *
+    return 2.5651 * (1 + 1.92 * pow(x, -1. / 3.) + 0.9977 * pow(x, -2. / 3.)) *
            exp(-1.8899 * pow(x, 1. / 3.));
 }
 
 // A.19
 double I_Q(double x) {
     return 2.5651 *
-           (1. + 0.932 * pow(x, -1. / 3.) + 0.4998 * pow(x, -2. / 3.)) *
+           (1 + 0.93193 * pow(x, -1. / 3.) + 0.499873 * pow(x, -2. / 3.)) *
            exp(-1.8899 * pow(x, 1. / 3.));
 }
 
 // A.20
 double I_V(double x) {
-    return (1.8138 / x + 3.423 * pow(x, -2. / 3.) + 0.02955 * pow(x, -0.5) +
-            2.0377 * pow(x, -1 / 3.)) *
-           exp(-1.8899 * pow(x, 1. / 3.));
-}
-
-double I_I_(double x) {
-    return 2.5651 * (1 + 1.92 * pow(x, -1. / 3.) + 0.9977 * pow(x, -2. / 3.)) *
-           exp(-1.8899 * pow(x, 1. / 3.));
-}
-
-double I_Q_(double x) {
-    return 2.5651 *
-           (1 + 0.93193 * pow(x, -1. / 3.) + 0.499873 * pow(x, -2. / 3.)) *
-           exp(-1.8899 * pow(x, 1. / 3.));
-}
-
-double I_V_(double x) {
     return (1.81348 / x + 3.42319 * pow(x, -2. / 3.) +
             0.0292545 * pow(x, -0.5) + 2.03773 * pow(x, -1. / 3.)) *
            exp(-1.8899 * pow(x, 1. / 3.));
@@ -542,11 +424,6 @@ double I_V_(double x) {
 
 // A.12
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B) {
-
-    // double nu_B = e * B / (2. * M_PI * m * c);
-    // double nu_p = 3. / 2. * nu_B * sin(theta_B);
-    // double nu_c = nu_p * theta_e * theta_e;
-    // Alternatively,
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                       (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
                       theta_e +
@@ -554,12 +431,8 @@ double j_I(double theta_e, double n_e, double nu, double B, double theta_B) {
 
     double x = nu / nu_c;
 
-    //    return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / (2. * sqrt(3.) *
-    //    SPEED_OF_LIGHT * theta_e * theta_e) * I_I(x);
-
-    // NEW VERSION
     return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
-           SPEED_OF_LIGHT / theta_e / theta_e * I_I_(x);
+           SPEED_OF_LIGHT / theta_e / theta_e * I_I(x);
 }
 
 // A.13
@@ -571,12 +444,8 @@ double j_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 
     double x = nu / nu_c;
 
-    // return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / (2. * sqrt(3.) *
-    // SPEED_OF_LIGHT * theta_e * theta_e) * I_Q(x);
-
-    // NEW VERSION
     return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
-           SPEED_OF_LIGHT / theta_e / theta_e * I_Q_(x);
+           SPEED_OF_LIGHT / theta_e / theta_e * I_Q(x);
 }
 
 // A.14 (theta_B = pitch angle, k dot B)
@@ -588,14 +457,9 @@ double j_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 
     double x = nu / nu_c;
 
-    //    return 2. * n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu *
-    //    tan(theta_B) / (3. * sqrt(3.) * SPEED_OF_LIGHT * theta_e * theta_e *
-    //    theta_e) * I_V(x);
-
-    // NEW VERSION
     return 2. * n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / tan(theta_B) /
            3. / sqrt(3.) / SPEED_OF_LIGHT / theta_e / theta_e / theta_e *
-           I_V_(x);
+           I_V(x);
 }
 
 // ABSORPTION
@@ -606,51 +470,21 @@ double j_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 // ROTATION
 ///////////
 
-// B.6
-double f(double X) {
-    return 2.011 * exp(-pow(X, 1.035) / 4.7) -
-           cos(X / 2.) * exp(-sqrt(X) / 2.73) - 0.011 * exp(-X / 47.2);
-}
-
 // B.13 NOTE: make sure that, in B.13, Dexter does not mean X when he writes x
 // (in the final term) Note that X = ... (B.8) UPDATE: it was apparently indeed
 // a typo. while x = nu / nu_c UPDATE: it seems Dexter did make TWO typos: it
 // should be ln(X/120), not "ln x / 120". Thus I have greyed out the original,
 // new one is below.
-double f_m(double X, double x) {
-    //    return f(X) + (0.011 * exp(-X/47.2) - pow(2.,-1./3.)/pow(3.,23./6.) *
-    //    10000. * M_PI * pow(X, -8./3.)) * 0.5 * (1. + tanh(10. *
-    //    log(x)/120.));
-    return f(X) +
+double f_m(double X) {
+    return 2.011 * exp(-pow(X, 1.035) / 4.7) -
+           cos(X * 0.5) * exp(-pow(X, 1.2) / 2.73) - 0.011 * exp(-X / 47.2) +
            (0.011 * exp(-X / 47.2) - pow(2., -1. / 3.) / pow(3., 23. / 6.) *
                                          10000. * M_PI * pow(X, -8. / 3.)) *
                0.5 * (1. + tanh(10. * log(X / 120.)));
 }
 
 // Bessel function approximations:
-double K_0(double x) { return -log(0.5 * x) - 0.5772; }
-double K_1(double x) { return 1. / x; }
-double K_2(double x) { return 2. / (x * x); }
-
-// B.15:
-double DeltaJ_5(double X) {
-    return 0.4379 * log(1. + 0.001858 * pow(X, 1.503));
-}
-
-/*
-    *rQ = 2. * M_PI * nu / 2. / CL * wp2 * omega0 * omega0 / pow(2 * M_PI * nu,
-   4) * jffunc(Xe) * (besselk_asym(1, Thetaer) / besselk_asym(2, Thetaer) +
-         6. * Thetae) * sin(theta) * sin(theta);
-    *rU = 0.0;
-    *rV = 2.0 * M_PI * nu / CL * wp2 * omega0 / pow(2. * M_PI * nu, 3) *
-        (besselk_asym(0, Thetaer) - Je(Xe)) / besselk_asym(2, Thetaer) *
-   cos(theta);
-*/
-
-double besselk_asym(int n, double x) {
-
-    //    return gsl_sf_bessel_Kn(n, x);
-
+double bessel_appr(int n, double x) {
     if (n == 0)
         return -log(x / 2.) - 0.5772;
 
@@ -660,23 +494,12 @@ double besselk_asym(int n, double x) {
     if (n == 2)
         return 2. / x / x;
 
-    fprintf(stderr, "this cannot happen\n");
     exit(1);
 }
 
-double jffunc(double Xe) {
-    double extraterm;
-    extraterm =
-        (0.011 * exp(-Xe / 47.2) - pow(2., -1. / 3.) / pow(3., 23. / 6.) *
-                                       M_PI * 1e4 * pow(Xe + 1e-16, -8. / 3.)) *
-        (0.5 + 0.5 * tanh((log(Xe) - log(120.)) / 0.1));
-    return 2.011 * exp(-pow(Xe, 1.035) / 4.7) -
-           cos(Xe * 0.5) * exp(-pow(Xe, 1.2) / 2.73) - 0.011 * exp(-Xe / 47.2) +
-           extraterm;
-}
-
-double Je(double Xe) {
-    return 0.43793091 * log(1. + 0.00185777 * pow(Xe, 1.50316886));
+// B.15:
+double DeltaJ_5(double X) {
+    return 0.43793091 * log(1. + 0.00185777 * pow(X, 1.50316886));
 }
 
 // B.4
@@ -689,8 +512,8 @@ double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
     double Thetaer = 1. / theta_e;
 
     return 2. * M_PI * nu / 2. / SPEED_OF_LIGHT * wp2 * omega0 * omega0 /
-           pow(2. * M_PI * nu, 4.) * jffunc(Xe) *
-           (besselk_asym(1, Thetaer) / besselk_asym(2, Thetaer) +
+           pow(2. * M_PI * nu, 4.) * f_m(Xe) *
+           (bessel_appr(1, Thetaer) / bessel_appr(2, Thetaer) +
             6. * theta_e) *
            sin(theta_B) * sin(theta_B);
 }
@@ -705,8 +528,8 @@ double rho_V(double theta_e, double n_e, double nu, double B, double theta_B) {
     double Thetaer = 1. / theta_e;
 
     return 2.0 * M_PI * nu / SPEED_OF_LIGHT * wp2 * omega0 /
-           pow(2. * M_PI * nu, 3) * (besselk_asym(0, Thetaer) - Je(Xe)) /
-           besselk_asym(2, Thetaer) * cos(theta_B);
+           pow(2. * M_PI * nu, 3) * (bessel_appr(0, Thetaer) - DeltaJ_5(Xe)) /
+           bessel_appr(2, Thetaer) * cos(theta_B);
 }
 
 double radiative_transfer(double *lightpath, int steps, double frequency) {
@@ -796,72 +619,6 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
 
     // Store integrated intensity in the image
     return I_current * pow(frequency, 3.);
-}
-
-// TODO WARNING: handle the case when p=0
-void stokes_to_f_tetrad_u_old(const double complex S_A[4],
-                              double complex f_tetrad_u[4], double *p) {
-    // *p = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]) / S_A[0];
-
-    if (cabs(S_A[1] + S_A[2] + S_A[3]) <
-        1.e-100) { // Taylor expand for small values
-        *p = (S_A[1] + S_A[2] + S_A[3]) / S_A[0];
-    } else {
-        *p = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]) / S_A[0];
-    }
-
-    double complex QJones = S_A[1] / (S_A[0] * *p);
-    double complex UJones = S_A[2] / (S_A[0] * *p);
-    double complex VJones = S_A[3] / (S_A[0] * *p);
-
-    // source:
-    // https://physics.stackexchange.com/questions/238957/converting-stokes-parameters-to-jones-vector
-
-    f_tetrad_u[1] = sqrt((1. + QJones) / 2.);
-
-    if (f_tetrad_u[1] == 0)
-        f_tetrad_u[2] = 1.;
-    else
-        f_tetrad_u[2] =
-            UJones / (2. * f_tetrad_u[1]) - I * VJones / (2. * f_tetrad_u[1]);
-
-    f_tetrad_u[1] *= sqrt(S_A[0] * *p);
-    f_tetrad_u[2] *= sqrt(S_A[0] * *p);
-
-    //    fprintf(stderr, "\n\nf dot f %+.15e\n\n", f_tetrad_u[1] *
-    //    conj(f_tetrad_u[1]) + f_tetrad_u[2] * conj(f_tetrad_u[2]));
-}
-
-double check_handedness(double X_u[4], double tetrad_u[][4]) {
-    int i, j, k, l;
-    // Obtain relevant metric terms:
-    double g_uu[4][4], g_dd[4][4];
-    metric_uu(X_u, g_uu);
-    metric_dd(X_u, g_dd);
-
-    double g = determ(g_dd, 4);
-
-    double eps[4][4][4][4];
-    LOOP_ijkl {
-        if ((i == j) || (i == k) || (i == l) || (j == k) || (j == l) ||
-            (k == l))
-            eps[i][j][k][l] = 0.;
-        else
-            eps[i][j][k][l] = ((i - j) * (i - k) * (i - l) * (j - k) * (j - l) *
-                               (k - l) / 12.);
-    }
-
-    double result = 0.;
-
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
-            for (l = 0; l < 4; l++)
-                for (k = 0; k < 4; k++) {
-                    result += g * eps[i][j][k][l] * tetrad_u[i][0] *
-                              tetrad_u[j][1] * tetrad_u[k][2] * tetrad_u[l][3];
-                }
-
-    return result;
 }
 
 double radiative_transfer_polarized(double *lightpath, int steps,
@@ -1014,16 +771,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
             // If (POLARIZATION_ACTIVE), get Stokes params from f_u and p.
             // (Otherwise, never been in volume before; we simply use
             // S_I_current)
-            if (POLARIZATION_ACTIVE && 0) {
-                // Get f_tetrad_u
-                LOOP_i f_tetrad_u[i] = 0.;
-                LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
-
-                // Get Stokes params from f_tetrad_u
-                f_tetrad_u_to_stokes(f_tetrad_u, *p, S_A);
-            }
-
-            // NEW VERSION
             if (POLARIZATION_ACTIVE && 1) {
                 // Get f_tetrad_u
                 LOOP_i f_tetrad_u[i] = 0.;
@@ -1172,22 +919,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
                 S_A[2] = U0 + 1. / 6. * (Uk1 + 2. * Uk2 + 2. * Uk3 + Uk4);
                 S_A[3] = V0 + 1. / 6. * (Vk1 + 2. * Vk2 + 2. * Vk3 + Vk4);
             } else {
-                /*
-                                double u11 = 1. + dl_current * C * aI;
-                                double u12 = dl_current * C * aQ;
-                                double u14 = dl_current * C * aV;
-                                double l21 = dl_current * C * aQ / u11;
-                                double u22 = 1. + dl_current * C * aI - l21 *
-                   u12; double u23 = dl_current * C * rV; double u24 = -l21 *
-                   u14; double l32 = -dl_current * C * rV / u22; double u33 = 1.
-                   + dl_current * C * aI - l32 * u23; double u34 = dl_current *
-                   C * rQ - l32 * u24; double l41 = dl_current * C * aV / u11;
-                                double l42 = -l41 * u12 / u22;
-                                double l43 = (-dl_current * C * rQ - l42 * u23)
-                   / u33; double u44 = 1. + dl_current * C * aI - l41 * u14 -
-                   l42
-                   * u24 - l43 * u34;
-                */
                 double u11 = 1. + 0.5 * dl_current * C * aI;
                 double u12 = 0.5 * dl_current * C * aQ;
                 double u14 = 0.5 * dl_current * C * aV;
@@ -1205,12 +936,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
                              l42 * u24 - l43 * u34;
 
                 // Construct b-vector.
-                /*
-                                double b1 = I0 + dl_current * C * jI;
-                                double b2 = Q0 + dl_current * C * jQ;
-                                double b3 = U0 + dl_current * C * jU;
-                                double b4 = V0 + dl_current * C * jV;
-                */
                 double b1 = I0 + dl_current * C / 2. *
                                      (2. * jI - (aI * I0 + aQ * Q0 + aV * V0));
                 double b2 = Q0 + dl_current * C / 2. *
@@ -1246,21 +971,9 @@ double radiative_transfer_polarized(double *lightpath, int steps,
             Iinv_pol =
                 sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
 
-            double Iinvt = 0.;
-            double Iinv_polt = 0.;
-            double complex S_Atest[4] = {0., 0., 0., 0.};
-            double complex f_test[4] = {0., 0., 0., 0.};
-            if (Iinv_pol > 1.e-70 && 0) {
-                fprintf(stderr, "\n\nPRE: %g, %g, %g, %g ", creal(S_A[0]), 
-                        creal(S_A[1]), creal(S_A[2]), creal(S_A[3]));
-                stokes_to_f(S_A, &Iinvt, &Iinv_polt, f_test);
-                fprintf(stderr, " Iinvt = %g ", Iinvt);
-                f_to_stokes(Iinvt, Iinv_polt, f_test, S_Atest);
-                fprintf(stderr, "POST: %g, %g, %g, %g \n\n", 
-                        creal(S_Atest[0]), creal(S_Atest[1]), 
-                        creal(S_Atest[2]), creal(S_Atest[3]));
-            }
-
+            // We have now updated the Stokes vector using plasma at current
+            // position. Only do stuff below this line IF S_A[0] > 1.e-40. If
+            // not, POLARIZATION_ACTIVE is set to FALSE and we reset S_A[i] = 0
             if (Iinv_pol > 1.e-100 && 1) {
                 stokes_to_f(S_A, &Iinv, &Iinv_pol, f_tetrad_u);
 
@@ -1272,48 +985,12 @@ double radiative_transfer_polarized(double *lightpath, int steps,
                 // in_volume.
                 POLARIZATION_ACTIVE = 1;
 
-                // Ik ben gewoon een geit.
-
             } else {
                 POLARIZATION_ACTIVE = 0;
                 S_A[1] = 0.;
                 S_A[2] = 0.;
                 S_A[3] = 0.;
             }
-
-            // We have now updated the Stokes vector using plasma at current
-            // position. Only do stuff below this line IF S_A[0] > 1.e-40. If
-            // not, POLARIZATION_ACTIVE is set to FALSE and we reset S_A[i] = 0
-            double STOKES_I_THRESHOLD = 1.e-70;
-            if (cabs(S_A[0]) > STOKES_I_THRESHOLD && 0) {
-                if (cabs(S_A[1] + S_A[2] + S_A[3]) <
-                    1.e-100) { // Taylor expand for small values
-                    *p = (S_A[1] + S_A[2] + S_A[3]) / S_A[0];
-                } else {
-                    *p = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] +
-                              S_A[3] * S_A[3]) /
-                         S_A[0];
-                }
-
-                // Pack new Stokes params into f_u and p.
-                stokes_to_f_tetrad_u(S_A, f_tetrad_u, p);
-
-                // Update f_u using f_tetrad_u.
-                LOOP_i f_u[i] = 0.;
-                LOOP_ij f_u[i] += tetrad_u[i][j] * f_tetrad_u[j];
-
-                // Set POLARIZATION_ACTIVE to true; we are, after all,
-                // in_volume.
-                POLARIZATION_ACTIVE = 1;
-
-                // Get f_tetrad_u
-                // LOOP_i  f_tetrad_u[i] = 0.;
-                // LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
-
-            } // else{
-              //    POLARIZATION_ACTIVE = 0;
-              //    LOOP_i S_A[i] = 0.;
-              //}
         }     // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP
@@ -1377,16 +1054,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
     double complex S_Qf = 0.;
     double complex S_Uf = 0.;
     double complex S_Vf = 0.;
-
-    if (POLARIZATION_ACTIVE && 0) {
-        f_tetrad_u_to_stokes(f_obs_tetrad_u, *p, S_A);
-
-        // Construct final (NON-INVARIANT) Stokes params.
-        S_If = S_A[0] * pow(frequency, 3.);
-        S_Qf = S_A[1] * pow(frequency, 3.);
-        S_Uf = S_A[2] * pow(frequency, 3.);
-        S_Vf = S_A[3] * pow(frequency, 3.);
-    }
 
     if (POLARIZATION_ACTIVE && 1) {
         f_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);

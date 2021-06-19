@@ -95,6 +95,11 @@ void connection_udd(const double X_u[4], double gamma_udd[4][4][4]);
 // This function initializes a single 'superphoton' or light ray.
 void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
 
+// Transformation functions
+double Xg2_approx_rand(double Xr2);
+
+double Ug2_approx_rand(double Ur2, double Xg2);
+
 // TETRAD.C
 ///////////
 
@@ -222,14 +227,18 @@ void write_VTK_image(FILE *imgfile, double *intensityfield, double *lambdafield,
 // See grmonty paper by Dolence et al.
 // HARM model internal utilities
 void init_model();
+
 void set_units(double);
+
 void init_harm3d_data(char *fname);
+
 void init_storage();
 
 double interp_scalar(double ***var, int i, int j, int k, double coeff[4]);
+
 void Xtoijk(double *X, int *i, int *j, int *k, double *del);
+
 void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
                       double *B_u, double Ucon[4], int *IN_VOLUME);
-double Xg2_approx_rand(double Xr2);
-double Ug2_approx_rand(double Ur2, double Xg2);
+
 #endif // FUNCTIONS_H
