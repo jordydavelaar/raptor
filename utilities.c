@@ -43,10 +43,6 @@ void write_image(FILE *imgfile, double *intensityfield, double scalefactor) {
     // Write image to output file
     for (i = 0; i < IMG_WIDTH; i++) {
         for (j = 0; j < IMG_HEIGHT; j++) {
-            //            double stepx = size / (double) width;
-            //            double stepy = size / (double) height;
-            //            double alpha = -size * 0.5 + (i + 0.5) * stepx;
-            //            double beta  = -size * 0.5 + (j + 0.5) * stepy;
             fprintf(imgfile, "%d\t%d\t%+.15e\n", i, j,
                     scalefactor * intensityfield[i + j * IMG_WIDTH]);
         }
@@ -76,9 +72,6 @@ void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield,
     // Write image to output file
     for (i = 0; i < IMG_WIDTH; i++) {
         for (j = 0; j < IMG_HEIGHT; j++) {
-            // Note HACK FIX implementation of weird EHT convention, which
-            // demands Q
-            // -> -Q and U -> -U w.r.t. IEEE convention
             fprintf(imgfile, "%d\t%d\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n", i, j,
                     scalefactor * Ifield[i + j * IMG_WIDTH],
                     scalefactor * Qfield[i + j * IMG_WIDTH],

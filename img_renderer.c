@@ -173,8 +173,7 @@ int main(int argc, char *argv[]) {
            f_x_field, f_y_field, I_field, Q_field, U_field, V_field,           \
            IQUV_field, p_field, x, stepx, stepy, CUTOFF_INNER,    \
            IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static, 1)
-        for (y = 0; y < IMG_HEIGHT;
-             y++) { // For all pixel rows (distributed over threads)...
+        for (y = 0; y < IMG_HEIGHT; y++) { // For all pixel rows 
             if ((y + x * IMG_HEIGHT) % 100 == 0)
                 fprintf(stderr, "current pixel %d of %d\n", y + x * IMG_HEIGHT,
                         IMG_WIDTH * IMG_HEIGHT);
