@@ -171,18 +171,6 @@ double emission_coeff_THSYNCHAV(double B, double THETA_e, double nu_p,
     return j_nu;
 }
 
-// Return emission coefficient for thermal free-free radiation
-double emission_coeff_FFTHERMAL(double nu, double n_e, double T) {
-    double n_i = n_e; // Assume neutral hydrogen plasma
-    double Z = 1.;    // For H, Z = 1
-    double g_ff = 1.; // Gaunt factor
-
-    double j_nu = 5.44e-39 * (Z * Z / sqrt(T)) * n_i * n_e * g_ff *
-                  exp(-PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T));
-
-    return j_nu;
-}
-
 // Return emissivity for the simple Gaussian hot spot model discussed in Dexter
 // 2009.
 double emissivity_hotspot(double *X_u) {

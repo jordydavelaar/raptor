@@ -785,8 +785,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
             double complex U0 = S_A[2];
             double complex V0 = S_A[3];
 
-            double THRESH = 0.1;
-
             // New stiffness check
             double a2 = rQ * rQ + rV * rV - aQ * aQ - aV * aV;
             double a0 =
@@ -833,8 +831,8 @@ double radiative_transfer_polarized(double *lightpath, int steps,
 
             // If both rotation coeffs (times dlambda) are smaller than
             // threshold, take an RK4 step; otherwise, implicit Euler.
-            // if(!STIFF)
-            if (fabs(rQ) < THRESH && fabs(rV) < THRESH) {
+            //if (fabs(rQ) < THRESH && fabs(rV) < THRESH) {
+            if(!STIFF){
                 // RK4 with constant coefficients
                 // k1
                 double complex Ik1 =
