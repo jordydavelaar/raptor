@@ -535,7 +535,7 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
     int IN_VOLUME, path_counter;
     double I_current = 0.;
     double j_nu = 0.;
-    double B, THETA_e, pitch_ang, nu_p, n_e, nu_p2, dl_current;
+    double B, THETA_e, pitch_ang, nu_p, n_e, dl_current;
     int i;
     double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
@@ -577,7 +577,6 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
 
             // Compute the photon frequency in the plasma frame:
             nu_p = freq_in_plasma_frame(Uplasma_u, k_d);
-            nu_p2 = nu_p * nu_p;
 
             // Obtain emission coefficient in current plasma conditions
             j_nu = emission_coeff_THSYNCHAV(B, THETA_e, nu_p, n_e);
@@ -593,7 +592,7 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
 
             double dtau = (nu_p * a_nu * dl_current * C + dtau_old);
             double K_inv = (nu_p * a_nu);
-            double j_inv = (j_nu / nu_p2);
+            double j_inv = (j_nu / (nu_p * nu_p));
 
             // Only add I_current if it is not NaN
             if (j_nu == j_nu &&
@@ -877,35 +876,126 @@ void stokes_to_f(double complex f_u[], double complex f_tetrad_u[],
     f_tetrad_to_f(f_u, tetrad_u, f_tetrad_u);
 }
 
+void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double *rQ, double *rU, double *rV, double *aI, double *aQ, double *aU, double *aV,
+                                double *nu_p, double THETA_e, double n_e, double B, double *pitch_ang, double frequency, double *dl_current, double C,
+                                double X_u[], double k_u[], double B_u[], double Uplasma_u[], double k_d[], int *POLARIZATION_ACTIVE,
+                                double complex f_u[], double complex f_tetrad_u[], double tetrad_d[][4], double tetrad_u[][4], double complex S_A[], double *Iinv, double *Iinv_pol){
+
+    int i;
+
+    // Unpolarized: 1) Create light path by integration. 2) For each
+    // step in lightpath, perform one radiative transfer step.
+    // Polarized:   1) Create light path by integration. 2) For each
+    // step in lightpath, perform one radiative transfer step, AND,
+    // OUTSIDE in_volume loop, do a spacetime propagation step.
+
+    // TRANSFER STEP
+    ////////////////
+
+    // Obtain pitch angle: still no units (geometric)
+    *pitch_ang = pitch_angle(X_u, k_u, B_u, Uplasma_u);
+
+    // CGS UNITS USED FROM HERE ON OUT
+    //////////////////////////////////
+
+    // Scale the wave vector to correct energy
+    LOOP_i k_u[i] *= PLANCK_CONSTANT * frequency /
+                     (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+
+    // Convert distance dlambda accordingly
+    *dl_current *= (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
+                  (PLANCK_CONSTANT * frequency);
+
+    // lower the index of the wavevector
+    lower_index(X_u, k_u, k_d);
+
+    // Compute the photon frequency in the plasma frame:
+    *nu_p = freq_in_plasma_frame(Uplasma_u, k_d);
+
+    // POLARIZED EMISSION/ABSORPTION COEFFS
+    ///////////////////////////////////////
+
+    evaluate_coeffs(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV, *nu_p, 
+                    THETA_e, n_e, B, *pitch_ang);
+
+    // Create tetrad, needed whether POLARIZATION_ACTIVE is true or
+    // false.
+    create_observer_tetrad(X_u, k_u, Uplasma_u, B_u, tetrad_u);
+    create_tetrad_d(X_u, tetrad_u, tetrad_d);
+
+    // FROM F VECTOR TO STOKES (when applicable)
+    ////////////////////////////////////////////
+
+    // If (POLARIZATION_ACTIVE), get Stokes params from f_u and p.
+    // (Otherwise, never been in volume before; we simply use
+    // S_I_current)
+    if (*POLARIZATION_ACTIVE) {
+        f_to_stokes(f_u, f_tetrad_u, tetrad_d, S_A, *Iinv, *Iinv_pol);
+    }
+
+    // Given Stokes params and plasma coeffs, compute NEW Stokes params
+    // after plasma step.
+
+    int STIFF = check_stiffness(*jI, *jQ, *jU, *jV, *rQ, *rU, *rV, 
+                                *aI, *aQ, *aU, *aV, *dl_current);
+
+    // If both rotation coeffs (times dlambda) are smaller than
+    // threshold, take an RK4 step; otherwise, implicit Euler.
+    //if (fabs(rQ) < THRESH && fabs(rV) < THRESH) {
+    if(!STIFF){
+        pol_rte_rk4_step(*jI, *jQ, *jU, *jV, *rQ, *rU, *rV, *aI, *aQ, *aU, *aV, *dl_current, C, S_A);
+    } else {
+        pol_rte_trapezoid_step(*jI, *jQ, *jU, *jV, *rQ, *rU, *rV, *aI, *aQ, *aU, *aV, *dl_current, C, S_A);
+    }
+
+    // FROM STOKES TO F VECTOR
+    ///////////////////////////
+
+    *Iinv = S_A[0];
+    *Iinv_pol =
+        sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
+
+    // We have now updated the Stokes vector using plasma at current
+    // position. Only do stuff below this line IF S_A[0] > 1.e-40. If
+    // not, POLARIZATION_ACTIVE is set to FALSE and we reset S_A[i] = 0
+    if (*Iinv_pol > 1.e-100) {
+        stokes_to_f(f_u, f_tetrad_u, tetrad_u, S_A, Iinv, Iinv_pol);
+
+        // Set POLARIZATION_ACTIVE to true; we are, after all,
+        // in_volume.
+        *POLARIZATION_ACTIVE = 1;
+
+    } else {
+        *POLARIZATION_ACTIVE = 0;
+        S_A[1] = 0.;
+        S_A[2] = 0.;
+        S_A[3] = 0.;
+    }
+}
 
 double radiative_transfer_polarized(double *lightpath, int steps,
                                     double frequency, double *f_x, double *f_y,
                                     double *p, int PRINT_POLAR, double *IQUV) {
     int IN_VOLUME, path_counter;
-    double B, THETA_e, pitch_ang, nu_p, n_e, nu_p2, dl_current;
+    double B, THETA_e, pitch_ang, nu_p, n_e, dl_current;
     int i, j;
     double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
-    double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
-
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
-
+    double Iinv, Iinv_pol;
     int POLARIZATION_ACTIVE = 0;
 
     double tetrad_u[4][4], tetrad_d[4][4];
     LOOP_ij tetrad_u[i][j] = 0.;
     LOOP_ij tetrad_d[i][j] = 0.;
 
-    double photon_u_current[8] = {0., 0., 0., 0., 0., 0., 0., 0.};
-
+    double photon_u_current[8]   = {0., 0., 0., 0., 0., 0., 0., 0.};
     double complex f_tetrad_u[4] = {0., 0., 0., 0.};
-    double complex f_u[4] = {0., 0., 0., 0.};
-
-    double complex S_A[4] = {0., 0., 0., 0.};
-
-    double Iinv = 0.;
-    double Iinv_pol = 0.;
+    double complex f_u[4]        = {0., 0., 0., 0.};
+    double complex S_A[4]        = {0., 0., 0., 0.};
 
     // Constant used in integration (to produce correct units)
+    // TODO REFACTOR: move these elsewhere
+    double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
     double C = Rg * PLANCK_CONSTANT /
                (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
@@ -928,100 +1018,10 @@ double radiative_transfer_polarized(double *lightpath, int steps,
 
         // Check whether the ray is currently in the GRMHD simulation volume
         if (IN_VOLUME && r_current2 < OUTER_BOUND_POL) {
-            // Obtain pitch angle: still no units (geometric)
-            pitch_ang = pitch_angle(X_u, k_u, B_u, Uplasma_u);
-
-            // CGS UNITS USED FROM HERE ON OUT
-            //////////////////////////////////
-
-            // For the polarized case, we have to do it differently.
-            // Unpolarized: 1) Create light path by integration. 2) For each
-            // step in lightpath, perform one radiative transfer step.
-            // Polarized:   1) Create light path by integration. 2) For each
-            // step in lightpath, perform one radiative transfer step, AND,
-            // OUTSIDE in_volume loop, do a spacetime propagation step.
-
-            // TRANSFER STEP
-            ////////////////
-
-            // Scale the wave vector to correct energy
-            LOOP_i k_u[i] *= PLANCK_CONSTANT * frequency /
-                             (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
-
-            // Convert distance dlambda accordingly
-            dl_current *= (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
-                          (PLANCK_CONSTANT * frequency);
-
-            // lower the index of the wavevector
-            lower_index(X_u, k_u, k_d);
-
-            // Compute the photon frequency in the plasma frame:
-            nu_p = freq_in_plasma_frame(Uplasma_u, k_d);
-            nu_p2 = nu_p * nu_p;
-
-            // POLARIZED EMISSION/ABSORPTION COEFFS
-            ///////////////////////////////////////
-
-            evaluate_coeffs(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV, nu_p, 
-                            THETA_e, n_e, B, pitch_ang);
-
-            // POLARIZED TRANSFER
-            /////////////////////
-
-            // Create tetrad, needed whether POLARIZATION_ACTIVE is true or
-            // false.
-            create_observer_tetrad(X_u, k_u, Uplasma_u, B_u, tetrad_u);
-            create_tetrad_d(X_u, tetrad_u, tetrad_d);
-
-            // FROM F VECTOR TO STOKES (when applicable)
-            ////////////////////////////////////////////
-
-            // If (POLARIZATION_ACTIVE), get Stokes params from f_u and p.
-            // (Otherwise, never been in volume before; we simply use
-            // S_I_current)
-            if (POLARIZATION_ACTIVE) {
-                f_to_stokes(f_u, f_tetrad_u, tetrad_d, S_A, Iinv, Iinv_pol);
-            }
-
-            // Given Stokes params and plasma coeffs, compute NEW Stokes params
-            // after plasma step.
-
-            int STIFF = check_stiffness(jI, jQ, jU,  jV, rQ, rU, rV, 
-                                        aI, aQ, aU, aV, dl_current);
-
-            // If both rotation coeffs (times dlambda) are smaller than
-            // threshold, take an RK4 step; otherwise, implicit Euler.
-            //if (fabs(rQ) < THRESH && fabs(rV) < THRESH) {
-            if(!STIFF){
-                pol_rte_rk4_step(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV, dl_current, C, S_A);
-            } else {
-                pol_rte_trapezoid_step(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV, dl_current, C, S_A);
-            }
-
-            // FROM STOKES TO F VECTOR
-            ///////////////////////////
-
-            Iinv = S_A[0];
-
-            Iinv_pol =
-                sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
-
-            // We have now updated the Stokes vector using plasma at current
-            // position. Only do stuff below this line IF S_A[0] > 1.e-40. If
-            // not, POLARIZATION_ACTIVE is set to FALSE and we reset S_A[i] = 0
-            if (Iinv_pol > 1.e-100) {
-                stokes_to_f(f_u, f_tetrad_u, tetrad_u, S_A, &Iinv, &Iinv_pol);
-
-                // Set POLARIZATION_ACTIVE to true; we are, after all,
-                // in_volume.
-                POLARIZATION_ACTIVE = 1;
-
-            } else {
-                POLARIZATION_ACTIVE = 0;
-                S_A[1] = 0.;
-                S_A[2] = 0.;
-                S_A[3] = 0.;
-            }
+            pol_integration_step(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV,
+                                 &nu_p, THETA_e, n_e, B, &pitch_ang, frequency, &dl_current, C,
+                                 X_u, k_u, B_u, Uplasma_u, k_d, &POLARIZATION_ACTIVE,
+                                 f_u, f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv, &Iinv_pol);
         }     // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP
