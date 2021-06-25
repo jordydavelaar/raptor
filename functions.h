@@ -43,6 +43,12 @@ void BL_to_KS_u(double *BLphoton_u, double *KSphoton_u);
 // Transform a contravariant vector from KS to BL coordinates
 void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u);
 
+// Return the photon frequency in the co-moving frame of the plasma
+double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
+
+// Angle between k_u and B_u in the plasma frame
+double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
+
 // INTEGRATOR.C
 ///////////////
 
@@ -127,8 +133,8 @@ double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]);
 
 void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
 
-// RADIATIVE_TRANSFER.C
-///////////////////////
+// EMISSION.C
+/////////////
 
 // Return emission coefficient j_nu for kappa distribution function
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
@@ -158,14 +164,8 @@ double emissivity_thindisk(double *X_u);
 // Return absorption coefficient a_nu
 double absorption_coeff_TH(double j_nu, double nu, double THETA_e);
 
-// Return the photon frequency in the co-moving frame of the plasma
-double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
-
 // Planck function
 double planck_function(double nu, double THETA_e);
-double planck_function2(double nu, double THETA_e);
-// Angle between k_u and B_u in the plasma frame
-double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 
 // Perform radiative transfer along the ray stored in "lightpath"
 double radiative_transfer(double *lightpath, int steps, double frequency);
