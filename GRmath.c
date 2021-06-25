@@ -9,6 +9,7 @@
  *
  */
 #include "functions.h"
+#include "constants.h"
 #include "parameters.h"
 #include <math.h>
 
