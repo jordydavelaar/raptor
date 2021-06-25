@@ -127,25 +127,6 @@ double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]);
 
 void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
 
-// PLASMA.C
-///////////
-
-// Return the plasma parameters: electron density, dimensionless temperature,
-// magnetic field strength, contravariant plasma four-velocity
-void get_plasma_parameters(double X_u[4], double *n_e, double *THETA_e_,
-                           double *B, double Uplasma_u[4]);
-
-// Return electron density at position X_u
-double electron_density(double X_u[4], double u_u[4]);
-
-void hotspot_velocity(double *X_u, double *Uplasma_u);
-
-// Return the value (or VECTOR?!) for B at position X_u
-double B_fun(double X_u[4], double ne);
-
-// Return the value for Te at position X_u
-double THETA_e(double X_u[4]);
-
 // RADIATIVE_TRANSFER.C
 ///////////////////////
 

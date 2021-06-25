@@ -225,18 +225,6 @@ double planck_function(double nu, double THETA_e) {
            (exp(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T)) - 1.);
 }
 
-double planck_function2(double nu, double Thetae) {
-    double X = PLANCK_CONSTANT * nu /
-               (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT * Thetae);
-
-    if (X < 2.e-3)
-        return ((2. * PLANCK_CONSTANT / (SPEED_OF_LIGHT * SPEED_OF_LIGHT)) /
-                (X / 24. * (24. + X * (12. + X * (4. + X)))));
-
-    return ((2. * PLANCK_CONSTANT / (SPEED_OF_LIGHT * SPEED_OF_LIGHT)) /
-            (exp(X) - 1.));
-}
-
 // Return absorption coefficient - assume local thermodynamical equilibrium so
 // that Kirchoff's Law applies
 double absorption_coeff_TH(double j_nu, double nu, double THETA_e) {
