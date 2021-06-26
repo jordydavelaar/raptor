@@ -49,6 +49,12 @@ double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
 // Angle between k_u and B_u in the plasma frame
 double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 
+//void f_tetrad_to_stokes(double Iinv, double Iinv_pol, double complex f_tetrad_u[], double complex S_A[4]);
+
+//void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol, double complex f_tetrad_u[4]);
+
+//void construct_U_vector(const double X_u[], double U_u[]);
+
 // INTEGRATOR.C
 ///////////////
 
@@ -173,6 +179,18 @@ double radiative_transfer(double *lightpath, int steps, double frequency);
 // Backward transfer
 double backward_transfer(double alpha, double beta, double *photon_u,
                          int *steps);
+
+// POLARIZED
+
+double j_I(double theta_e, double n_e, double nu, double B, double theta_B);
+
+double j_Q(double theta_e, double n_e, double nu, double B, double theta_B);
+
+double j_V(double theta_e, double n_e, double nu, double B, double theta_B);
+
+double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B);
+
+double rho_V(double theta_e, double n_e, double nu, double B, double theta_B);
 
 // UTILITIES.C
 //////////////
