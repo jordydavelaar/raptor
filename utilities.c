@@ -1,7 +1,7 @@
 /*
  * Radboud Polarized Integrator
- * Copyright 2014-2020 Black Hole Cam (ERC Synergy Grant)
- * Authors: Thomas Bronzwaer, Monika Moscibrodzka, Ziri Younsi
+ * Copyright 2014-2021 Black Hole Cam (ERC Synergy Grant)
+ * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
 #include "constants.h"

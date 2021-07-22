@@ -1,7 +1,7 @@
 /*
  * Radboud Polarized Integrator
- * Copyright 2014-2020 Black Hole Cam (ERC Synergy Grant)
- * Authors: Thomas Bronzwaer, Monika Mościbrodzka
+ * Copyright 2014-2021 Black Hole Cam (ERC Synergy Grant)
+ * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  *
  * Indices 0,1,2,3 correspond to t,r,theta,phi
  *

@@ -1,7 +1,7 @@
 /*
  * Radboud Polarized Integrator
- * Copyright 2014-2020 Black Hole Cam (ERC Synergy Grant)
- * Authors: Thomas Bronzwaer, Monika Moscibrodzka
+ * Copyright 2014-2021 Black Hole Cam (ERC Synergy Grant)
+ * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  *
  */
 #include "constants.h"
@@ -69,24 +69,6 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
     g_dd[3][0] = g_dd[0][3];
     g_dd[3][1] = g_dd[1][3];
     g_dd[3][3] = omega * omega;
-
-#elif (metric == DM) // Modified Schwarzschild metric with dark matter present)
-
-    double r = logscale ? exp(X_u[1]) + R0 : X_u[1];
-    double theta = X_u[2];
-    double Rfactor = 1.e3 * 2.;   // 1.e3 * Rs
-    double gammafactor = 7. / 3.; // Slope of the NFW profile
-    double Afactor =
-        1. /
-        (1. - 2. / r * (1. + qfactor * pow(r / Rfactor, 3. - gammafactor)));
-    double Bfactor = 1. / Afactor;
-    double sth = sin(theta);
-    double sth2 = sth * sth;
-
-    g_dd[0][0] = -Bfactor;
-    g_dd[1][1] = Afactor;
-    g_dd[2][2] = r * r;
-    g_dd[3][3] = r * r * sth2;
 
 #elif (metric == MKS2) // Proper MKS coords
 
@@ -207,24 +189,6 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 
     g_uu[3][1] = g_uu[1][3];
     g_uu[3][3] = irho2 / (sin2th);
-
-#elif (metric == DM) // Modified Schwarzschild metric with dark matter present)
-
-    double r = logscale ? exp(X_u[1]) + R0 : X_u[1];
-    double theta = X_u[2];
-    double Rfactor = 1.e3 * 2.;   // 1.e3 * Rs
-    double gammafactor = 7. / 3.; // Slope of the NFW profile
-    double Afactor =
-        1. /
-        (1. - 2. / r * (1. + qfactor * pow(r / Rfactor, 3. - gammafactor)));
-    double Bfactor = 1. / Afactor;
-    double sth = sin(theta);
-    double sth2 = sth * sth;
-
-    g_uu[0][0] = 1. / (-Bfactor);
-    g_uu[1][1] = 1. / (Afactor);
-    g_uu[2][2] = 1. / (r * r);
-    g_uu[3][3] = 1. / (r * r * sth2);
 
 #endif
 }

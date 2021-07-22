@@ -1,7 +1,7 @@
 /*
  * Radboud Polarized Integrator
- * Copyright 2014-2020 Black Hole Cam (ERC Synergy Grant)
- * Authors: Thomas Bronzwaer, Monika Mościbrodzka
+ * Copyright 2014-2021 Black Hole Cam (ERC Synergy Grant)
+ * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  *
  */
 
@@ -176,7 +176,7 @@ void integrate_geodesic(double alpha, double beta, double *photon_u,
 
     // Trace light ray until it reaches the event horizon or the outer
     // cutoff, or steps > max_steps
-#if (metric == BL || metric == MBL || metric == DM)
+#if (metric == BL || metric == MBL)
 
     // Stop condition for BL coords
     while (r_current > cutoff_inner && r_current < cutoff_outer &&
