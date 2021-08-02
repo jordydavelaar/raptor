@@ -305,7 +305,7 @@ double j_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 
 // B.13 NOTE: make sure that, in B.13, Dexter does not mean X when he writes x
 // (in the final term) Note that X = ... (B.8) UPDATE: it was apparently indeed
-// a typo. while x = nu / nu_c UPDATE: it seems Dexter did make TWO typos: it
+// a typo. while x = nu / nu_c UPDATE: it
 // should be ln(X/120), not "ln x / 120". Thus I have greyed out the original,
 // new one is below.
 double f_m(double X) {
