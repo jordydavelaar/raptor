@@ -11,6 +11,11 @@
 
 #include <stdio.h>
 
+// CORE.C
+/////////
+
+void read_model(char *argv[]);
+
 // GRMATH.C
 ///////////
 
@@ -49,11 +54,13 @@ double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
 // Angle between k_u and B_u in the plasma frame
 double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 
-//void f_tetrad_to_stokes(double Iinv, double Iinv_pol, double complex f_tetrad_u[], double complex S_A[4]);
+// void f_tetrad_to_stokes(double Iinv, double Iinv_pol, double complex
+// f_tetrad_u[], double complex S_A[4]);
 
-//void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol, double complex f_tetrad_u[4]);
+// void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
+// double complex f_tetrad_u[4]);
 
-//void construct_U_vector(const double X_u[], double U_u[]);
+// void construct_U_vector(const double X_u[], double U_u[]);
 
 // INTEGRATOR.C
 ///////////////
@@ -111,12 +118,11 @@ double Ug2_approx_rand(double Ur2, double Xg2);
 
 double determ(double matrix[][4], int n);
 
-void create_tetrad(double X_u[], double k_u[],
-                   double U_u[], double tetrad_u[][4]);
+void create_tetrad(double X_u[], double k_u[], double U_u[],
+                   double tetrad_u[][4]);
 
-void create_observer_tetrad(double X_u[], double k_u[],
-                            double U_u[], double b_u[],
-                            double tetrad_u[][4]);
+void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
+                            double b_u[], double tetrad_u[][4]);
 
 double tetrad_identity_eta(const double X_u[4], const double tetrad_u[4][4],
                            const int a, const int b);
@@ -196,6 +202,9 @@ double rho_V(double theta_e, double n_e, double nu, double B, double theta_B);
 //////////////
 
 void set_constants();
+
+// IO.C
+///////
 
 // Write the array "intensityfield" (scaled by "scalefactor") to the file
 // "imgfile"
