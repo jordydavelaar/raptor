@@ -94,11 +94,11 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n", num_indices);
     double energy_spectrum[num_indices];
     double frequencies[num_indices];
-    double intensityfield[num_indices][IMG_WIDTH * IMG_HEIGHT];
+
     double f_x_field[IMG_WIDTH * IMG_HEIGHT];
     double f_y_field[IMG_WIDTH * IMG_HEIGHT];
     double p_field[IMG_WIDTH * IMG_HEIGHT];
-    double IQUV_field[IMG_WIDTH * IMG_HEIGHT * 4];
+
     double I_field[IMG_WIDTH * IMG_HEIGHT];
     double Q_field[IMG_WIDTH * IMG_HEIGHT];
     double U_field[IMG_WIDTH * IMG_HEIGHT];
@@ -113,10 +113,10 @@ int main(int argc, char *argv[]) {
     for (x = 0; x < IMG_WIDTH; x++) { // For all pixel columns...
 #pragma omp parallel for default(none) private(f, steps, alpha, beta,          \
                                                photon_u)                       \
-    shared(num_indices, energy_spectrum, frequencies, intensityfield,          \
-           f_x_field, f_y_field, I_field, Q_field, U_field, V_field,           \
-           IQUV_field, p_field, x, stepx, stepy, CUTOFF_INNER, IMG_WIDTH,      \
-           IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y) schedule(static, 1)
+    shared(num_indices, energy_spectrum, frequencies, f_x_field, f_y_field,    \
+           I_field, Q_field, U_field, V_field, p_field, x, stepx, stepy,       \
+           CUTOFF_INNER, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y)        \
+        schedule(static, 1)
         for (y = 0; y < IMG_HEIGHT; y++) { // For all pixel rows
             if ((y + x * IMG_HEIGHT) % 100 == 0)
                 fprintf(stderr, "current pixel %d of %d\n", y + x * IMG_HEIGHT,
@@ -135,33 +135,28 @@ int main(int argc, char *argv[]) {
 
             // INTEGRATE THIS PIXEL'S GEODESIC
 
-            int PRINT_POLAR = 1;
-
-            if (PRINT_POLAR)
-                integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps,
-                                   CUTOFF_INNER);
+            integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps,
+                               CUTOFF_INNER);
 
             // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
-            if (PRINT_POLAR)
-                for (f = 0; f < num_indices; f++) {
-                    intensityfield[f][y * IMG_WIDTH + x] =
-                        radiative_transfer_polarized(lightpath2, steps,
-                                                     frequencies[f], &f_x, &f_y,
-                                                     &p, PRINT_POLAR, IQUV);
-                    energy_spectrum[f] += intensityfield[f][y * IMG_WIDTH + x];
-                }
+            for (f = 0; f < num_indices; f++) {
+                intensityfield[f][y * IMG_WIDTH + x] =
+                    radiative_transfer_polarized(lightpath2, steps,
+                                                 frequencies[f], &f_x, &f_y, &p,
+                                                 PRINT_POLAR, IQUV);
+                energy_spectrum[f] += IQUV[0];
 
-            f_x_field[y * IMG_WIDTH + x] = f_x;
-            f_y_field[y * IMG_WIDTH + x] = f_y;
-            p_field[y * IMG_WIDTH + x] = p;
-            IQUV_field[y * IMG_WIDTH + 4 * x + 0] = IQUV[0];
-            IQUV_field[y * IMG_WIDTH + 4 * x + 1] = IQUV[1];
-            IQUV_field[y * IMG_WIDTH + 4 * x + 2] = IQUV[2];
-            IQUV_field[y * IMG_WIDTH + 4 * x + 3] = IQUV[3];
-            I_field[y * IMG_WIDTH + x] = IQUV[0];
-            Q_field[y * IMG_WIDTH + x] = IQUV[1];
-            U_field[y * IMG_WIDTH + x] = IQUV[2];
-            V_field[y * IMG_WIDTH + x] = IQUV[3];
+                /*
+                            f_x_field[y * IMG_WIDTH + x] = f_x;
+                            f_y_field[y * IMG_WIDTH + x] = f_y;
+                            p_field[y * IMG_WIDTH + x] = p;
+                */
+
+                I_field[y * IMG_WIDTH + x][f] = IQUV[0];
+                Q_field[y * IMG_WIDTH + x][f] = IQUV[1];
+                U_field[y * IMG_WIDTH + x] = IQUV[2];
+                V_field[y * IMG_WIDTH + x] = IQUV[3];
+            }
             free(lightpath2);
             free(IQUV);
         }
