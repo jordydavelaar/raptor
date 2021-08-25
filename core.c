@@ -18,7 +18,7 @@ void read_model(char *argv[]) {
     input = fopen(inputfile, "r");
     if (input == NULL) {
         printf("Cannot read input file");
-        return 1;
+        //return 1;
     }
 
     char temp[100], temp2[100];

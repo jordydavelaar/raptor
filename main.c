@@ -140,10 +140,10 @@ int main(int argc, char *argv[]) {
 
             // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
             for (f = 0; f < num_indices; f++) {
-                intensityfield[f][y * IMG_WIDTH + x] =
+                double blank =
                     radiative_transfer_polarized(lightpath2, steps,
                                                  frequencies[f], &f_x, &f_y, &p,
-                                                 PRINT_POLAR, IQUV);
+                                                 0, IQUV);
                 energy_spectrum[f] += IQUV[0];
 
                 /*
@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
                             p_field[y * IMG_WIDTH + x] = p;
                 */
 
-                I_field[y * IMG_WIDTH + x][f] = IQUV[0];
-                Q_field[y * IMG_WIDTH + x][f] = IQUV[1];
+                I_field[y * IMG_WIDTH + x] = IQUV[0];
+                Q_field[y * IMG_WIDTH + x] = IQUV[1];
                 U_field[y * IMG_WIDTH + x] = IQUV[2];
                 V_field[y * IMG_WIDTH + x] = IQUV[3];
             }
@@ -170,9 +170,9 @@ int main(int argc, char *argv[]) {
     //    FILE *spectrum    = fopen("output/spectrum.dat", "w");
 
     // check if output folder excists
-    if (stat("output", &st) == -1) {
-        mkdir("output", 0700);
-    }
+    //if (stat("output", &st) == -1) {
+    //    mkdir("output", 0700);
+    //}
 
     for (f = 0; f < num_indices; f++) { // For all frequencies...
         // Create filenames, open files
