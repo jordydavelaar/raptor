@@ -186,7 +186,8 @@ double radiative_transfer(double *lightpath, int steps, double frequency);
 double backward_transfer(double alpha, double beta, double *photon_u,
                          int *steps);
 
-// POLARIZED
+// POL_EMISSION.C
+/////////////////
 
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B);
 

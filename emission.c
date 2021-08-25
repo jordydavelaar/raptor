@@ -13,30 +13,7 @@
 #include <math.h>
 #include <stdio.h>
 
-// kappa distribution function
-
-int N_theta, N_theta_e, N_B, N_n_e, N_nuratio, N_nu;
-double theta_min, theta_max, d_theta;
-double theta_e_min, theta_e_max, d_theta_e;
-double B_min, B_max, d_B;
-double n_e_min, n_e_max, d_n_e;
-double nuratio_min, nuratio_max, d_nuratio;
-double nu_min, nu_max, d_nu;
-
-double kappa, gamma_min, gamma_max, gamma_cutoff;
-double **j_nu_data, **alpha_nu_data;
-
-#define ME (9.10956e-28)
-#define mc2 (8.18726e-07)
-#define kb (1.38e-16)
-#define hpl (6.6262e-27)
-#define CL (2.99792458e10)
-#define keV (1.602e-9)
-#define alphaf (7.29735e-3)
-#define h__mc2 (8.09e-21)
-#define SIGMATH (0.665245873e-24)
-
-double Xmax = 1e-25, Xmin = 1e25;
+double kappa;
 
 // non thermal emission
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
