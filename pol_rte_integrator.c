@@ -504,7 +504,24 @@ void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double
     }
 }
 
-double radiative_transfer_polarized(double *lightpath, int steps,
+void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u, double complex *f_obs_tetrad_u){
+    int i, j;
+    double cam_up_u[4] = {0., 0., 0., -1.};
+    double U_obs_u[4] = {0., 0., 0., 0.};
+    double obs_tetrad_u[4][4], obs_tetrad_d[4][4];
+    LOOP_ij obs_tetrad_u[i][j] = 0.;
+    LOOP_ij obs_tetrad_d[i][j] = 0.;
+
+    construct_U_vector(X_u, U_obs_u);
+    create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
+    create_tetrad_d(X_u, obs_tetrad_u, obs_tetrad_d);
+
+    // Convert f_u to f_obs_tetrad_u
+    LOOP_i f_obs_tetrad_u[i] = 0.;
+    LOOP_ij f_obs_tetrad_u[i] += obs_tetrad_d[j][i] * f_u[j];
+}
+
+void radiative_transfer_polarized(double *lightpath, int steps,
                                     double frequency, double *f_x, double *f_y,
                                     double *p, int PRINT_POLAR, double *IQUV) {
     int IN_VOLUME, path_counter;
@@ -524,12 +541,6 @@ double radiative_transfer_polarized(double *lightpath, int steps,
     double complex f_u[4]        = {0., 0., 0., 0.};
     double complex S_A[4]        = {0., 0., 0., 0.};
 
-    // Constant used in integration (to produce correct units)
-    // TODO REFACTOR: move these elsewhere
-    double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
-    double C = Rg * PLANCK_CONSTANT /
-               (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
-
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--) {
         // Current position, wave vector, and dlambda
@@ -544,13 +555,12 @@ double radiative_transfer_polarized(double *lightpath, int steps,
         // PLASMA INTEGRATION STEP
         //////////////////////////
 
-        double r_current2 = logscale ? exp(X_u[1]) : X_u[1];
-        double OUTER_BOUND_POL = 1000.;
+        double r_current = logscale ? exp(X_u[1]) : X_u[1];
 
         // Check whether the ray is currently in the GRMHD simulation volume
-        if (IN_VOLUME && r_current2 < OUTER_BOUND_POL) {
+        if (IN_VOLUME && r_current < OUTER_BOUND_POL) {
             pol_integration_step(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV,
-                                 &nu_p, THETA_e, n_e, B, &pitch_ang, frequency, &dl_current, C,
+                                 &nu_p, THETA_e, n_e, B, &pitch_ang, frequency, &dl_current, C_CONST,
                                  X_u, k_u, B_u, Uplasma_u, k_d, &POLARIZATION_ACTIVE,
                                  f_u, f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv, &Iinv_pol);
         }     // End of if(IN_VOLUME)
@@ -585,50 +595,16 @@ double radiative_transfer_polarized(double *lightpath, int steps,
         X_u[i] = lightpath[i];
         k_u[i] = lightpath[4 + i];
     }
-    double cam_up_u[4] = {0., 0., 0., -1.};
 
-    if (0) {
-        printf("\n X_u[0] = %+.15e", X_u[0]);
-        printf("\n X_u[1] = %+.15e", X_u[1]);
-        printf("\n X_u[2] = %+.15e", X_u[2]);
-        printf("\n X_u[3] = %+.15e", X_u[3]);
-    }
-
-    // Need U_obs_u
-    double U_obs_u[4] = {0., 0., 0., 0.};
-    double obs_tetrad_u[4][4], obs_tetrad_d[4][4];
-    LOOP_ij obs_tetrad_u[i][j] = 0.;
-    LOOP_ij obs_tetrad_d[i][j] = 0.;
-    construct_U_vector(X_u, U_obs_u);
-
-    create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
-    create_tetrad_d(X_u, obs_tetrad_u, obs_tetrad_d);
-
-    // Convert f_u to f_obs_tetrad_u
     double complex f_obs_tetrad_u[4] = {0., 0., 0., 0.};
-    LOOP_i f_obs_tetrad_u[i] = 0.;
-    LOOP_ij f_obs_tetrad_u[i] += obs_tetrad_d[j][i] * f_u[j];
+    construct_f_obs_tetrad_u(X_u, k_u, f_u, f_obs_tetrad_u);
 
-    double complex S_If = 0.;
-    double complex S_Qf = 0.;
-    double complex S_Uf = 0.;
-    double complex S_Vf = 0.;
+    LOOP_i IQUV[i] = 0.;
 
     if (POLARIZATION_ACTIVE) {
         f_tetrad_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);
 
         // Construct final (NON-INVARIANT) Stokes params.
-        S_If = S_A[0] * pow(frequency, 3.);
-        S_Qf = S_A[1] * pow(frequency, 3.);
-        S_Uf = S_A[2] * pow(frequency, 3.);
-        S_Vf = S_A[3] * pow(frequency, 3.);
+        LOOP_i IQUV[i] = S_A[i] * pow(frequency, 3.);
     }
-
-    IQUV[0] = S_If;
-    IQUV[1] = S_Qf;
-    IQUV[2] = S_Uf;
-    IQUV[3] = S_Vf;
-
-    // Store integrated intensity in the image.
-    return S_If; // I_current * pow(frequency, 3.);
 }

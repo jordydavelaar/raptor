@@ -26,6 +26,7 @@
 // Constants that must be evaluated at startup
 // (They depend on spin and other user-supplied parameters)
 double R_GRAV;        // Gravitational radius
+double C_CONST;       // A constant frequently used in RTE integration
 double R_ISCO;        // Innermost stable circular orbit
 double CUTOFF_INNER;  // Inner integration boundary
 double JANSKY_FACTOR; // Factor to scale image output

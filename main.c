@@ -140,8 +140,7 @@ int main(int argc, char *argv[]) {
 
             // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
             for (f = 0; f < num_indices; f++) {
-                double blank =
-                    radiative_transfer_polarized(lightpath2, steps,
+                radiative_transfer_polarized(lightpath2, steps,
                                                  frequencies[f], &f_x, &f_y, &p,
                                                  0, IQUV);
                 energy_spectrum[f] += IQUV[0];

@@ -14,6 +14,8 @@ void set_constants() {
     double Rh = (1. + sqrt(1. - a * a));
     CUTOFF_INNER = Rh * (1. + horizon_marg); // Cutoff outside or inside BH EH
     R_GRAV = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
+    C_CONST = R_GRAV * PLANCK_CONSTANT /
+               (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
     // Innermost stable circular orbit (ISCO)
     double Z1 = 1. + pow(1. - a * a, (1. / 3.)) *

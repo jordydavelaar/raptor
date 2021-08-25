@@ -86,7 +86,7 @@ void f_geodesic(double *y, double *fvector);
 void integrate_geodesic(double alpha, double beta, double *photon_u,
                         double *lightpath, int *steps, double cutoff_inner);
 
-double radiative_transfer_polarized(double *lightpath, int steps,
+void radiative_transfer_polarized(double *lightpath, int steps,
                                     double frequency, double *f_x, double *f_y,
                                     double *p, int PRINT_POLAR, double *IQUV);
 
