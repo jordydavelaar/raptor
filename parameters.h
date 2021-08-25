@@ -99,6 +99,30 @@ double STEPSIZE;
 #define RK4 (2)              //
 #define int_method (2)       // method of integration 2=Verlet, 4-RK4
 
+// CONSTANTS
+////////////
+
+// PHYSICAL CONSTANTS
+#define ELECTRON_CHARGE (4.80320425e-10)
+#define ELECTRON_MASS (9.1093829e-28)
+#define PROTON_MASS (1.6726219e-24)
+#define BOLTZMANN_CONSTANT (1.3806488e-16)
+#define SPEED_OF_LIGHT (2.99792458e10)
+#define PLANCK_CONSTANT (6.62606885e-27)
+#define MPCL2 (0.0015033)
+#define GGRAV (6.674e-8)
+#define MSUN (1.989e33)
+#define MPoME (PROTON_MASS / ELECTRON_MASS)
+//#define M_PI 3.14159265358979323846
+
+// Constants that must be evaluated at startup
+// (They depend on spin and other user-supplied parameters)
+double R_GRAV;        // Gravitational radius
+double C_CONST;       // A constant frequently used in RTE integration
+double R_ISCO;        // Innermost stable circular orbit
+double CUTOFF_INNER;  // Inner integration boundary
+double JANSKY_FACTOR; // Factor to scale image output
+
 // MACROS
 /////////
 

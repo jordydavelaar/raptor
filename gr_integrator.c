@@ -5,7 +5,6 @@
  *
  */
 
-#include "constants.h"
 #include "functions.h"
 #include "parameters.h"
 #include <complex.h>

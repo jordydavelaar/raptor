@@ -39,7 +39,6 @@
  * Indices 0, 1, 2, 3 correspond to t, r, theta, phi (Schwarzschild/Kerr).
  */
 
-#include "constants.h"
 #include "functions.h"
 #include "parameters.h"
 #include <math.h>

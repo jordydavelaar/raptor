@@ -4,7 +4,6 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  *
  */
-#include "constants.h"
 #include "functions.h"
 #include "parameters.h"
 #include "raptor_harm3d_model.h" // We need hslope from here - ought to move it to constants.h!!

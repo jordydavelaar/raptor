@@ -5,7 +5,6 @@
  *
  */
 
-#include "constants.h"
 #include "functions.h"
 #include "gsl/gsl_sf_hyperg.h"
 #include "parameters.h"

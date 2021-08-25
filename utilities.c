@@ -4,7 +4,6 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
-#include "constants.h"
 #include "parameters.h"
 #include <math.h>
 #include <stdio.h>

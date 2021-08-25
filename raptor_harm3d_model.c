@@ -10,7 +10,6 @@
  */
 
 #include "raptor_harm3d_model.h"
-#include "constants.h"
 #include "functions.h"
 #include <math.h>
 #include <stdio.h>

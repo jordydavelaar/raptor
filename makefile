@@ -21,7 +21,7 @@ orbit: $(OBJ1) makefile
 img: $(OBJ2) makefile
 	$(CC) $(CFLAGS) -o RAPTOR $(OBJ2) $(LDFLAGS)
 
-$(OBJ): makefile functions.h constants.h parameters.h raptor_harm3d_model.h
+$(OBJ): makefile functions.h parameters.h raptor_harm3d_model.h
 
 clean:
 	rm *.o
