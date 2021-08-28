@@ -52,6 +52,95 @@ void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield,
     }
 }
 
+void write_image_hdf5(char *hdf5_filename, struct Camera *data,
+                      double *frequencies, double factor) {
+
+    hid_t file_id, dataset_id, dataspace_id; /* identifiers */
+    hsize_t dims[2];
+    herr_t status;
+    double dA;
+
+    /* Create a new file using default properties. */
+    file_id = H5Fcreate(hdf5_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    double buffer[tot_blocks][tot_pixels];
+    /* Create the data space for the dataset. */
+    dims[1] = tot_pixels;
+    dims[0] = tot_blocks;
+    //   dims[1] = IMG_WIDTH;
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1; // data[block].dx[0] * data[block].dx[1];
+                buffer[block][pixel] =
+                    data[block].Intensity[pixel][freq] * factor * dA;
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "I%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        /* End access to the dataset and release resources used by it. */
+        status = H5Dclose(dataset_id);
+
+        /* Terminate access to the data space. */
+        status = H5Sclose(dataspace_id);
+    }
+    char dataset[200];
+
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].alpha[pixel];
+        }
+    }
+    sprintf(dataset, "alpha");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    /* End access to the dataset and release resources used by it. */
+    status = H5Dclose(dataset_id);
+
+    /* Terminate access to the data space. */
+    status = H5Sclose(dataspace_id);
+
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].beta[pixel];
+        }
+    }
+    sprintf(dataset, "beta");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    /* End access to the dataset and release resources used by it. */
+    status = H5Dclose(dataset_id);
+
+    /* Terminate access to the data space. */
+    status = H5Sclose(dataspace_id);
+
+    /* Close the file. */
+    status = H5Fclose(file_id);
+}
+
 void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
                      double scalefactor) {
     int i, j;
