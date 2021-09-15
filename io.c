@@ -5,6 +5,7 @@
  */
 
 #include "parameters.h"
+#include <hdf5.h>
 #include <math.h>
 #include <stdio.h>
 
