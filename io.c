@@ -53,18 +53,18 @@ void write_image_IQUV(FILE *imgfile, double *Ifield, double *Qfield,
     }
 }
 
+/*
 void write_image_hdf5(char *hdf5_filename, struct Camera *data,
                       double *frequencies, double factor) {
 
-    hid_t file_id, dataset_id, dataspace_id; /* identifiers */
+    hid_t file_id, dataset_id, dataspace_id; 
     hsize_t dims[2];
     herr_t status;
     double dA;
 
-    /* Create a new file using default properties. */
     file_id = H5Fcreate(hdf5_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     double buffer[tot_blocks][tot_pixels];
-    /* Create the data space for the dataset. */
+
     dims[1] = tot_pixels;
     dims[0] = tot_blocks;
     //   dims[1] = IMG_WIDTH;
@@ -90,10 +90,8 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  buffer);
 
-        /* End access to the dataset and release resources used by it. */
         status = H5Dclose(dataset_id);
 
-        /* Terminate access to the data space. */
         status = H5Sclose(dataspace_id);
     }
     char dataset[200];
@@ -112,10 +110,8 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
     H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
              buffer);
 
-    /* End access to the dataset and release resources used by it. */
     status = H5Dclose(dataset_id);
 
-    /* Terminate access to the data space. */
     status = H5Sclose(dataspace_id);
 
     dataspace_id = H5Screate_simple(2, dims, NULL);
@@ -132,15 +128,13 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
     H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
              buffer);
 
-    /* End access to the dataset and release resources used by it. */
     status = H5Dclose(dataset_id);
 
-    /* Terminate access to the data space. */
     status = H5Sclose(dataspace_id);
 
-    /* Close the file. */
     status = H5Fclose(file_id);
 }
+*/
 
 void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
                      double scalefactor) {
