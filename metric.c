@@ -8,8 +8,8 @@
 #include "parameters.h"
 #include "raptor_harm3d_model.h" // We need hslope from here - ought to move it to constants.h!!
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // Returns the covariant metric g_dd at location X_u
 void metric_dd(const double X_u[4], double g_dd[4][4]) {
@@ -891,7 +891,7 @@ void initialize_photon_perspective(double alpha, double beta,
                      // + uz * cos(theta);
     utheta = thetaprime - theta; // ux * cos(theta) * cos(phi) + uy * cos(theta)
                                  // * sin(phi) - uz * sin(theta);;
-    uphi = phiprime - phi; //-ux * sin(phi) + uy * cos(phi);
+    uphi = phiprime - phi;       //-ux * sin(phi) + uy * cos(phi);
 
     double X_u[4];
     double k_u[4];
@@ -919,7 +919,7 @@ void initialize_photon_perspective(double alpha, double beta,
 // TRANSFORMATION FUNCTIONS
 ///////////////////////////
 
-// WARNING: some of these functions are NOT listed in functions.h, and are 
+// WARNING: some of these functions are NOT listed in functions.h, and are
 // only used by other functions in this file.
 
 // Returns the value of f(Xg2) given some value for Xr2. For the correct Xg2,
@@ -1022,4 +1022,3 @@ double Ug2_approx_rand(double Ur2, double Xg2) {
 
     return Ug2_current;
 }
-

@@ -37,9 +37,9 @@ void get_impact_params(struct Camera **intensityfield, int block) {
     double stepx, stepy, d_x, d_y;
 
     BLOCK_SIZE_X = CAM_SIZE_X / (pow(2, (*intensityfield)[block].level - 1) *
-                                 (double)num_blocks);
+                                 (double)(num_blocks));
     BLOCK_SIZE_Y = CAM_SIZE_Y / (pow(2, (*intensityfield)[block].level - 1) *
-                                 (double)num_blocks);
+                                 (double)(num_blocks));
 
     d_x = BLOCK_SIZE_X * R_GRAV / source_dist; // angular size of block in cm
     d_y = BLOCK_SIZE_Y * R_GRAV / source_dist; // angular size of block in cm
@@ -61,6 +61,9 @@ void get_impact_params(struct Camera **intensityfield, int block) {
             (xpixel + 0.5) * stepx + (*intensityfield)[block].lcorner[0];
         (*intensityfield)[block].beta[pixel] =
             (ypixel + 0.5) * stepy + (*intensityfield)[block].lcorner[1];
+        fprintf(stderr, "%d %d %e %e\n", xpixel, ypixel,
+                (*intensityfield)[block].alpha[pixel],
+                (*intensityfield)[block].beta[pixel]);
         for (int f = 0; f < num_frequencies; f++) {
             for (int s = 0; s < 4; s++) {
                 (*intensityfield)[block].IQUV[pixel][f][s] = 0;

@@ -1,6 +1,6 @@
 
 CC = h5cc
-CFLAGS = -openmp -lomp -std=c99 -I/usr/include -Wall
+CFLAGS =  -std=c99 -I/usr/include -L/opt/local/lib -Wall
 LDFLAGS = -lm -lgsl -lcblas -g
 
 SRC2=main.c core.c io.c GRmath.c gr_integrator.c rte_integrator.c pol_rte_integrator.c metric.c emission.c pol_emission.c tetrad.c raptor_harm3d_model.c utilities.c camera.c
