@@ -11,7 +11,6 @@
 #define PARAMETERS_H
 
 #include <math.h>
-#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,8 +19,8 @@
 #include <time.h>
 
 #define num_frequencies 1
-#define num_pixels_1d 100
-#define tot_pixels 10000
+#define num_pixels_1d 10
+#define tot_pixels 100
 int num_blocks, tot_blocks, tot_blocks_alloc;
 double BLOCK_SIZE_X, BLOCK_SIZE_Y;
 int max_level;

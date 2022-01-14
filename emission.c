@@ -6,7 +6,7 @@
  */
 
 #include "functions.h"
-#include "gsl/gsl_sf_hyperg.h"
+#include <gsl/gsl_sf_hyperg.h>
 #include "parameters.h"
 #include <gsl/gsl_sf_bessel.h>
 #include <math.h>

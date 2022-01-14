@@ -163,7 +163,12 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     double photon_u[8];
 
     // Create initial ray conditions
+    //fprintf(stderr,"%e %e\n",alpha,beta);
+    // Create initial ray conditions
     initialize_photon(alpha, beta, photon_u, t_init);
+    //fprintf(stderr,"%e %e %e %e\n", photon_u[0],photon_u[1],photon_u[2],photon_u[3]);
+  //  fprintf(stderr,"%e %e %e %e\n", photon_u[4],photon_u[5],photon_u[6],photon_u[7]);
+//exit(1);
 
     // Current r-coordinate
     double r_current = logscale ? exp(photon_u[1]) : photon_u[1];
