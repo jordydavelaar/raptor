@@ -10,6 +10,38 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
+#include <math.h>
+#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+
+#define num_frequencies 1
+#define num_pixels_1d 25
+#define tot_pixels 625
+int num_blocks, tot_blocks, tot_blocks_alloc;
+double BLOCK_SIZE_X, BLOCK_SIZE_Y;
+int max_level;
+
+char inputfile[100];
+#define IMGFILE (1)
+#define SPECFILE (1)
+#define RAD_TRANS (1)
+
+struct Camera {
+    double IQUV[tot_pixels][num_frequencies][4]; // intensity
+    double tau[tot_pixels][num_frequencies];     // intensity
+    double alpha[tot_pixels];                    // impact parameter
+    double beta[tot_pixels];                     // impact parameter
+    double lcorner[2];                           // upper left corner of a block
+    double dx[2];                                // pixel spacing of block
+    int level;
+    int ind[2];
+};
+
 #define sign(x) (((x) < 0) ? -1 : ((x) > 0))
 
 extern double L_unit;
@@ -24,11 +56,11 @@ extern double Thetae_unit;
 ////////////////////
 
 // coordinate and metric choices
-#define CAR  (0) // Minkowski
-#define BL   (1) // Boyer-Lindquist,               x1=r, x2=th, and x3=phi
-#define MBL  (2) // modified Boyer-Lindquist, x1=log(r), x2=th, and x3=phi
-#define KS   (3) // Kerr-Schild,                   x1=r, x2=th, and x3=phi
-#define MKS  (4) // modified Kerr-Schild,     x1=log(r), x2=th, and x3=phi
+#define CAR (0)  // Minkowski
+#define BL (1)   // Boyer-Lindquist,               x1=r, x2=th, and x3=phi
+#define MBL (2)  // modified Boyer-Lindquist, x1=log(r), x2=th, and x3=phi
+#define KS (3)   // Kerr-Schild,                   x1=r, x2=th, and x3=phi
+#define MKS (4)  // modified Kerr-Schild,     x1=log(r), x2=th, and x3=phi
 #define MKS2 (9) // Proper MKS coords
 
 extern double a;
@@ -48,7 +80,7 @@ extern double R0; // Parameter for MKS coords
 // GRMHD data file
 char GRMHD_FILE[256];
 char OUTPUT_FILE[256];
-int  SPHERICAL_ACC;
+int SPHERICAL_ACC;
 char TEMP_MODEL[100];
 
 int ABSORPTION;
@@ -59,8 +91,8 @@ int ABSORPTION;
     (40.) // Outer boundary of radiative transfer computation
 
 // Black hole mass
-double  MBH;
-double  M_UNIT;
+double MBH;
+double M_UNIT;
 
 // OBSERVER PARAMETERS
 //////////////////////
@@ -70,15 +102,15 @@ double TIME_INIT;
 double INCLINATION;
 
 // SED parameters
-int    FREQS_PER_DEC;
+int FREQS_PER_DEC;
 double FREQ_MIN;
 double FREQ_MAX;
 
 #define source_dist (5.061e25) // Distance to M87 (cm); for Sgr A* use (2.47e22)
 #define rcam (1e4) //(500.)    // Camera distance from the sing.(units of Rg)
 
-int    IMG_WIDTH;
-int    IMG_HEIGHT;
+int IMG_WIDTH;
+int IMG_HEIGHT;
 double CAM_SIZE_X;
 double CAM_SIZE_Y;
 #define max_order                                                              \

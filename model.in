@@ -12,3 +12,4 @@ FREQS_PER_DEC	(-)		1
 FREQ_MIN	(Hz)		230.e9
 FREQ_MAX	(Hz)		230.e9
 STEPSIZE	(-)		0.04
+MAX_LEVEL	(-)    		1

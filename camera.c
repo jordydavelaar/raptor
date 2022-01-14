@@ -9,20 +9,8 @@
 #include <math.h>
 #include <stdio.h>
 
-struct sample_block {
-    double IQUV[4][tot_pixels][num_frequencies]; // intensity
-    double alpha[tot_pixels];                    // impact parameter
-    double beta[tot_pixels];                     // impact parameter
-    double lcorner[2];                           // lower left corner of a block
-    double dx[2];                                // pixel spacing of block
-    int level;
-    int ind[2];
-};
-
 void init_camera(struct Camera **intensityfield) {
     int x, y;
-    int xpixel, ypixel;
-    double stepx, stepy, d_x, d_y;
 
     num_blocks = IMG_HEIGHT / num_pixels_1d;
     int num_blocks2 = IMG_WIDTH / num_pixels_1d;
@@ -45,7 +33,6 @@ void init_camera(struct Camera **intensityfield) {
 }
 
 void get_impact_params(struct Camera **intensityfield, int block) {
-    int x, y;
     int xpixel, ypixel;
     double stepx, stepy, d_x, d_y;
 
@@ -75,7 +62,9 @@ void get_impact_params(struct Camera **intensityfield, int block) {
         (*intensityfield)[block].beta[pixel] =
             (ypixel + 0.5) * stepy + (*intensityfield)[block].lcorner[1];
         for (int f = 0; f < num_frequencies; f++) {
-            (*intensityfield)[block].Intensity[pixel][f] = 0;
+            for (int s = 0; s < 4; s++) {
+                (*intensityfield)[block].IQUV[pixel][f][s] = 0;
+            }
         }
     }
 }
@@ -93,7 +82,6 @@ void shift_camera_array(struct Camera **intensityfield, int current_block) {
 
 void add_block(struct Camera **intensityfield, int current_block) {
     int cind_i, cind_j;
-    struct Camera *tmp;
 
     int ind_i = (*intensityfield)[current_block].ind[0];
     int ind_j = (*intensityfield)[current_block].ind[1];
@@ -125,12 +113,12 @@ int refine_block(struct Camera intensity) {
                 pixel2 = ypixel + 1 + xpixel * num_pixels_1d;
                 pixel3 = ypixel + (xpixel + 1) * num_pixels_1d;
 
-                gradI_y = fabs(intensity.Intensity[pixel2][freq] -
-                               intensity.Intensity[pixel1][freq]) /
-                          (intensity.Intensity[pixel1][freq] + 1e-40);
-                gradI_x = fabs(intensity.Intensity[pixel3][freq] -
-                               intensity.Intensity[pixel1][freq]) /
-                          (intensity.Intensity[pixel1][freq] + 1e-40);
+                gradI_y = fabs(intensity.IQUV[pixel2][freq][0] -
+                               intensity.IQUV[pixel1][freq][0]) /
+                          (intensity.IQUV[pixel1][freq][0] + 1e-40);
+                gradI_x = fabs(intensity.IQUV[pixel3][freq][0] -
+                               intensity.IQUV[pixel1][freq][0]) /
+                          (intensity.IQUV[pixel1][freq][0] + 1e-40);
 
                 if (gradI_x > gradImax)
                     gradImax = gradI_x;

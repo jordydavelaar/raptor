@@ -14,7 +14,7 @@ void set_constants() {
     CUTOFF_INNER = Rh * (1. + horizon_marg); // Cutoff outside or inside BH EH
     R_GRAV = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
     C_CONST = R_GRAV * PLANCK_CONSTANT /
-               (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+              (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
     // Innermost stable circular orbit (ISCO)
     double Z1 = 1. + pow(1. - a * a, (1. / 3.)) *
@@ -24,16 +24,6 @@ void set_constants() {
         a < 0. ? 1. : -1.; // 1 for retrograde orbits, -1 for prograde
     R_ISCO = (3. + Z2 + retro * pow((3. - Z1) * (3. + Z1 + 2. * Z2), 0.5));
 
-    // Calibration constant for the spectral irradiance
-    // We want Jansky/pixel^2.
-    double d_x = CAM_SIZE_X * R_GRAV; // Size of image in cm
-    double delta_x =
-        d_x / source_dist; // it is far away so just a ratio without tan
-    double d_y = CAM_SIZE_Y * R_GRAV; // Size of image in cm
-    double delta_y =
-        d_y / source_dist; // it is far away so just a ratio without tan
-    double pixsize = (delta_x / (double)IMG_WIDTH) *
-                     (delta_y / (double)IMG_HEIGHT); // Pix size in Sr
     JANSKY_FACTOR =
-        1.e23 * pixsize; // 1.e23 is conversion from Jansky to ergs/Sr Hz s cm2
+        1.e23; // 1.e23 is conversion from Jansky to ergs/Sr Hz s cm2
 }

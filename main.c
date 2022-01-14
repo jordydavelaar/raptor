@@ -41,12 +41,6 @@
 
 #include "functions.h"
 #include "parameters.h"
-#include <math.h>
-#include <omp.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
 int main(int argc, char *argv[]) {
 
@@ -66,21 +60,6 @@ int main(int argc, char *argv[]) {
     // These depend on the black hole spin
     set_constants();
 
-    // INITIALIZE VARIABLES
-    ///////////////////////
-
-    // Set the "camera time" (initial coordinate time of rays)
-    //    double t_init = 0.; // MUST BE UPDATED
-    //    sscanf(argv[1], "%lf", &t_init);
-
-    int steps;
-
-    // Stepsize for constructing the impact parameters alpha, beta
-    double stepx = CAM_SIZE_X / (double)IMG_WIDTH;
-    double stepy = CAM_SIZE_Y / (double)IMG_HEIGHT;
-    double photon_u[8], alpha, beta;
-    int x, y, f;
-
     // MAIN PROGRAM LOOP
     ////////////////////
 
@@ -88,115 +67,50 @@ int main(int argc, char *argv[]) {
     // initialize_ray(x, y, photon_u);
     // img[y * IMG_WIDTH + x] = integrate_backward(photon_u);
 
-    int num_indices =
-        FREQS_PER_DEC * (int)(log10(FREQ_MAX) - log10(FREQ_MIN)) + 1;
-    fprintf(stderr, "\nNumber of frequencies to compute: %d\n", num_indices);
-    double energy_spectrum[num_indices];
-    double frequencies[num_indices];
+    fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
+            num_frequencies);
+    double energy_spectrum[num_frequencies];
+    double frequencies[num_frequencies];
 
-    double f_x_field[IMG_WIDTH * IMG_HEIGHT];
-    double f_y_field[IMG_WIDTH * IMG_HEIGHT];
-    double p_field[IMG_WIDTH * IMG_HEIGHT];
+    struct Camera *intensityfield;
 
-    double I_field[IMG_WIDTH * IMG_HEIGHT];
-    double Q_field[IMG_WIDTH * IMG_HEIGHT];
-    double U_field[IMG_WIDTH * IMG_HEIGHT];
-    double V_field[IMG_WIDTH * IMG_HEIGHT];
+    init_camera(&intensityfield);
 
-    for (f = 0; f < num_indices; f++) { // For all frequencies...
+    for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
         frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
         energy_spectrum[f] = 0.;
         printf("freq = %+.15e\n", frequencies[f]);
     }
 
-    for (x = 0; x < IMG_WIDTH; x++) { // For all pixel columns...
-#pragma omp parallel for default(none) private(f, steps, alpha, beta,          \
-                                               photon_u)                       \
-    shared(num_indices, energy_spectrum, frequencies, f_x_field, f_y_field,    \
-           I_field, Q_field, U_field, V_field, p_field, x, stepx, stepy,       \
-           CUTOFF_INNER, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y)        \
-        schedule(static, 1)
-        for (y = 0; y < IMG_HEIGHT; y++) { // For all pixel rows
-            if ((y + x * IMG_HEIGHT) % 100 == 0)
-                fprintf(stderr, "current pixel %d of %d\n", y + x * IMG_HEIGHT,
-                        IMG_WIDTH * IMG_HEIGHT);
-            double *lightpath2 = malloc(9 * max_steps * sizeof(double));
+    int block = 0;
 
-            double *IQUV = malloc(4 * sizeof(double));
+    while (block < tot_blocks) {
+        if (block % (10) == 0)
+            fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
-            // Compute impact parameters for this pixel
-            alpha = -CAM_SIZE_X * 0.5 + (x + 0.5) * stepx;
-            beta = -CAM_SIZE_Y * 0.5 + (y + 0.5) * stepy;
+        calculate_image_block(&intensityfield[block], energy_spectrum,
+                              frequencies);
 
-            double f_x = 0.;
-            double f_y = 0.;
-            double p = 0.;
-
-            // INTEGRATE THIS PIXEL'S GEODESIC
-
-            integrate_geodesic(alpha, beta, photon_u, lightpath2, &steps,
-                               CUTOFF_INNER);
-
-            // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
-            for (f = 0; f < num_indices; f++) {
-                radiative_transfer_polarized(lightpath2, steps,
-                                                 frequencies[f], &f_x, &f_y, &p,
-                                                 0, IQUV);
-                energy_spectrum[f] += IQUV[0];
-
-                /*
-                            f_x_field[y * IMG_WIDTH + x] = f_x;
-                            f_y_field[y * IMG_WIDTH + x] = f_y;
-                            p_field[y * IMG_WIDTH + x] = p;
-                */
-
-                I_field[y * IMG_WIDTH + x] = IQUV[0];
-                Q_field[y * IMG_WIDTH + x] = IQUV[1];
-                U_field[y * IMG_WIDTH + x] = IQUV[2];
-                V_field[y * IMG_WIDTH + x] = IQUV[3];
-            }
-            free(lightpath2);
-            free(IQUV);
+        if (refine_block(intensityfield[block])) {
+            add_block(&intensityfield, block);
+        } else {
+            block++;
         }
-#pragma omp barrier
     }
+
+    compute_spec(intensityfield, energy_spectrum);
 
     // WRITE OUTPUT FILES
     /////////////////////
 
-    // We open ONE spectrum file and multiple image files (one per frequency)
-    //    FILE *spectrum    = fopen("output/spectrum.dat", "w");
+    output_files(intensityfield, energy_spectrum, frequencies);
 
-    // check if output folder excists
-    //if (stat("output", &st) == -1) {
-    //    mkdir("output", 0700);
-    //}
+    fprintf(stderr, "\nFinished writing files.\n");
 
-    for (f = 0; f < num_indices; f++) { // For all frequencies...
-        // Create filenames, open files
-        char dat_filename[256] = "";
-        char vtk_filename[256] = "";
-        sprintf(dat_filename, "output/img_data_%e_IQUV.dat", frequencies[f]);
-        sprintf(vtk_filename, "output/img_data_%e.vtk", frequencies[f]);
-        FILE *imgfile = fopen(dat_filename, "w");
-        //    FILE *fp          = fopen(vtk_filename, "w");
+    // FREE ALLOCATED POINTERS
+    //////////////////////////
 
-        // Write image data to file
-        //        write_image_polarized(imgfile, intensityfield[f], f_x_field,
-        //        f_y_field, p_field, JANSKY_FACTOR);
-        write_image_IQUV(imgfile, I_field, Q_field, U_field, V_field,
-                         JANSKY_FACTOR);
-
-        // Close image files
-        fclose(imgfile);
-        //      fclose(fp);
-
-        // Update spectrum file
-        //        fprintf(spectrum, "%+.15e\t%+.15e\n", frequencies[f],
-        //        JANSKY_FACTOR * energy_spectrum[f]);
-    }
-
-    //  fclose(spectrum);
+    free(intensityfield);
 
     // END OF PROGRAM
     /////////////////

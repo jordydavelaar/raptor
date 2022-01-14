@@ -9,6 +9,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include "parameters.h"
 #include <stdio.h>
 
 // CORE.C
@@ -83,12 +84,12 @@ void f_geodesic(double *y, double *fvector);
 
 // Integrate the null geodesic specified by alpha and beta, store results
 // in lightpath
-void integrate_geodesic(double alpha, double beta, double *photon_u,
-                        double *lightpath, int *steps, double cutoff_inner);
+void integrate_geodesic(double alpha, double beta, double *lightpath,
+                        int *steps, double cutoff_inner);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
-                                    double frequency, double *f_x, double *f_y,
-                                    double *p, int PRINT_POLAR, double *IQUV);
+                                  double frequency, double *f_x, double *f_y,
+                                  double *p, int PRINT_POLAR, double *IQUV);
 
 // METRIC.C
 ///////////
@@ -243,4 +244,30 @@ void Xtoijk(double *X, int *i, int *j, int *k, double *del);
 void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
                       double *B_u, double Ucon[4], int *IN_VOLUME);
 
+// IO
+
+void compute_spec(struct Camera *intensity,
+                  double energy_spectrum[num_frequencies]);
+
+// Create output files (image, spectrum, etc.)
+void output_files(struct Camera *intesityfield,
+                  double spectrum[num_frequencies],
+                  double frequencies[num_frequencies]);
+
+void write_image_hdf5(char *hdf5_filename, struct Camera *data,
+                      double *frequencies, double factor);
+
+// Integrate null geodesics, perform radiative transfer calculations, and
+// compute the image.
+void calculate_image_block(struct Camera *intensityfield,
+                           double energy_spectrum[num_frequencies],
+                           double frequencies[num_frequencies]);
+/// CAMERA.C
+void init_camera(struct Camera **intensityfield);
+
+void add_block(struct Camera **intensityfield, int current_block);
+
+int refine_block();
+
+void get_impact_params(struct Camera **intensityfield, int block);
 #endif // FUNCTIONS_H

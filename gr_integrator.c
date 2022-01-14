@@ -8,8 +8,8 @@
 #include "functions.h"
 #include "parameters.h"
 #include <complex.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
 // Updates the vector y (containing position/velocity) by one RK4 step.
 void rk4_step(double *y, void (*f)(double *, double *), double dt) {
@@ -152,14 +152,15 @@ void f_geodesic(double *y, double *fvector) {
 }
 
 // Integrate the null geodesic defined by "photon_u"
-void integrate_geodesic(double alpha, double beta, double *photon_u,
-                        double *lightpath, int *steps, double cutoff_inner) {
+void integrate_geodesic(double alpha, double beta, double *lightpath,
+                        int *steps, double cutoff_inner) {
     int i, q;
     double t_init = 0.;
     double dlambda_adaptive;
     int theta_turns = 0;
     double thetadot_prev;
     double X_u[4], k_u[4];
+    double photon_u[8];
 
     // Create initial ray conditions
     initialize_photon(alpha, beta, photon_u, t_init);
