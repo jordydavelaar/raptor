@@ -137,8 +137,8 @@ void f_geodesic(double *y, double *fvector) {
     double A_u[4] = {0., 0., 0., 0.};         // d^2X/dLambda^2
 
     // Obtain the Christoffel symbols at the current location
-    connection_udd(X_u, gamma_udd);
-    // connection_num_udd(X_u, gamma_udd);
+    // connection_udd(X_u, gamma_udd);
+    connection_num_udd(X_u, gamma_udd);
 
     // Compute 4-acceleration using the geodesic equation
     int i, j, k; // Einstein summation over indices v and w
@@ -163,15 +163,10 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     double photon_u[8];
 
     // Create initial ray conditions
-    //fprintf(stderr,"%e %e\n",alpha,beta);
-    // Create initial ray conditions
     initialize_photon(alpha, beta, photon_u, t_init);
-    //fprintf(stderr,"%e %e %e %e\n", photon_u[0],photon_u[1],photon_u[2],photon_u[3]);
-  //  fprintf(stderr,"%e %e %e %e\n", photon_u[4],photon_u[5],photon_u[6],photon_u[7]);
-//exit(1);
-
+    LOOP_i X_u[i] = photon_u[i];
     // Current r-coordinate
-    double r_current = logscale ? exp(photon_u[1]) : photon_u[1];
+    double r_current = get_r(X_u);
 
     // Reset lambda and steps
     double lambda = 0.;
@@ -187,7 +182,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     while (r_current > cutoff_inner && r_current < cutoff_outer &&
            *steps < max_steps && !TERMINATE) { // && photon_u[0] < t_final){
 
-#elif (metric == KS || metric == MKS || metric == MKS2)
+#elif (metric == KS || metric == MKSHARM || MKSBHAC || metric == MKSN)
 
     // Stop condition for KS coords
     while (r_current < cutoff_outer && r_current > cutoff_inner &&
@@ -228,10 +223,10 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
         verlet_step(photon_u, &f_geodesic, dlambda_adaptive);
 
 #endif
-
+        LOOP_i X_u[i] = photon_u[i];
         // Advance (affine) parameter lambda
         lambda += fabs(dlambda_adaptive);
-        r_current = logscale ? exp(photon_u[1]) : photon_u[1];
+        r_current = get_r(X_u);
 
         *steps = *steps + 1;
     }

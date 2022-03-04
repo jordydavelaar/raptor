@@ -10,7 +10,7 @@
 
 void set_constants() {
     // Horizon radius for integration cutoff
-    double Rh = (1. + sqrt(1. - a * a));
+    double Rh = (1. + sqrt(1. - a * a - Q * Q));
     CUTOFF_INNER = Rh * (1. + horizon_marg); // Cutoff outside or inside BH EH
     R_GRAV = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
     C_CONST = R_GRAV * PLANCK_CONSTANT /

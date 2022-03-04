@@ -12,6 +12,21 @@
 #include "parameters.h"
 #include <math.h>
 
+double get_r(double X_u[4]) {
+
+#if (metric == CKS)
+
+    double R2 = X_u[1] * X_u[1] + X_u[2] * X_u[2] + X_u[3] * X_u[3];
+    double a2 = a * a;
+    double r2 =
+        (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * X_u[3] * X_u[3])) *
+        0.5;
+    return sqrt(r2);
+#else
+    return logscale ? exp(X_u[1]) : X_u[1];
+#endif
+}
+
 // Lowers the index of the contravariant vector V_u, storing the results in a
 // covariant one (V_d), based on the metric at position X_u
 void lower_index(const double X_u[4], double V_u[4], double V_d[4]) {
@@ -271,7 +286,6 @@ void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u) {
     }
 }
 
-
 // Compute the photon frequency in the plasma frame:
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]) {
     double nu_plasmaframe = 0.;
@@ -319,4 +333,3 @@ double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u) {
 
     return (acos(mu));
 }
-

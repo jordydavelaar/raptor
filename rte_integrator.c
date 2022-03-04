@@ -38,7 +38,7 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
         // get_plasma_parameters(X_u, &n_e, &THETA_e, &B, Uplasma_u);
 
         // Check whether the ray is currently in the GRMHD simulation volume
-        if (get_fluid_params(X_u, modvar)) {
+        if (get_fluid_params(X_u, &modvar)) {
             // Obtain pitch angle: still no units (geometric)
             pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 

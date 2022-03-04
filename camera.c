@@ -70,7 +70,7 @@ void get_impact_params(struct Camera **intensityfield, int block) {
     }
 }
 
-void new_index(int child, int *new_i, int *new_j, int ip, int jp) {
+void new_cindex(int child, int *new_i, int *new_j, int ip, int jp) {
     *new_i = 2 * (ip) + child % 2;
     *new_j = 2 * (jp) + child / 2;
 }
@@ -95,7 +95,7 @@ void add_block(struct Camera **intensityfield, int current_block) {
     // compute new indices
     int new_level = (*intensityfield)[current_block].level + 1;
     for (int i = 0; i < 4; i++) {
-        new_index(i, &cind_i, &cind_j, ind_i, ind_j);
+        new_cindex(i, &cind_i, &cind_j, ind_i, ind_j);
         (*intensityfield)[current_block + i].ind[0] = cind_i;
         (*intensityfield)[current_block + i].ind[1] = cind_j;
         (*intensityfield)[current_block + i].level = new_level;

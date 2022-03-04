@@ -26,10 +26,10 @@ void init_model() {
 
     fprintf(stderr, "getting simulation data...\n");
 
-    init_harm3d_data(GRMHD_FILE);
+    init_grmhd_data(GRMHD_FILE);
 }
 
-void init_harm3d_data(char *fname) {
+void init_grmhd_data(char *fname) {
     FILE *fp;
 
     fprintf(stderr, "%s\n", fname);

@@ -6,10 +6,6 @@
 #include "functions.h"
 #include "parameters.h"
 
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_permutation.h>
-
 void init_model() {
     // Set physical units
     set_units(M_UNIT);
@@ -17,13 +13,12 @@ void init_model() {
     // Initialize the BHAC AMR GRMHD data
     fprintf(stderr, "\nREADING BHAC AMR SIMULATION DATA FROM %s", GRMHD_FILE);
 
-    init_bhac_amr_data(GRMHD_FILE);
+    init_grmhd_data(GRMHD_FILE);
 
     fprintf(stderr, "DONE!");
 }
 
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
-    int igrid = 0;
     double small = 1e-14;
 
     for (int igrid = 0; igrid < nleafs; igrid++) {
@@ -140,20 +135,6 @@ double get_detgamma(double x, double y, double z) {
     X_u[2] = y;
     X_u[3] = z;
 
-    double rho = X_u[1] * X_u[1] + X_u[2] * X_u[2] + X_u[3] * X_u[3] - a * a;
-    double r = sqrt(0.5 * (rho + sqrt(rho * rho + 4. * z * z * a * a)));
-    double sqrtgamma;
-    /*
-           if (r < 1)
-             sqrtgamma =
-       sqrt(1.0+(1.4142135623730950*sqrt(rho+sqrt(rho*rho+4.0*a*a*z*z)))/sqrt(rho*rho
-       + 4.0*a*a*z*z + 1.e-3 )); else sqrtgamma =
-       sqrt(1.0+(1.4142135623730950*sqrt(rho+sqrt(rho*rho+4.0*a*a*z*z)))/sqrt(rho*rho
-       + 4.0*a*a*z*z));
-
-            return sqrtgamma;
-
-    */
     metric_dd(X_u, g_dd);
 
     double detgamma =
@@ -178,7 +159,6 @@ double get_detgamma(double x, double y, double z) {
 }
 
 void calc_coord_bar(double *X, double *dxc_block, double *Xbar) {
-    double g_dd[4][4];
     double coef_1D[3];
     double coef_2D[3][3];
     double coef_3D[3][3][3];
@@ -389,8 +369,6 @@ void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
         }
     }
 
-    double lor = 1 / sqrt(1 - VdotV);
-
 #if (DEBUG)
 
     if (prim[UU] < 0) {
@@ -421,7 +399,7 @@ void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
 #endif
 }
 
-void init_bhac_amr_data(char *fname) {
+void init_grmhd_data(char *fname) {
 
     fprintf(stderr, "\nReading HEADER...\n");
 
@@ -433,15 +411,14 @@ void init_bhac_amr_data(char *fname) {
             xprobmin2         = 0.0d0
             xprobmax2         = 0.5d0
     */
-
     ng[0] = 1;
     ng[1] = 1;
     ng[2] = 1;
-    nxlone[0] = 192;
-    nxlone[1] = 96;
-    nxlone[2] = 96;
+    nxlone[0] = 128;
+    nxlone[1] = 48;
+    nxlone[2] = 48;
 
-    xprobmax[0] = 7.824046010856292;
+    xprobmax[0] = 8.1117280833;
     xprobmax[1] = M_PI;
     xprobmax[2] = 2. * M_PI;
 
@@ -450,11 +427,13 @@ void init_bhac_amr_data(char *fname) {
     xprobmin[2] = 0.;
 
     startx[1] = .17;
-    stopx[1] = 7.824046010856292;
+    stopx[1] = 8.1117280833;
     startx[2] = 0.;
     stopx[2] = M_PI;
     startx[3] = 0.;
     stopx[3] = 2. * M_PI;
+
+    hslope = 1.0;
 
     double buffer[1];
     unsigned int buffer_i[1];
@@ -467,7 +446,6 @@ void init_bhac_amr_data(char *fname) {
         fflush(stderr);
         exit(1234);
     }
-    int i = 1;
 
     long int offset;
     int j = 0;
@@ -524,6 +502,7 @@ void init_bhac_amr_data(char *fname) {
     }
 
     a = neqpar[3];
+    Q = a;
     fprintf(stderr, "spin %g\n", a);
     // Q=0.66;//662912607362388;
     int cells = 1;
@@ -550,7 +529,6 @@ void init_bhac_amr_data(char *fname) {
     // exit(1);
     fseek(file_id, 0, SEEK_SET);
     fseek(file_id, offset, SEEK_CUR);
-    int leaf;
 
     for (int i = 0; i < ndimini; i++) {
         ng[i] = nxlone[i] / nx[i]; // number of blocks in each direction
@@ -561,7 +539,6 @@ void init_bhac_amr_data(char *fname) {
     int igrid = 0;
     int refine = 0;
 
-    int size_f = 0;
     block_info = (struct block *)malloc(0);
 
     forest = (int *)malloc(sizeof(int));
@@ -575,6 +552,10 @@ void init_bhac_amr_data(char *fname) {
                 read_node(file_id, &igrid, &refine, ndimini, level, i, j, k);
             }
         }
+    }
+    if (nleafs != igrid) {
+        fprintf(stderr, "something wrong with grid dimensions\n");
+        exit(1);
     }
 
     fprintf(stderr, "%d %d \n", block_info[0].level, igrid);
@@ -606,11 +587,6 @@ void init_bhac_amr_data(char *fname) {
             Xbar[j][i] = (double *)malloc(ndimini * sizeof(double));
         }
     }
-
-    int h_i = 0, h_j = 0, h_k = 0;
-    double del[3];
-
-    long int count = 0;
 
     init_storage();
 
@@ -685,17 +661,70 @@ void init_bhac_amr_data(char *fname) {
     // exit(1);
 }
 
+void set_units(double M_unit_) {
+    //	double MBH;
+
+    /* set black hole mass */
+    /** could be read in from file here,
+        along with M_unit and other parameters **/
+    //	MBH = 4.e6;
+
+    /** input parameters appropriate to Sgr A* **/
+    // double BH_MASS = MBH * MSUN;
+
+    /** from this, calculate units of length, time, mass,
+        and derivative units **/
+    L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+    T_unit = L_unit / SPEED_OF_LIGHT;
+
+    fprintf(stderr, "\nUNITS\n");
+    fprintf(stderr, "L,T,M: %g %g %g\n", L_unit, T_unit, M_unit_);
+
+    RHO_unit = M_unit_ / pow(L_unit, 3);
+    U_unit = RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
+    B_unit = SPEED_OF_LIGHT * sqrt(4. * M_PI * RHO_unit);
+
+    fprintf(stderr, "rho,u,B: %g %g %g\n", RHO_unit, U_unit, B_unit);
+
+    Ne_unit = RHO_unit / (PROTON_MASS + ELECTRON_MASS);
+}
+
+void init_storage() {
+    int i;
+    fprintf(stderr, "\nAllocation memory...\n");
+    p = (double ****)malloc(
+        NPRIM * sizeof(double ***)); // malloc_rank1(NPRIM, sizeof(double *));
+    for (i = 0; i < NPRIM; i++) {
+        p[i] = (double ***)malloc(
+            (N1 + 1) * sizeof(double **)); // malloc_rank2_cont(N1, N2);
+        for (int j = 0; j <= N1; j++) {
+            p[i][j] = (double **)malloc((N2 + 1) * sizeof(double *));
+            for (int k = 0; k <= N2; k++) {
+                p[i][j][k] = (double *)malloc((N3) * sizeof(double));
+            }
+        }
+    }
+
+    values = (double **)malloc(nwini * sizeof(double *));
+    for (int j = 0; j < nwini; j++) {
+        values[j] = (double *)malloc(cells * sizeof(double));
+    }
+
+    return;
+}
+
 // Get the flud parameters in the local co-moving plasma frame.
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
-    int i, j, k, c;
-    double del[NDIM];
-    double rho, uu;
-    double Bp[NDIM], gV_u[NDIM], V_u[NDIM], Vfac, VdotV, UdotBp;
+    int i, c;
+    double r;
 
-#if (metric == MKS)
+    double rho, uu;
+    double Bp[NDIM], V_u[NDIM], VdotV;
+
+#if (metric != CKS)
     X[3] = fmod(X[3], 2 * M_PI);
     X[2] = fmod(X[2], M_PI);
     if (X[3] < 0.)
@@ -734,6 +763,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                 X[1], X[2], X[3]);
         exit(1);
     }
+    if (igrid >= 3840) {
+        fprintf(stderr, "issues with igrid %d\n", igrid);
+        exit(1);
+    }
 
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
     //		      fprintf(stderr,"igrid %d dxc %e\n",igrid,*dx_local);
@@ -746,21 +779,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     Xcent[1] = Xbar[igrid][c][0];
     Xcent[2] = Xbar[igrid][c][1];
     Xcent[3] = Xbar[igrid][c][2];
-#if (metric == CKS)
-    double R2 = Xcent[1] * Xcent[1] + Xcent[2] * Xcent[2] + Xcent[3] * Xcent[3];
-    double a2 = a * a;
-    double r2 = (R2 - a2 +
-                 sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * Xcent[3] * Xcent[3])) *
-                0.5;
-#elif (metric == MKS)
-    if (sqrt(r2) < (1. + sqrt(1 - a * a)) * (1 + 5e-2)) {
-        fprintf(stderr, "inside horizon\n");
-        return 0;
-    }
-#else
-    fprintf(stderr, "metric type not supported.");
-    exit(1);
-#endif
+    r = get_r(Xcent);
+    /*
+        if (r < (1. + sqrt(1 - a * a)) * (1 + 5e-2)) {
+            fprintf(stderr, "inside horizon\n");
+            return 0;
+        }
+    */
     metric_uu(Xcent, g_uu); // cell centered, nearest neighbour so need metric
                             // at cell position
     metric_dd(Xcent, g_dd);
@@ -807,7 +832,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double lfac = 1 / sqrt(1 - VdotV);
 
-    double gamma = 1 / sqrt(1 - VdotV);
     (*modvar).U_u[0] = lfac / alpha;
 
     // U_u[0] = gamma/alpha;
@@ -878,15 +902,15 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
 
-    double Rhigh = R_HIGH;
-    double Rlow = R_LOW;
+    double Rhigh = 1; // R_HIGH;
+    double Rlow = 1;  // R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
     double two_temp_gam =
         0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
 
-    Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
+    Thetae_unit = (two_temp_gam - 1.) * (MPoME) / (trat + 1);
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 

@@ -69,9 +69,8 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
     g_dd[3][1] = g_dd[1][3];
     g_dd[3][3] = omega * omega;
 
-#elif (metric == MKS2) // Proper MKS coords
+#elif (metric == MKSHARM) // Proper MKS coords
 
-    // TAKEN FROM GRMONTY
     double r = exp(X_u[1]) + R0;
     double theta =
         M_PI * X_u[2] + 0.5 * (1. - hslope) * sin(2. * M_PI * X_u[2]);
@@ -101,6 +100,107 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
     g_dd[3][1] = g_dd[1][3];
     g_dd[3][3] =
         sin2th * (rho2 + a * a * sin2th * (1. + 2. * r / rho2)) * pfac * pfac;
+#elif (metric == MKSBHAC)
+    double r = exp(X_u[1]);
+    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
+
+    double sinth = sin(theta);
+    double sin2th = sinth * sinth;
+    double costh = cos(theta);
+    double tfac, rfac, hfac, pfac;
+    double rho2 = r * r + a * a * costh * costh;
+
+    tfac = 1.;
+    rfac = r;
+    hfac = 1 + (1. - hslope) * cos(2. * X_u[2]);
+    pfac = 1.;
+
+    g_dd[0][0] = (-1. + 2. * r / rho2) * tfac * tfac;
+    g_dd[0][1] = (2. * r / rho2) * tfac * rfac;
+    g_dd[0][3] = (-2. * a * r * sin2th / rho2) * tfac * pfac;
+
+    g_dd[1][0] = g_dd[0][1];
+    g_dd[1][1] = (1. + 2. * r / rho2) * rfac * rfac;
+    g_dd[1][3] = (-a * sin2th * (1. + 2. * r / rho2)) * rfac * pfac;
+
+    g_dd[2][2] = rho2 * hfac * hfac;
+
+    g_dd[3][0] = g_dd[0][3];
+    g_dd[3][1] = g_dd[1][3];
+    g_dd[3][3] =
+        sin2th * (rho2 + a * a * sin2th * (1. + 2. * r / rho2)) * pfac * pfac;
+
+#elif (metric == MKSN)
+    double r = exp(X_u[1]) + R0;
+    double theta = X_u[2]; //+ 0.5 * (1. - hslope) * sin(2. *  X_u[2]);
+
+    double sinth = sin(theta);
+    double sin2th = sinth * sinth;
+    double costh = cos(theta);
+    double tfac, rfac, hfac, pfac;
+
+    tfac = 1.;
+    rfac = (r - R0);
+    hfac = 1.; ///( 1. + (1. - hslope) * 1. * cos(2. * M_PI * X_u[2]));
+    pfac = 1.;
+
+    double Sigma = r * r + a * a * costh * costh;
+    double rho = (2 * r - Q * Q) / Sigma + 1e-10;
+    double Delta = r * r - 2 * r + Q * Q + a * a;
+    double Ac = (r * r + a * a) * (r * r + a * a) - a * a * Delta * sin2th;
+
+    g_dd[0][0] = -(1 - rho) * tfac * tfac;
+    g_dd[0][1] = rho * tfac * rfac;
+    g_dd[0][3] = -rho * a * sin2th * tfac * pfac;
+
+    g_dd[1][0] = g_dd[0][1];
+    g_dd[1][1] = (1 + rho) * rfac * rfac;
+    g_dd[1][3] = -a * sin2th * (1 + rho) * rfac * pfac;
+
+    g_dd[2][2] = Sigma * hfac * hfac;
+
+    g_dd[3][0] = g_dd[0][3];
+    g_dd[3][1] = g_dd[1][3];
+    g_dd[3][3] = (Ac * sin2th / Sigma) * pfac * pfac;
+
+#elif (metric == CKS)
+
+    double R2 = X_u[1] * X_u[1] + X_u[2] * X_u[2] + X_u[3] * X_u[3];
+    double a2 = a * a;
+    double r2 =
+        (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * X_u[3] * X_u[3])) *
+        0.5;
+    double r = sqrt(r2);
+
+    double sig = (r2 * r2 + a2 * X_u[3] * X_u[3]);
+    double del = (r2 + a2);
+    double isig, idel;
+
+    if (r < 1)
+        isig = 1 / (sig + 1e-3);
+    else
+        isig = 1 / sig;
+    idel = 1 / (del);
+
+    double f = 2. * r2 * r * isig; //(r2*r2+a2*X_u[3]*X_u[3]);
+    double l[4];
+
+    l[0] = 1;
+    l[1] = (r * X_u[1] + a * X_u[2]) * idel; //(r2+a2);
+    l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
+    l[3] = (X_u[3]) / (r);
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            if (i == j && i == 0)
+                g_dd[i][j] = -1. + f * l[i] * l[j];
+            else if (i == j && i != 0)
+                g_dd[i][j] = 1. + f * l[i] * l[j];
+            else
+                g_dd[i][j] = f * l[i] * l[j];
+        }
+    }
+
 #endif
 }
 
@@ -162,7 +262,7 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
     g_uu[2][2] = 1. / (rho2);
     g_uu[3][3] = 1. / (ztilde);
 
-#elif (metric == MKS2) // Proper MKS units
+#elif (metric == MKSHARM) // Proper MKS units
 
     // TAKEN FROM GRMONTY
     double r = exp(X_u[1]) + R0;
@@ -188,10 +288,111 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 
     g_uu[3][1] = g_uu[1][3];
     g_uu[3][3] = irho2 / (sin2th);
+#elif (metric == MKSBHAC)
+
+    double r = exp(X_u[1]);
+    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
+
+    double sinth = sin(theta);
+    double sin2th = sinth * sinth;
+    double costh = cos(theta);
+
+    double irho2 = 1. / (r * r + a * a * costh * costh);
+
+    double hfac = 1 + (1. - hslope) * cos(2. * X_u[2]);
+
+    g_uu[0][0] = -1. - 2. * r * irho2;
+    g_uu[0][1] = 2. * irho2;
+
+    g_uu[1][0] = g_uu[0][1];
+    g_uu[1][1] = irho2 * (r * (r - 2.) + a * a) / (r * r);
+    g_uu[1][3] = a * irho2 / r;
+
+    g_uu[2][2] = irho2 / (hfac * hfac);
+
+    g_uu[3][1] = g_uu[1][3];
+    g_uu[3][3] = irho2 / (sin2th);
+
+#elif (metric == MKSN)
+
+    double r = exp(X_u[1]) + R0;
+    double theta = X_u[2]; // + 0.5 * (1. - hslope) * sin(2. * M_PI * X_u[2]);
+
+    double sinth = sin(theta);
+    double sin2th = sinth * sinth;
+    double costh = cos(theta);
+    double tfac, rfac, hfac, pfac;
+
+    tfac = 1.;
+    rfac = (r - R0);
+    hfac = 1; // + (1. - hslope) * 1* cos(2. * M_PI * X_u[2]);
+    pfac = 1.;
+
+    double Sigma = r * r + a * a * costh * costh;
+    double rho = (2. * r - Q * Q) / Sigma;
+    double Delta = r * r - 2. * r + Q * Q + a * a;
+    double Ac = (r * r + a * a) * (r * r + a * a) - a * a * Delta * sin2th;
+    double Omega =
+        (Ac - a * a * Sigma * (1 + rho) * sin2th) * sin2th * (1 + rho);
+
+    g_uu[0][0] = -(1 + rho) / (tfac * tfac);
+    g_uu[0][1] = rho / (tfac * rfac);
+
+    g_uu[1][0] = g_uu[0][1];
+    g_uu[1][1] =
+        ((Ac / Omega) * sin2th - rho * rho / (1 + rho)) / (rfac * rfac);
+    g_uu[1][3] = (a * Sigma / Omega) * sin2th * (1 + rho) / (rfac * pfac);
+
+    g_uu[2][2] = ((Ac / (Omega * Sigma)) * sin2th * (1 + rho) -
+                  a * a * sin2th * sin2th * (1 + rho) * (1 + rho) / Omega) /
+                 (hfac * hfac);
+
+    g_uu[3][0] = g_uu[0][3];
+    g_uu[3][1] = g_uu[1][3];
+    g_uu[3][3] = (1 + rho) * (Sigma / Omega) / (pfac * pfac);
+
+#elif (metric == CKS)
+
+    double R2 = X_u[1] * X_u[1] + X_u[2] * X_u[2] + X_u[3] * X_u[3];
+    double a2 = a * a;
+    double r2 =
+        (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * X_u[3] * X_u[3])) *
+        0.5;
+    double r = sqrt(r2);
+
+    double sig = (r2 * r2 + a2 * X_u[3] * X_u[3]);
+    double del = (r2 + a2);
+    double isig, idel;
+
+    if (r < 1)
+        isig = 1 / (sig + 1e-3);
+    else
+        isig = 1 / sig;
+    idel = 1 / (del);
+
+    double f = 2. * r2 * r * isig; //(r2*r2+a2*X_u[3]*X_u[3]);
+
+    double l[4];
+
+    l[0] = -1.;
+    l[1] = (r * X_u[1] + a * X_u[2]) * idel; //(r2+a2);
+    l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
+    l[3] = (X_u[3]) / (r);
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            if (i == j && i == 0)
+                g_uu[i][j] = -1. - f * l[i] * l[j];
+            else if (i == j && i != 0)
+                g_uu[i][j] = 1. - f * l[i] * l[j];
+            else
+                g_uu[i][j] = -f * l[i] * l[j];
+        }
+    }
 
 #endif
 }
-
+/*
 // Returns the partial derivative of metric element g_dd[alpha][beta] w.r.t.
 // direction 'dir'
 double part_deriv_metric_dd(const double X_u[4], int dir, int alpha, int beta) {
@@ -233,6 +434,118 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
                                       (part_deriv_metric_dd(X_u, j, k, i) +
                                        part_deriv_metric_dd(X_u, i, k, j) -
                                        part_deriv_metric_dd(X_u, k, i, j));
+}*/
+
+// Computes the Christoffel symbols at location X numerically
+// (Requires the metric to be specified everywhere!)
+void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
+    int i, j, k;
+    double temp[4][4][4];
+    double dg[4][4][4];
+
+    LOOP_ijk {
+        gamma_udd[i][j][k] = 0.;
+        dg[i][j][k] = 0.0;
+    }
+    // memset(gamma_udd, 0, 64 * sizeof(double ));
+
+    // Obtain metric at current position (contravariant form)
+    double g_uu[4][4], g_dd[4][4], g_dd_m[4][4], g_dd_p[4][4];
+    double X_u_temp[4];
+    metric_uu(X_u, g_uu);
+    metric_dd(X_u, g_dd);
+
+    double delta[4][4];
+    LOOP_ij delta[i][j] = 0;
+
+    LOOP_ijk delta[i][j] += g_uu[i][k] * g_dd[k][j];
+
+    //	fprintf(stderr,"%e\n",exp(X_u[1]));
+
+    //  LOOP_ij fprintf(stderr,"%d %d %e\n",i,j,delta[i][j]);
+    // fprintf(stderr,"\n");
+
+    //     LOOP_ijk fprintf(stderr,"gamma init %e\n",gamma_udd[i][j][k]);
+    //	LOOP_ij fprintf(stderr,"gdd at base %e\n",g_dd[i][j]);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            X_u_temp[j] = X_u[j];
+        }
+        X_u_temp[i] += delta_num;
+
+        metric_dd(X_u_temp, g_dd_p);
+
+        X_u_temp[i] -= 2. * delta_num;
+        metric_dd(X_u_temp, g_dd_m);
+
+        //	LOOP_kl fprintf(stderr,"gddm %d base %e\n",i,g_dd_m[l][k]);
+        //	LOOP_kl fprintf(stderr,"gddp %d %e\n",i,g_dd_p[l][k]);
+
+        dg[i][0][0] = (g_dd_p[0][0] - g_dd_m[0][0]) / (2. * delta_num);
+        dg[i][1][0] = (g_dd_p[1][0] - g_dd_m[1][0]) / (2. * delta_num);
+        dg[i][2][0] = (g_dd_p[2][0] - g_dd_m[2][0]) / (2. * delta_num);
+        dg[i][3][0] = (g_dd_p[3][0] - g_dd_m[3][0]) / (2. * delta_num);
+
+        dg[i][0][1] = (g_dd_p[0][1] - g_dd_m[0][1]) / (2. * delta_num);
+        dg[i][1][1] = (g_dd_p[1][1] - g_dd_m[1][1]) / (2. * delta_num);
+        dg[i][2][1] = (g_dd_p[2][1] - g_dd_m[2][1]) / (2. * delta_num);
+        dg[i][3][1] = (g_dd_p[3][1] - g_dd_m[3][1]) / (2. * delta_num);
+
+        dg[i][0][2] = (g_dd_p[0][2] - g_dd_m[0][2]) / (2. * delta_num);
+        dg[i][1][2] = (g_dd_p[1][2] - g_dd_m[1][2]) / (2. * delta_num);
+        dg[i][2][2] = (g_dd_p[2][2] - g_dd_m[2][2]) / (2. * delta_num);
+        dg[i][3][2] = (g_dd_p[3][2] - g_dd_m[3][2]) / (2. * delta_num);
+
+        dg[i][0][3] = (g_dd_p[0][3] - g_dd_m[0][3]) / (2. * delta_num);
+        dg[i][1][3] = (g_dd_p[1][3] - g_dd_m[1][3]) / (2. * delta_num);
+        dg[i][2][3] = (g_dd_p[2][3] - g_dd_m[2][3]) / (2. * delta_num);
+        dg[i][3][3] = (g_dd_p[3][3] - g_dd_m[3][3]) / (2. * delta_num);
+    }
+    // Solve the Christoffel connection equation
+    int alpha;
+    //      LOOP_ijk fprintf(stderr,"dg %e\n",dg[i][j][k]);
+
+    for (alpha = 0; alpha < 4; alpha++) {
+        for (k = 0; k < 4; k++) {
+            gamma_udd[alpha][0][0] +=
+                g_uu[alpha][k] * (0.5 * (2. * dg[0][k][0] - dg[k][0][0]));
+            gamma_udd[alpha][0][1] +=
+                g_uu[alpha][k] *
+                (0.5 * (dg[1][k][0] + dg[0][k][1] - dg[k][0][1]));
+            gamma_udd[alpha][0][2] +=
+                g_uu[alpha][k] *
+                (0.5 * (dg[2][k][0] + dg[0][k][2] - dg[k][0][2]));
+            gamma_udd[alpha][0][3] +=
+                g_uu[alpha][k] *
+                (0.5 * (dg[3][k][0] + dg[0][k][3] - dg[k][0][3]));
+
+            gamma_udd[alpha][1][1] +=
+                g_uu[alpha][k] * (0.5 * (2. * dg[1][k][1] - dg[k][1][1]));
+            gamma_udd[alpha][1][2] +=
+                g_uu[alpha][k] *
+                (0.5 * (dg[2][k][1] + dg[1][k][2] - dg[k][1][2]));
+            gamma_udd[alpha][1][3] +=
+                g_uu[alpha][k] *
+                (0.5 * (dg[3][k][1] + dg[1][k][3] - dg[k][1][3]));
+
+            gamma_udd[alpha][2][2] +=
+                g_uu[alpha][k] * (0.5 * (2. * dg[2][k][2] - dg[k][2][2]));
+            gamma_udd[alpha][2][3] +=
+                g_uu[alpha][k] *
+                (0.5 * (dg[3][k][2] + dg[2][k][3] - dg[k][2][3]));
+
+            gamma_udd[alpha][3][3] +=
+                g_uu[alpha][k] * (0.5 * (2. * dg[3][k][3] - dg[k][3][3]));
+        }
+        gamma_udd[alpha][1][0] = gamma_udd[alpha][0][1];
+
+        gamma_udd[alpha][2][0] = gamma_udd[alpha][0][2];
+        gamma_udd[alpha][2][1] = gamma_udd[alpha][1][2];
+
+        gamma_udd[alpha][3][0] = gamma_udd[alpha][0][3];
+        gamma_udd[alpha][3][1] = gamma_udd[alpha][1][3];
+        gamma_udd[alpha][3][2] = gamma_udd[alpha][2][3];
+    }
 }
 
 // Computes the Christoffel symbols at location X based on an exact metric
@@ -638,7 +951,7 @@ void connection_udd(const double X_u[4], double gamma[4][4][4]) {
     gamma[3][3][2] = gamma[3][2][3];
     gamma[3][3][3] = (-a * r1sth2 * rho22 + a3 * sth4 * fac1) * irho23;
 
-#elif (metric == MKS2) //  (Modified) Kerr-Schild metric
+#elif (metric == MKSHARM) //  (Modified) Kerr-Schild metric
 
     double r = R0 + exp(X_u[1]);
     double r2 = r * r;
@@ -738,7 +1051,11 @@ void connection_udd(const double X_u[4], double gamma[4][4][4]) {
     gamma[3][3][3] = -a * C * sin2th;
 
     // Symmetries
-
+#else
+    fprintf(stderr,
+            "Analytical connections not avaialbe for this metric in metric.c, "
+            "switch to numerical?\n");
+    exit(1);
 #endif
 }
 
@@ -815,7 +1132,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 //    LOOP_i printf("\n%+.15e", photon_u[i+4]);
 
 // Convert k_u to the coordinate system that is currently used
-#if (metric == KS || metric == MKS || metric == MKS2)
+#if (metric == KS || metric == MKS || metric == MKSHARM)
 
     double KSphoton_u[8];
     BL_to_KS_u(photon_u, KSphoton_u);
@@ -826,7 +1143,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
 #endif
 
-#if (metric == MKS2)
+#if (metric == MKSHARM)
     photon_u[2] =
         Xg2_approx_rand(photon_u[2]); // We only transform theta - r is
                                       // already exponential and R0 = 0

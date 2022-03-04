@@ -10,7 +10,7 @@
 #define FUNCTIONS_H
 
 #include "parameters.h"
-#include "raptor_harm3d_model.h"
+#include "raptor_bhac3d_model.h"
 #include <stdio.h>
 // CORE.C
 /////////
@@ -20,8 +20,10 @@ void read_model(char *argv[]);
 // GRMATH.C
 ///////////
 
-// Lowers the index of the contravariant vector V_u, storing the results in a
-// covariant one (V_d), based on the metric at position X_u
+double get_r(double X_u[4]);
+
+// Lowers the index of the contravariant vector V_u, storing the results in
+// a covariant one (V_d), based on the metric at position X_u
 void lower_index(const double X_u[4], double V_u[4], double V_d[4]);
 
 // Lowers two indices of a rank (2, 0) tensor
@@ -233,7 +235,7 @@ void init_model();
 
 void set_units(double);
 
-void init_harm3d_data(char *fname);
+void init_grmhd_data(char *fname);
 
 void init_storage();
 

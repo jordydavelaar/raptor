@@ -11,12 +11,23 @@
 #define PARAMETERS_H
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+
+#define BHAC3D (1)
+#define HARM3D (0)
+
+#define NDIM 4
+#define NPRIM 8
+//#if (HARM3D)
+//#include "raptor_harm3d_model.h"
+//#elif (BHAC3D)
+//#endif
 
 char inputfile[100];
 #define IMGFILE (1)
@@ -55,21 +66,26 @@ extern double Thetae_unit;
 ////////////////////
 
 // coordinate and metric choices
-#define CAR (0)  // Minkowski
-#define BL (1)   // Boyer-Lindquist,               x1=r, x2=th, and x3=phi
-#define MBL (2)  // modified Boyer-Lindquist, x1=log(r), x2=th, and x3=phi
-#define KS (3)   // Kerr-Schild,                   x1=r, x2=th, and x3=phi
-#define MKS (4)  // modified Kerr-Schild,     x1=log(r), x2=th, and x3=phi
-#define MKS2 (9) // Proper MKS coords
+#define CAR (0) // Minkowski
+#define BL (1)  // Boyer-Lindquist,               x1=r, x2=th, and x3=phi
+#define MBL (2) // modified Boyer-Lindquist, x1=log(r), x2=th, and x3=phi
+#define KS (3)  // Kerr-Schild,                   x1=r, x2=th, and x3=phi
+#define MKS (4) // modified Kerr-Schild,          x1=log(r), x2=th, and x3=phi
+#define MKSHARM                                                                \
+    (5) // HARM3D MKS coords        x1=log(r), x2=th/pi, and x3=phi/2pi
+#define MKSBHAC                                                                \
+    (6) // BHAC style MKS coords          x1=log(r), x2=th/pi, and x3=phi
+#define MKSN (6) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 
-extern double a;
+extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKS2)
+#define metric (MKSN)
 #if (metric == BL || metric == KS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
-#elif (metric == MBL || metric == MKS || metric == MKS2)
+#elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
+       metric == MKSBHAC || metric == MKSN)
 #define logscale (1) // Modified BL/KS coordinates; logarithmic radius
 #endif
 
@@ -174,5 +190,7 @@ double JANSKY_FACTOR; // Factor to scale image output
         for (j = 0; j < DIM; j++)                                              \
             for (k = 0; k < DIM; k++)                                          \
                 for (l = 0; l < DIM; l++)
+
+#include "raptor_bhac3d_model.h"
 
 #endif // PARAMETERS_H

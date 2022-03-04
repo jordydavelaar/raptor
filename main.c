@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     int block = 0;
 
     while (block < tot_blocks) {
-        if (block % (10) == 0)
+        if (block % (1) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
         calculate_image_block(&intensityfield[block], energy_spectrum,
