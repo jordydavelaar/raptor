@@ -61,9 +61,7 @@ void get_impact_params(struct Camera **intensityfield, int block) {
             (xpixel + 0.5) * stepx + (*intensityfield)[block].lcorner[0];
         (*intensityfield)[block].beta[pixel] =
             (ypixel + 0.5) * stepy + (*intensityfield)[block].lcorner[1];
-        fprintf(stderr, "%d %d %e %e\n", xpixel, ypixel,
-                (*intensityfield)[block].alpha[pixel],
-                (*intensityfield)[block].beta[pixel]);
+
         for (int f = 0; f < num_frequencies; f++) {
             for (int s = 0; s < 4; s++) {
                 (*intensityfield)[block].IQUV[pixel][f][s] = 0;
