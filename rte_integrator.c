@@ -8,20 +8,22 @@
 #include "functions.h"
 #include "parameters.h"
 #include <complex.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
 double radiative_transfer(double *lightpath, int steps, double frequency) {
-    int IN_VOLUME, path_counter;
+    int path_counter;
     double I_current = 0.;
     double j_nu = 0.;
-    double B, THETA_e, pitch_ang, nu_p, n_e, dl_current;
+    double pitch_ang, nu_p, dl_current;
     int i;
-    double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
+    double X_u[4], k_u[4], k_d[4];
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
 
     double a_nu = 0.;
     double dtau_old = 0;
+
+    struct GRMHD modvar;
 
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--) {
@@ -34,12 +36,11 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
 
         // Obtain the parameters n_e, THETA_e, B, and Uplasma_u at X_u
         // get_plasma_parameters(X_u, &n_e, &THETA_e, &B, Uplasma_u);
-        get_fluid_params(X_u, &n_e, &THETA_e, &B, B_u, Uplasma_u, &IN_VOLUME);
 
         // Check whether the ray is currently in the GRMHD simulation volume
-        if (IN_VOLUME) {
+        if (get_fluid_params(X_u, modvar)) {
             // Obtain pitch angle: still no units (geometric)
-            pitch_ang = pitch_angle(X_u, k_u, B_u, Uplasma_u);
+            pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 
             // CGS UNITS USED FROM HERE ON OUT
             //////////////////////////////////
@@ -56,14 +57,15 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
             lower_index(X_u, k_u, k_d);
 
             // Compute the photon frequency in the plasma frame:
-            nu_p = freq_in_plasma_frame(Uplasma_u, k_d);
+            nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
             // Obtain emission coefficient in current plasma conditions
-            j_nu = emission_coeff_THSYNCHAV(B, THETA_e, nu_p, n_e);
+            j_nu = emission_coeff_THSYNCHAV(modvar.B, modvar.theta_e, nu_p,
+                                            modvar.n_e);
 
             // Obtain absorption coefficient
             if (ABSORPTION) {
-                a_nu = absorption_coeff_TH(j_nu, nu_p, THETA_e);
+                a_nu = absorption_coeff_TH(j_nu, nu_p, modvar.theta_e);
             }
 
             // Constant used in integration (to produce correct units)

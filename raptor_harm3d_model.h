@@ -17,6 +17,16 @@
 #define NDIM 4
 #define NPRIM 8
 
+struct GRMHD {
+    double U_u[4];
+    double B_u[4];
+    double U_d[4];
+    double B_d[4];
+    double n_e;
+    double B;
+    double theta_e;
+};
+
 double ****econ;
 double ****ecov;
 double ***bcon;

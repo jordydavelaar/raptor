@@ -18,17 +18,17 @@
 #include <sys/types.h>
 #include <time.h>
 
+char inputfile[100];
+#define IMGFILE (1)
+#define SPECFILE (1)
+#define RAD_TRANS (1)
+
 #define num_frequencies 1
 #define num_pixels_1d 10
 #define tot_pixels 100
 int num_blocks, tot_blocks, tot_blocks_alloc;
 double BLOCK_SIZE_X, BLOCK_SIZE_Y;
 int max_level;
-
-char inputfile[100];
-#define IMGFILE (1)
-#define SPECFILE (1)
-#define RAD_TRANS (1)
 
 struct Camera {
     double IQUV[tot_pixels][num_frequencies][4]; // intensity

@@ -10,8 +10,8 @@
 #define FUNCTIONS_H
 
 #include "parameters.h"
+#include "raptor_harm3d_model.h"
 #include <stdio.h>
-
 // CORE.C
 /////////
 
@@ -241,9 +241,9 @@ double interp_scalar(double ***var, int i, int j, int k, double coeff[4]);
 
 void Xtoijk(double *X, int *i, int *j, int *k, double *del);
 
-void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
-                      double *B_u, double Ucon[4], int *IN_VOLUME);
-
+// void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
+//                      double *B_u, double Ucon[4], int *IN_VOLUME);
+int get_fluid_params(double X[NDIM], struct GRMHD *modvar);
 // IO
 
 void compute_spec(struct Camera *intensity,

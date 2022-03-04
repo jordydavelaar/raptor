@@ -46,28 +46,28 @@ def plot_data(folder,tstart,tend):
             current_I=np.max(images[data_I_id][i])
             if(max_I<current_I):
                 max_I=current_I
-            current=np.min(images[data_I_id][i])
+            current_I=np.min(images[data_I_id][i])
             if(min_I>current_I):
                 min_I=current_I
 
             current_Q=np.max(images[data_Q_id][i])
             if(max_Q<current_Q):
                 max_Q=current_Q
-            current=np.min(images[data_Q_id][i])
+            current_Q=np.min(images[data_Q_id][i])
             if(min_Q>current_Q):
-                min_Q=current_U
+                min_Q=current_Q
 
             current_U=np.max(images[data_U_id][i])
             if(max_U<current_U):
                 max_U=current_U
-            current=np.min(images[data_U_id][i])
+            current_U=np.min(images[data_U_id][i])
             if(min_U>current_U):
                 min_U=current_U
 
             current_V=np.max(images[data_V_id][i])
             if(max_V<current_V):
                 max_V=current_V
-            current=np.min(images[data_V_id][i])
+            current_V=np.min(images[data_V_id][i])
             if(min_V>current_V):
                 min_V=current_V
 
@@ -77,11 +77,8 @@ def plot_data(folder,tstart,tend):
             array_Q=((np.reshape(images[data_Q_id][i],(pixels,pixels))))
             array_U=((np.reshape(images[data_U_id][i],(pixels,pixels))))
             array_V=((np.reshape(images[data_V_id][i],(pixels,pixels))))
-            print(pixels)
             alpha=((np.reshape(images['alpha'][i],(pixels,pixels))))
             beta=((np.reshape(images['beta'][i],(pixels,pixels))))
-            print(alpha)
-            print(beta)
 
             figure_I=axs[0][0].pcolormesh(alpha,beta,(array_I/max_I),vmin=0,vmax=1,cmap='afmhot')
             figure_Q=axs[1][0].pcolormesh(alpha,beta,(array_Q/max_Q),vmin=-1,vmax=1,cmap='RdBu',shading='auto')

@@ -8,9 +8,8 @@
 #include "functions.h"
 #include "parameters.h"
 #include <complex.h>
-#include <stdlib.h>
 #include <math.h>
-
+#include <stdlib.h>
 
 // y contains the 4-position and the 4-velocity for one lightray/particle.
 void f_parallel(const double y[], double complex f_u[], double fvector[],
@@ -93,8 +92,8 @@ void rk4_step_f(double y[], double complex f_u[], double dt) {
     }
 }
 
-void f_tetrad_to_stokes(double Iinv, double Iinv_pol, double complex f_tetrad_u[],
-                 double complex S_A[]) {
+void f_tetrad_to_stokes(double Iinv, double Iinv_pol,
+                        double complex f_tetrad_u[], double complex S_A[]) {
     S_A[0] = Iinv;
     S_A[1] = Iinv_pol * (cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) -
                          cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2]));
@@ -105,7 +104,7 @@ void f_tetrad_to_stokes(double Iinv, double Iinv_pol, double complex f_tetrad_u[
 }
 
 void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
-                 double complex f_tetrad_u[]) {
+                        double complex f_tetrad_u[]) {
 
     *Iinv = S_A[0];
 
@@ -148,29 +147,29 @@ void construct_U_vector(const double X_u[], double U_u[]) {
     raise_index(X_u, U_d, U_u);
 }
 
-
-
 // NEW FUNCTIONS JUNE 2021
 //////////////////////////
 
 // Transform f_tetrad_u to f_u
-void f_tetrad_to_f(double complex *f_u, double tetrad_u[][4], double complex *f_tetrad_u){
+void f_tetrad_to_f(double complex *f_u, double tetrad_u[][4],
+                   double complex *f_tetrad_u) {
     int i, j;
     LOOP_i f_u[i] = 0.;
     LOOP_ij f_u[i] += tetrad_u[i][j] * f_tetrad_u[j];
 }
 
 // Transform f_u to f_tetrad_u
-void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4], double complex *f_u){
+void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4],
+                   double complex *f_u) {
     int i, j;
     LOOP_i f_tetrad_u[i] = 0.;
     LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
 }
 
-void evaluate_coeffs(double *jI, double *jQ, double *jU, double *jV,
-                     double *rQ, double *rU, double *rV,
-                     double *aI, double *aQ, double *aU, double *aV , 
-                     double nu_p, double THETA_e, double n_e, double B, double pitch_ang){
+void evaluate_coeffs(double *jI, double *jQ, double *jU, double *jV, double *rQ,
+                     double *rU, double *rV, double *aI, double *aQ, double *aU,
+                     double *aV, double nu_p, double THETA_e, double n_e,
+                     double B, double pitch_ang) {
     *jI = j_I(THETA_e, n_e, nu_p, B, pitch_ang);
     *jQ = j_Q(THETA_e, n_e, nu_p, B, pitch_ang);
     *jU = 0.;
@@ -201,14 +200,12 @@ void evaluate_coeffs(double *jI, double *jQ, double *jU, double *jV,
     *rV *= nu_p;
 }
 
-
-int check_stiffness(double jI, double jQ, double jU, double jV,
-                    double rQ, double rU, double rV,
-                    double aI, double aQ, double aU, double aV, double dl_current){
+int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
+                    double rU, double rV, double aI, double aQ, double aU,
+                    double aV, double dl_current) {
     // int STIFF = check_stiffness...
     double a2 = rQ * rQ + rV * rV - aQ * aQ - aV * aV;
-    double a0 =
-        -2. * aV * aQ * rV * rQ - aQ * aQ * rQ * rQ - aV * aV * rV * rV;
+    double a0 = -2. * aV * aQ * rV * rQ - aQ * aQ * rQ * rQ - aV * aV * rV * rV;
 
     complex double zplus = (-a2 + sqrt(a2 * a2 - 4. * a0)) / 2.;
     complex double zminus = (-a2 - sqrt(a2 * a2 - 4. * a0)) / 2.;
@@ -245,17 +242,17 @@ int check_stiffness(double jI, double jQ, double jU, double jV,
 
     double STIFFTHRESH = 0.99;
 
-    if (res1 > STIFFTHRESH || res2 > STIFFTHRESH ||
-        res3 > STIFFTHRESH || res4 > STIFFTHRESH)
+    if (res1 > STIFFTHRESH || res2 > STIFFTHRESH || res3 > STIFFTHRESH ||
+        res4 > STIFFTHRESH)
         STIFF = 1;
 
     return STIFF;
 }
 
-void pol_rte_rk4_step(double jI, double jQ, double jU, double jV,
-                  double rQ, double rU, double rV,
-                  double aI, double aQ, double aU, double aV, 
-                  double dl_current, double C, double complex S_A[]){
+void pol_rte_rk4_step(double jI, double jQ, double jU, double jV, double rQ,
+                      double rU, double rV, double aI, double aQ, double aU,
+                      double aV, double dl_current, double C,
+                      double complex S_A[]) {
     double complex I0 = S_A[0];
     double complex Q0 = S_A[1];
     double complex U0 = S_A[2];
@@ -263,72 +260,72 @@ void pol_rte_rk4_step(double jI, double jQ, double jU, double jV,
 
     // RK4 with constant coefficients
     // k1
-    double complex Ik1 = dl_current * C * jI - dl_current * C * (aI * I0 + aQ * Q0 + aU * U0 + aV * V0);
-    double complex Qk1 = dl_current * C * jQ - dl_current * C * (aQ * I0 + aI * Q0 + rV * U0 - rU * V0);
-    double complex Uk1 = dl_current * C * jU - dl_current * C * (aU * I0 - rV * Q0 + aI * U0 + rQ * V0);
-    double complex Vk1 = dl_current * C * jV - dl_current * C * (aV * I0 + rU * Q0 - rQ * U0 + aI * V0);
+    double complex Ik1 =
+        dl_current * C * jI -
+        dl_current * C * (aI * I0 + aQ * Q0 + aU * U0 + aV * V0);
+    double complex Qk1 =
+        dl_current * C * jQ -
+        dl_current * C * (aQ * I0 + aI * Q0 + rV * U0 - rU * V0);
+    double complex Uk1 =
+        dl_current * C * jU -
+        dl_current * C * (aU * I0 - rV * Q0 + aI * U0 + rQ * V0);
+    double complex Vk1 =
+        dl_current * C * jV -
+        dl_current * C * (aV * I0 + rU * Q0 - rQ * U0 + aI * V0);
 
     // k2
-    double complex Ik2 =
-        dl_current * C * jI -
-        dl_current * C *
-            (aI * (I0 + 0.5 * Ik1) + aQ * (Q0 + 0.5 * Qk1) +
-             aU * (U0 + 0.5 * Uk1) + aV * (V0 + 0.5 * Vk1));
-    double complex Qk2 =
-        dl_current * C * jQ -
-        dl_current * C *
-            (aQ * (I0 + 0.5 * Ik1) + aI * (Q0 + 0.5 * Qk1) +
-             rV * (U0 + 0.5 * Uk1) - rU * (V0 + 0.5 * Vk1));
-    double complex Uk2 =
-        dl_current * C * jU -
-        dl_current * C *
-            (aU * (I0 + 0.5 * Ik1) - rV * (Q0 + 0.5 * Qk1) +
-             aI * (U0 + 0.5 * Uk1) + rQ * (V0 + 0.5 * Vk1));
-    double complex Vk2 =
-        dl_current * C * jV -
-        dl_current * C *
-            (aV * (I0 + 0.5 * Ik1) + rU * (Q0 + 0.5 * Qk1) -
-             rQ * (U0 + 0.5 * Uk1) + aI * (V0 + 0.5 * Vk1));
+    double complex Ik2 = dl_current * C * jI -
+                         dl_current * C *
+                             (aI * (I0 + 0.5 * Ik1) + aQ * (Q0 + 0.5 * Qk1) +
+                              aU * (U0 + 0.5 * Uk1) + aV * (V0 + 0.5 * Vk1));
+    double complex Qk2 = dl_current * C * jQ -
+                         dl_current * C *
+                             (aQ * (I0 + 0.5 * Ik1) + aI * (Q0 + 0.5 * Qk1) +
+                              rV * (U0 + 0.5 * Uk1) - rU * (V0 + 0.5 * Vk1));
+    double complex Uk2 = dl_current * C * jU -
+                         dl_current * C *
+                             (aU * (I0 + 0.5 * Ik1) - rV * (Q0 + 0.5 * Qk1) +
+                              aI * (U0 + 0.5 * Uk1) + rQ * (V0 + 0.5 * Vk1));
+    double complex Vk2 = dl_current * C * jV -
+                         dl_current * C *
+                             (aV * (I0 + 0.5 * Ik1) + rU * (Q0 + 0.5 * Qk1) -
+                              rQ * (U0 + 0.5 * Uk1) + aI * (V0 + 0.5 * Vk1));
 
     // k3
-    double complex Ik3 =
-        dl_current * C * jI -
-        dl_current * C *
-            (aI * (I0 + 0.5 * Ik2) + aQ * (Q0 + 0.5 * Qk2) +
-             aU * (U0 + 0.5 * Uk2) + aV * (V0 + 0.5 * Vk2));
-    double complex Qk3 =
-        dl_current * C * jQ -
-        dl_current * C *
-            (aQ * (I0 + 0.5 * Ik2) + aI * (Q0 + 0.5 * Qk2) +
-             rV * (U0 + 0.5 * Uk2) - rU * (V0 + 0.5 * Vk2));
-    double complex Uk3 =
-        dl_current * C * jU -
-        dl_current * C *
-            (aU * (I0 + 0.5 * Ik2) - rV * (Q0 + 0.5 * Qk2) +
-             aI * (U0 + 0.5 * Uk2) + rQ * (V0 + 0.5 * Vk2));
-    double complex Vk3 =
-        dl_current * C * jV -
-        dl_current * C *
-            (aV * (I0 + 0.5 * Ik2) + rU * (Q0 + 0.5 * Qk2) -
-             rQ * (U0 + 0.5 * Uk2) + aI * (V0 + 0.5 * Vk2));
+    double complex Ik3 = dl_current * C * jI -
+                         dl_current * C *
+                             (aI * (I0 + 0.5 * Ik2) + aQ * (Q0 + 0.5 * Qk2) +
+                              aU * (U0 + 0.5 * Uk2) + aV * (V0 + 0.5 * Vk2));
+    double complex Qk3 = dl_current * C * jQ -
+                         dl_current * C *
+                             (aQ * (I0 + 0.5 * Ik2) + aI * (Q0 + 0.5 * Qk2) +
+                              rV * (U0 + 0.5 * Uk2) - rU * (V0 + 0.5 * Vk2));
+    double complex Uk3 = dl_current * C * jU -
+                         dl_current * C *
+                             (aU * (I0 + 0.5 * Ik2) - rV * (Q0 + 0.5 * Qk2) +
+                              aI * (U0 + 0.5 * Uk2) + rQ * (V0 + 0.5 * Vk2));
+    double complex Vk3 = dl_current * C * jV -
+                         dl_current * C *
+                             (aV * (I0 + 0.5 * Ik2) + rU * (Q0 + 0.5 * Qk2) -
+                              rQ * (U0 + 0.5 * Uk2) + aI * (V0 + 0.5 * Vk2));
 
     // k4
-    double complex Ik4 = dl_current * C * jI -
-                         dl_current * C *
-                             (aI * (I0 + Ik3) + aQ * (Q0 + Qk3) +
-                              aU * (U0 + Uk3) + aV * (V0 + Vk3));
-    double complex Qk4 = dl_current * C * jQ -
-                         dl_current * C *
-                             (aQ * (I0 + Ik3) + aI * (Q0 + Qk3) +
-                              rV * (U0 + Uk3) - rU * (V0 + Vk3));
-    double complex Uk4 = dl_current * C * jU -
-                         dl_current * C *
-                             (aU * (I0 + Ik3) - rV * (Q0 + Qk3) +
-                              aI * (U0 + Uk3) + rQ * (V0 + Vk3));
-    double complex Vk4 = dl_current * C * jV -
-                         dl_current * C *
-                             (aV * (I0 + Ik3) + rU * (Q0 + Qk3) -
-                              rQ * (U0 + Uk3) + aI * (V0 + Vk3));
+    double complex Ik4 =
+        dl_current * C * jI - dl_current * C *
+                                  (aI * (I0 + Ik3) + aQ * (Q0 + Qk3) +
+                                   aU * (U0 + Uk3) + aV * (V0 + Vk3));
+    double complex Qk4 =
+        dl_current * C * jQ - dl_current * C *
+                                  (aQ * (I0 + Ik3) + aI * (Q0 + Qk3) +
+                                   rV * (U0 + Uk3) - rU * (V0 + Vk3));
+    double complex Uk4 =
+        dl_current * C * jU - dl_current * C *
+                                  (aU * (I0 + Ik3) - rV * (Q0 + Qk3) +
+                                   aI * (U0 + Uk3) + rQ * (V0 + Vk3));
+    double complex Vk4 =
+        dl_current * C * jV - dl_current * C *
+                                  (aV * (I0 + Ik3) + rU * (Q0 + Qk3) -
+                                   rQ * (U0 + Uk3) + aI * (V0 + Vk3));
 
     S_A[0] = I0 + 1. / 6. * (Ik1 + 2. * Ik2 + 2. * Ik3 + Ik4);
     S_A[1] = Q0 + 1. / 6. * (Qk1 + 2. * Qk2 + 2. * Qk3 + Qk4);
@@ -337,9 +334,9 @@ void pol_rte_rk4_step(double jI, double jQ, double jU, double jV,
 }
 
 void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
-                        double rQ, double rU, double rV,
-                        double aI, double aQ, double aU, double aV, 
-                        double dl_current, double C, double complex S_A[]){
+                            double rQ, double rU, double rV, double aI,
+                            double aQ, double aU, double aV, double dl_current,
+                            double C, double complex S_A[]) {
     double complex I0 = S_A[0];
     double complex Q0 = S_A[1];
     double complex U0 = S_A[2];
@@ -358,18 +355,18 @@ void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
     double l41 = 0.5 * dl_current * C * aV / u11;
     double l42 = -l41 * u12 / u22;
     double l43 = (-0.5 * dl_current * C * rQ - l42 * u23) / u33;
-    double u44 = 1. + 0.5 * dl_current * C * aI - l41 * u14 -
-                 l42 * u24 - l43 * u34;
+    double u44 =
+        1. + 0.5 * dl_current * C * aI - l41 * u14 - l42 * u24 - l43 * u34;
 
     // Construct b-vector.
-    double b1 = I0 + dl_current * C / 2. *
-                         (2. * jI - (aI * I0 + aQ * Q0 + aV * V0));
-    double b2 = Q0 + dl_current * C / 2. *
-                         (2. * jQ - (aQ * I0 + aI * Q0 + rV * U0));
-    double b3 = U0 + dl_current * C / 2. *
-                         (2. * jU - (-rV * Q0 + aI * U0 + rQ * V0));
-    double b4 = V0 + dl_current * C / 2. *
-                         (2. * jV - (aV * I0 - rQ * U0 + aI * V0));
+    double b1 =
+        I0 + dl_current * C / 2. * (2. * jI - (aI * I0 + aQ * Q0 + aV * V0));
+    double b2 =
+        Q0 + dl_current * C / 2. * (2. * jQ - (aQ * I0 + aI * Q0 + rV * U0));
+    double b3 =
+        U0 + dl_current * C / 2. * (2. * jU - (-rV * Q0 + aI * U0 + rQ * V0));
+    double b4 =
+        V0 + dl_current * C / 2. * (2. * jV - (aV * I0 - rQ * U0 + aI * V0));
 
     // Construct y.
     double y1 = b1;
@@ -389,30 +386,34 @@ void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
     S_A[3] = x4;
 }
 
-void f_to_stokes(double complex f_u[], double complex f_tetrad_u[], 
-                 double tetrad_d[][4], double complex S_A[],
-                 double Iinv, double Iinv_pol){
+void f_to_stokes(double complex f_u[], double complex f_tetrad_u[],
+                 double tetrad_d[][4], double complex S_A[], double Iinv,
+                 double Iinv_pol) {
     f_to_f_tetrad(f_tetrad_u, tetrad_d, f_u);
 
     // Get Stokes params from f_tetrad_u
     f_tetrad_to_stokes(Iinv, Iinv_pol, f_tetrad_u, S_A);
 }
 
-void stokes_to_f(double complex f_u[], double complex f_tetrad_u[], 
-                 double tetrad_u[][4], double complex S_A[],
-                 double *Iinv, double *Iinv_pol){
+void stokes_to_f(double complex f_u[], double complex f_tetrad_u[],
+                 double tetrad_u[][4], double complex S_A[], double *Iinv,
+                 double *Iinv_pol) {
     stokes_to_f_tetrad(S_A, Iinv, Iinv_pol, f_tetrad_u);
 
     f_tetrad_to_f(f_u, tetrad_u, f_tetrad_u);
 }
 
-void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double *rQ, double *rU, double *rV, double *aI, double *aQ, double *aU, double *aV,
-                                double *nu_p, double THETA_e, double n_e, double B, double *pitch_ang, double frequency, double *dl_current, double C,
-                                double X_u[], double k_u[], double B_u[], double Uplasma_u[], double k_d[], int *POLARIZATION_ACTIVE,
-                                double complex f_u[], double complex f_tetrad_u[], double tetrad_d[][4], double tetrad_u[][4], double complex S_A[], double *Iinv, double *Iinv_pol){
+void pol_integration_step(struct GRMHD modvar, double frequency,
+                          double *dl_current, double C, double X_u[],
+                          double k_u[], double k_d[], int *POLARIZATION_ACTIVE,
+                          double complex f_u[], double complex f_tetrad_u[],
+                          double tetrad_d[][4], double tetrad_u[][4],
+                          double complex S_A[], double *Iinv,
+                          double *Iinv_pol) {
 
     int i;
-
+    double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
+    double pitch_ang, nu_p;
     // Unpolarized: 1) Create light path by integration. 2) For each
     // step in lightpath, perform one radiative transfer step.
     // Polarized:   1) Create light path by integration. 2) For each
@@ -423,7 +424,7 @@ void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double
     ////////////////
 
     // Obtain pitch angle: still no units (geometric)
-    *pitch_ang = pitch_angle(X_u, k_u, B_u, Uplasma_u);
+    pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 
     // CGS UNITS USED FROM HERE ON OUT
     //////////////////////////////////
@@ -434,23 +435,23 @@ void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double
 
     // Convert distance dlambda accordingly
     *dl_current *= (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
-                  (PLANCK_CONSTANT * frequency);
+                   (PLANCK_CONSTANT * frequency);
 
     // lower the index of the wavevector
     lower_index(X_u, k_u, k_d);
 
     // Compute the photon frequency in the plasma frame:
-    *nu_p = freq_in_plasma_frame(Uplasma_u, k_d);
+    nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
 
-    evaluate_coeffs(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV, *nu_p, 
-                    THETA_e, n_e, B, *pitch_ang);
+    evaluate_coeffs(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV, nu_p,
+                    modvar.theta_e, modvar.n_e, modvar.B, pitch_ang);
 
     // Create tetrad, needed whether POLARIZATION_ACTIVE is true or
     // false.
-    create_observer_tetrad(X_u, k_u, Uplasma_u, B_u, tetrad_u);
+    create_observer_tetrad(X_u, k_u, modvar.U_u, modvar.B_u, tetrad_u);
     create_tetrad_d(X_u, tetrad_u, tetrad_d);
 
     // FROM F VECTOR TO STOKES (when applicable)
@@ -466,24 +467,25 @@ void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double
     // Given Stokes params and plasma coeffs, compute NEW Stokes params
     // after plasma step.
 
-    int STIFF = check_stiffness(*jI, *jQ, *jU, *jV, *rQ, *rU, *rV, 
-                                *aI, *aQ, *aU, *aV, *dl_current);
+    int STIFF = check_stiffness(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV,
+                                *dl_current);
 
     // If both rotation coeffs (times dlambda) are smaller than
     // threshold, take an RK4 step; otherwise, implicit Euler.
-    //if (fabs(rQ) < THRESH && fabs(rV) < THRESH) {
-    if(!STIFF){
-        pol_rte_rk4_step(*jI, *jQ, *jU, *jV, *rQ, *rU, *rV, *aI, *aQ, *aU, *aV, *dl_current, C, S_A);
+    // if (fabs(rQ) < THRESH && fabs(rV) < THRESH) {
+    if (!STIFF) {
+        pol_rte_rk4_step(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV,
+                         *dl_current, C, S_A);
     } else {
-        pol_rte_trapezoid_step(*jI, *jQ, *jU, *jV, *rQ, *rU, *rV, *aI, *aQ, *aU, *aV, *dl_current, C, S_A);
+        pol_rte_trapezoid_step(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV,
+                               *dl_current, C, S_A);
     }
 
     // FROM STOKES TO F VECTOR
     ///////////////////////////
 
     *Iinv = S_A[0];
-    *Iinv_pol =
-        sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
+    *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
 
     // We have now updated the Stokes vector using plasma at current
     // position. Only do stuff below this line IF S_A[0] > 1.e-40. If
@@ -503,7 +505,8 @@ void pol_integration_step(double *jI, double *jQ, double *jU, double *jV, double
     }
 }
 
-void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u, double complex *f_obs_tetrad_u){
+void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
+                              double complex *f_obs_tetrad_u) {
     int i, j;
     double cam_up_u[4] = {0., 0., 0., -1.};
     double U_obs_u[4] = {0., 0., 0., 0.};
@@ -521,13 +524,13 @@ void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u, dou
 }
 
 void radiative_transfer_polarized(double *lightpath, int steps,
-                                    double frequency, double *f_x, double *f_y,
-                                    double *p, int PRINT_POLAR, double *IQUV) {
-    int IN_VOLUME, path_counter;
-    double B, THETA_e, pitch_ang, nu_p, n_e, dl_current;
+                                  double frequency, double *f_x, double *f_y,
+                                  double *p, int PRINT_POLAR, double *IQUV) {
+    int path_counter;
+    double dl_current;
     int i, j;
-    double X_u[4], k_u[4], k_d[4], B_u[4], Uplasma_u[4];
-    double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
+    double X_u[4], k_u[4], k_d[4];
+
     double Iinv, Iinv_pol;
     int POLARIZATION_ACTIVE = 0;
 
@@ -535,11 +538,22 @@ void radiative_transfer_polarized(double *lightpath, int steps,
     LOOP_ij tetrad_u[i][j] = 0.;
     LOOP_ij tetrad_d[i][j] = 0.;
 
-    double photon_u_current[8]   = {0., 0., 0., 0., 0., 0., 0., 0.};
+    double photon_u_current[8] = {0., 0., 0., 0., 0., 0., 0., 0.};
     double complex f_tetrad_u[4] = {0., 0., 0., 0.};
-    double complex f_u[4]        = {0., 0., 0., 0.};
-    double complex S_A[4]        = {0., 0., 0., 0.};
+    double complex f_u[4] = {0., 0., 0., 0.};
+    double complex S_A[4] = {0., 0., 0., 0.};
 
+    struct GRMHD modvar;
+    modvar.B = 0;
+    modvar.n_e = 0.;
+    modvar.theta_e = 0;
+
+    LOOP_i {
+        modvar.B_u[i] = 0;
+        modvar.U_u[i] = 0;
+        modvar.B_d[i] = 0;
+        modvar.U_d[i] = 0;
+    }
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--) {
         // Current position, wave vector, and dlambda
@@ -549,20 +563,18 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         }
         dl_current = fabs(lightpath[(path_counter - 1) * 9 + 8]);
 
-        get_fluid_params(X_u, &n_e, &THETA_e, &B, B_u, Uplasma_u, &IN_VOLUME);
-
         // PLASMA INTEGRATION STEP
         //////////////////////////
 
         double r_current = logscale ? exp(X_u[1]) : X_u[1];
 
         // Check whether the ray is currently in the GRMHD simulation volume
-        if (IN_VOLUME && r_current < OUTER_BOUND_POL) {
-            pol_integration_step(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV,
-                                 &nu_p, THETA_e, n_e, B, &pitch_ang, frequency, &dl_current, C_CONST,
-                                 X_u, k_u, B_u, Uplasma_u, k_d, &POLARIZATION_ACTIVE,
-                                 f_u, f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv, &Iinv_pol);
-        }     // End of if(IN_VOLUME)
+        if (get_fluid_params(X_u, &modvar) && r_current < OUTER_BOUND_POL) {
+            pol_integration_step(modvar, frequency, &dl_current, C_CONST, X_u,
+                                 k_u, k_d, &POLARIZATION_ACTIVE, f_u,
+                                 f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv,
+                                 &Iinv_pol);
+        } // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP
         /////////////////////////////

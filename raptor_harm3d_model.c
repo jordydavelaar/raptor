@@ -11,11 +11,11 @@
 
 #include "raptor_harm3d_model.h"
 #include "functions.h"
+#include "parameters.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parameters.h"
 
 /* HDF5 v1.8 API */
 
@@ -84,33 +84,30 @@ void init_harm3d_data(char *fname) {
     //	exit(1);
 }
 
-
 // Current metric: modified Kerr-Schild, squashed in theta
 // to give higher resolution at the equator
 
 // Get the fluid parameters - IN THE PLASMA FRAME?
-void get_fluid_params(double X[NDIM], double *Ne, double *Thetae, double *B,
-                      double Bcon[NDIM], double Ucon[NDIM], int *IN_VOLUME) {
+int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     int i, j, k;
     double del[NDIM];
     double rho, uu;
-    double Bp[NDIM], Vcon[NDIM], Vfac, VdotV, UdotBp;
-    double gcon[NDIM][NDIM], gcov[NDIM][NDIM], Bcov[NDIM], Ucov[NDIM], coeff[4];
-    double bsq, beta, beta_trans, b2, trat, two_temp_gam, Th_unit, Be;
-    //double Rlow = 1, Rhigh = 1;
+    double Bp[NDIM], V_u[NDIM], Vfac, VdotV, UdotBp;
+    double g_uu[NDIM][NDIM], g_dd[NDIM][NDIM], coeff[4];
+    double bsq, beta, beta_trans, b2, trat, Th_unit, two_temp_gam;
+
+    // double Rlow = 1, Rhigh = 1;
     if (X[1] < startx[1] || X[1] > stopx[1] || X[2] < startx[2] ||
         X[2] > stopx[2]) {
-        *Ne = 0.;
-        *IN_VOLUME = 0;
-        return;
+        (*modvar).n_e = 0.;
+        return 0;
     }
-    *IN_VOLUME = 1;
 
     Xtoijk(X, &i, &j, &k, del);
 
-    metric_uu(X, gcon);
-    metric_dd(X, gcov);
+    metric_uu(X, g_uu);
+    metric_dd(X, g_dd);
 
     coeff[1] = del[1];
     coeff[2] = del[2];
@@ -120,7 +117,7 @@ void get_fluid_params(double X[NDIM], double *Ne, double *Thetae, double *B,
     // interpolate (cubiclinear interp.) like in mibothros
     rho = interp_scalar(p[KRHO], i, j, k, coeff);
     uu = interp_scalar(p[UU], i, j, k, coeff);
-    *Ne = rho * Ne_unit + 1e-40;
+    (*modvar).n_e = rho * Ne_unit + 1e-40;
 
     // here unlike in mibothros it was interpolating scalars and
     // reconstructing velocity and magnetic field based on interpolated
@@ -129,68 +126,75 @@ void get_fluid_params(double X[NDIM], double *Ne, double *Thetae, double *B,
     Bp[2] = interp_scalar(p[B2], i, j, k, coeff);
     Bp[3] = interp_scalar(p[B3], i, j, k, coeff);
 
-    Vcon[1] = interp_scalar(p[U1], i, j, k, coeff);
-    Vcon[2] = interp_scalar(p[U2], i, j, k, coeff);
-    Vcon[3] = interp_scalar(p[U3], i, j, k, coeff);
+    V_u[1] = interp_scalar(p[U1], i, j, k, coeff);
+    V_u[2] = interp_scalar(p[U2], i, j, k, coeff);
+    V_u[3] = interp_scalar(p[U3], i, j, k, coeff);
 
     // reconstrueren van de 4 vectoren
     // Get Ucov
     VdotV = 0.;
     for (i = 1; i < NDIM; i++)
         for (j = 1; j < NDIM; j++)
-            VdotV += gcov[i][j] * Vcon[i] * Vcon[j];
-    Vfac = sqrt(-1. / gcon[0][0] * (1. + fabs(VdotV)));
-    Ucon[0] = -Vfac * gcon[0][0];
+            VdotV += g_dd[i][j] * V_u[i] * V_u[j];
+    Vfac = sqrt(-1. / g_uu[0][0] * (1. + fabs(VdotV)));
+    (*modvar).U_u[0] = -Vfac * g_uu[0][0];
     for (i = 1; i < NDIM; i++)
-        Ucon[i] = Vcon[i] - Vfac * gcon[0][i];
+        (*modvar).U_u[i] = V_u[i] - Vfac * g_uu[0][i];
 
-    lower_index(X, Ucon, Ucov);
+    lower_index(X, (*modvar).U_u, (*modvar).U_d);
 
     double Utot = 0;
     for (int i = 0; i < NDIM; i++)
-        Utot += Ucon[i] * Ucov[i];
+        Utot += (*modvar).U_u[i] * (*modvar).U_d[i];
 
     // Get B and Bcov
     UdotBp = 0.;
     for (i = 1; i < NDIM; i++)
-        UdotBp += Ucov[i] * Bp[i];
-    Bcon[0] = UdotBp;
+        UdotBp += (*modvar).U_d[i] * Bp[i];
+    (*modvar).B_u[0] = UdotBp;
     for (i = 1; i < NDIM; i++)
-        Bcon[i] = (Bp[i] + Ucon[i] * UdotBp) / Ucon[0];
+        (*modvar).B_u[i] =
+            (Bp[i] + (*modvar).U_u[i] * UdotBp) / (*modvar).U_u[0];
 
-    lower_index(X, Bcon, Bcov);
+    lower_index(X, (*modvar).B_u, (*modvar).B_d);
 
-    bsq = Bcon[0] * Bcov[0] + Bcon[1] * Bcov[1] + Bcon[2] * Bcov[2] +
-          Bcon[3] * Bcov[3];
+    bsq = (*modvar).B_u[0] * (*modvar).B_d[0] +
+          (*modvar).B_u[1] * (*modvar).B_d[1] +
+          (*modvar).B_u[2] * (*modvar).B_d[2] +
+          (*modvar).B_u[3] * (*modvar).B_d[3];
 
-    *B = sqrt(bsq) * B_unit + 1e-40;
+    (*modvar).B = sqrt(bsq) * B_unit + 1e-40;
 
     /*electron temperature depending on the plasma magnetization*/
     beta = uu * (gam - 1.) / 0.5 / bsq;
-    Be = (-(1. + gam * uu / (rho)) * Ucov[0]);
+
     beta_trans = 1.;
     b2 = pow(beta / beta_trans, 2);
+
     trat = 3.; // Rhigh * b2/(1. + b2) + Rlow /(1. + b2);
     two_temp_gam = 0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
     Th_unit = (1.4444444444 - 1.) * (PROTON_MASS / ELECTRON_MASS) / (1. + trat);
-    *Thetae = (2. / 15.) * (uu / rho) * (PROTON_MASS / ELECTRON_MASS) + 1e-40;
-    Be = (-(1. + two_temp_gam * uu / rho) * Ucov[0]);
-    // if(bsq/rho>0.15){
+
+    (*modvar).theta_e =
+        (2. / 15.) * (uu / rho) * (PROTON_MASS / ELECTRON_MASS) + 1e-40;
+
     if (uu < 0)
         fprintf(stderr, "U %e %e\n", uu, p[UU][i][j][k]);
     ;
 
-    if (*Thetae < 0)
-        fprintf(stderr, "Te %e\n", *Thetae);
-    if (*B < 0)
-        fprintf(stderr, "B %e\n", *B);
-    if (*Ne < 0)
-        fprintf(stderr, "Ne %e %e\n", *Ne, p[KRHO][i][j][k]);
+    if ((*modvar).theta_e < 0)
+        fprintf(stderr, "Te %e\n", (*modvar).theta_e);
+    if ((*modvar).B < 0)
+        fprintf(stderr, "B %e\n", (*modvar).B);
+    if ((*modvar).n_e < 0)
+        fprintf(stderr, "Ne %e %e\n", (*modvar).n_e, p[KRHO][i][j][k]);
 
     if (bsq / rho > 1. || exp(X[1]) > 50.) {
-        *Ne = 0;
-        *IN_VOLUME = 0;
+        (*modvar).n_e = 0;
+        return 0;
     }
+
+    return 1;
 }
 
 void set_units(double M_unit_) {
