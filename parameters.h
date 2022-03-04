@@ -19,6 +19,10 @@
 #include <sys/types.h>
 #include <time.h>
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 #define BHAC3D (1)
 #define HARM3D (0)
 
@@ -81,7 +85,7 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKSN)
+#define metric (MKSBHAC)
 #if (metric == BL || metric == KS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
@@ -136,7 +140,7 @@ double CAM_SIZE_Y;
 
 #define OUTER_BOUND_POL (1000.) // Stop polarized integration beyond this radius
 
-#define delta_num (1.e-6) // Used for numerical derivatives
+#define delta_num (1.e-4) // Used for numerical derivatives
 #define max_steps (1e5)   // Maximum number of integration steps
 
 double STEPSIZE;

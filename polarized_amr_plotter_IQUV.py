@@ -80,10 +80,10 @@ def plot_data(folder,tstart,tend):
             alpha=((np.reshape(images['alpha'][i],(pixels,pixels))))
             beta=((np.reshape(images['beta'][i],(pixels,pixels))))
 
-            figure_I=axs[0][0].pcolormesh(alpha,beta,(array_I/max_I),vmin=0,vmax=1,cmap='afmhot')
+            figure_I=axs[0][0].pcolormesh(alpha,beta,np.sqrt(array_I/max_I),vmin=0,vmax=1,cmap='afmhot')
             figure_Q=axs[1][0].pcolormesh(alpha,beta,(array_Q/max_Q),vmin=-1,vmax=1,cmap='RdBu',shading='auto')
             figure_U=axs[0][1].pcolormesh(alpha,beta,(array_U/max_U),vmin=-1,vmax=1,cmap='RdBu',shading='auto')
-            figure_V=axs[1][1].pcolormesh(alpha,beta,(array_V/(max_V)),vmin=-1,vmax=1,cmap='RdBu',shading='auto')
+            figure_V=axs[1][1].pcolormesh(alpha,beta,(array_V/(max_V)),vmin=-0.00001,vmax=0.00001,cmap='RdBu',shading='auto')
 
         #plt.colorbar(figure_I,label="I")
         #plt.colorbar(figure_Q,label="I")

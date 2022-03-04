@@ -11,5 +11,5 @@ CAM_SIZE_Y  	(Rg)		20
 FREQS_PER_DEC	(-)		1
 FREQ_MIN	(Hz)		230.e9
 FREQ_MAX	(Hz)		230.e9
-STEPSIZE	(-)		0.02
+STEPSIZE	(-)		0.005
 MAX_LEVEL	(-)    		1

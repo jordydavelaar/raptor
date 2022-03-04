@@ -27,7 +27,7 @@ void f_parallel(const double y[], double complex f_u[], double fvector[],
     double complex A_u[4] = {0., 0., 0., 0.}; // d^2X/dLambda^2
 
     // Obtain the Christoffel symbols at the current location
-    connection_udd(X_u, gamma_udd);
+    connection_num_udd(X_u, gamma_udd);
 
     // Compute 4-acceleration using the geodesic equation
     LOOP_ijk A_u[i] -= gamma_udd[i][j][k] * U_u[j] * U_u[k];
@@ -443,6 +443,9 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // Compute the photon frequency in the plasma frame:
     nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
+    if(nu_p<0)
+	fprintf(stderr,"issue with nu_p\n");
+
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
 
@@ -554,6 +557,8 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         modvar.B_d[i] = 0;
         modvar.U_d[i] = 0;
     }
+    modvar.igrid_c=-1;
+    
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--) {
         // Current position, wave vector, and dlambda

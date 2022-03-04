@@ -502,7 +502,7 @@ void init_grmhd_data(char *fname) {
     }
 
     a = neqpar[3];
-    Q = a;
+    Q = 0.0;
     fprintf(stderr, "spin %g\n", a);
     // Q=0.66;//662912607362388;
     int cells = 1;
@@ -914,7 +914,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 1.)) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50. || (*modvar).theta_e<1e-2) { // excludes all spine emmission
         (*modvar).n_e = smalll;
         (*modvar).theta_e = smalll;
         return 0;
