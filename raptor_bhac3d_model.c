@@ -269,7 +269,7 @@ void calc_coord(int c, int *nx, int ndimini, double *lb, double *dxc_block,
     }
 }
 
-void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
+void _uvert2prim(double prim[8], double **conserved, int c, double X[3],
                  double Xgrid[3], double dxc[3]) {
 
     double X_u[4];
@@ -281,10 +281,10 @@ void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
 
     metric_dd(X_u, g_dd);
     metric_uu(X_u, g_uu);
-    _userved[S2][c] = _userved[S2][c];
-    double BS = _userved[S1][c] * _userved[B1][c] +
-                _userved[S2][c] * _userved[B2][c] +
-                _userved[S3][c] * _userved[B3][c];
+    conserved[S2][c] = conserved[S2][c];
+    double BS = conserved[S1][c] * conserved[B1][c] +
+                conserved[S2][c] * conserved[B2][c] +
+                conserved[S3][c] * conserved[B3][c];
     double Bsq = 0;
 
     double B_d[4];
@@ -305,51 +305,51 @@ void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
 
     for (int j = 1; j < 4; j++) {
         for (int i = 1; i < 4; i++) {
-            S_u[j] += gamma[i][j] * _userved[S1 + i - 1][c];
-            B_d[j] += g_dd[i][j] * _userved[B1 + i - 1][c];
+            S_u[j] += gamma[i][j] * conserved[S1 + i - 1][c];
+            B_d[j] += g_dd[i][j] * conserved[B1 + i - 1][c];
         }
     }
 
     for (int i = 1; i < 4; i++) {
         //		for(int j=1;j<4;j++){
-        Bsq += B_d[i] * _userved[B1 + i - 1][c];
+        Bsq += B_d[i] * conserved[B1 + i - 1][c];
     }
     //	}
 
 #if (DEBUG)
     if (isnan(BS) || isnan(Bsq)) {
         fprintf(stderr, "Bsq %e BS %e\n", Bsq, BS);
-        fprintf(stderr, "B %e %e %e\n", _userved[B1][c], _userved[B2][c],
-                _userved[B3][c]);
-        fprintf(stderr, "V %e %e %e\n", _userved[S1][c], _userved[S2][c],
-                _userved[S3][c]);
+        fprintf(stderr, "B %e %e %e\n", conserved[B1][c], conserved[B2][c],
+                conserved[B3][c]);
+        fprintf(stderr, "V %e %e %e\n", conserved[S1][c], conserved[S2][c],
+                conserved[S3][c]);
 
         LOOP_ij fprintf(stderr, "gij %d %d %e\n", i, j, g_dd[i][j]);
         exit(1);
     }
 #endif
-    prim[KRHO] = _userved[D][c] / _userved[LFAC][c];
+    prim[KRHO] = conserved[D][c] / conserved[LFAC][c];
     prim[UU] = (neqpar[0] - 1.) / neqpar[0] *
-               (_userved[XI][c] / pow(_userved[LFAC][c], 2.) - prim[KRHO]) /
+               (conserved[XI][c] / pow(conserved[LFAC][c], 2.) - prim[KRHO]) /
                (neqpar[0] -
                 1.); // need internal energy not pressure so extra 1/(gam-1)
     prim[U1] =
-        S_u[1] / (_userved[XI][c] + Bsq) +
-        _userved[B1][c] * BS / (_userved[XI][c] * (_userved[XI][c] + Bsq));
+        S_u[1] / (conserved[XI][c] + Bsq) +
+        conserved[B1][c] * BS / (conserved[XI][c] * (conserved[XI][c] + Bsq));
     prim[U2] =
-        S_u[2] / (_userved[XI][c] + Bsq) +
-        _userved[B2][c] * BS / (_userved[XI][c] * (_userved[XI][c] + Bsq));
+        S_u[2] / (conserved[XI][c] + Bsq) +
+        conserved[B2][c] * BS / (conserved[XI][c] * (conserved[XI][c] + Bsq));
     prim[U3] =
-        S_u[3] / (_userved[XI][c] + Bsq) +
-        _userved[B3][c] * BS / (_userved[XI][c] * (_userved[XI][c] + Bsq));
+        S_u[3] / (conserved[XI][c] + Bsq) +
+        conserved[B3][c] * BS / (conserved[XI][c] * (conserved[XI][c] + Bsq));
 
-    prim[B1] = _userved[B1][c];
-    prim[B2] = _userved[B2][c];
-    prim[B3] = _userved[B3][c];
+    prim[B1] = conserved[B1][c];
+    prim[B2] = conserved[B2][c];
+    prim[B3] = conserved[B3][c];
 
     if (prim[UU] < 0) {
         fprintf(stderr, "UU %e\n", prim[UU]);
-        prim[UU] = (_userved[DS][c] / _userved[D][c]) *
+        prim[UU] = (conserved[DS][c] / conserved[D][c]) *
                    pow(prim[KRHO], neqpar[0] - 1) /
                    (neqpar[0] -
                     1.); // need internal energy not pressure so extra 1/(gam-1)
@@ -369,27 +369,28 @@ void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
         }
     }
     double gammaf = 1./sqrt(1-VdotV)
-    if(gammaf != 
+    if(gammaf !=
 
 #if (DEBUG)
 
     if (prim[UU] < 0) {
         fprintf(stderr, "U %e gam %e XI %e LFAC %e lor %e RHO %e\n", prim[UU],
-                neqpar[0], _userved[XI][c], _userved[LFAC][c], lor, prim[KRHO]);
+                neqpar[0], conserved[XI][c], conserved[LFAC][c], lor,
+                prim[KRHO]);
         exit(1);
     }
 
     if (isnan(lor)) {
-        fprintf(stderr, "VdotV %e lfac %e lor %e\n", VdotV, _userved[LFAC][c],
+        fprintf(stderr, "VdotV %e lfac %e lor %e\n", VdotV, conserved[LFAC][c],
                 lor);
         fprintf(stderr, "\n");
 
         fprintf(stderr, "lor %e vdotv %e lfac %e XI %e Bsq %e BS %e\n", lor,
-                VdotV, _userved[LFAC][c], _userved[XI][c], Bsq, BS);
+                VdotV, conserved[LFAC][c], conserved[XI][c], Bsq, BS);
         fprintf(stderr, "xi? %e %e\n",
-                _userved[LFAC][c] * _userved[LFAC][c] * prim[KRHO] *
+                conserved[LFAC][c] * conserved[LFAC][c] * prim[KRHO] *
                     (1 + neqpar[0] * prim[UU] / prim[KRHO]),
-                _userved[XI][c]);
+                conserved[XI][c]);
         fprintf(stderr, "rc %e %e\n", r_current, (1. + sqrt(1. - a * a)));
         fprintf(stderr, "Xbar %e %e %e\n", X[0], X[1], X[2]);
         fprintf(stderr, "X %e %e %e\n", Xgrid[0], Xgrid[1], Xgrid[2]);
@@ -914,9 +915,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
 
-    (*modvar).theta_e = 10;//(uu / rho) * Thetae_unit;
+    (*modvar).theta_e = 10; //(uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50 || (*modvar).theta_e>20) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50 ||
+        (*modvar).theta_e > 20) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
