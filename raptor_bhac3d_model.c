@@ -368,6 +368,8 @@ void _uvert2prim(double prim[8], double **_userved, int c, double X[3],
             VdotV += g_dd[i][j] * prim[U1 + i - 1] * prim[U1 + j - 1];
         }
     }
+    double gammaf = 1./sqrt(1-VdotV)
+    if(gammaf != 
 
 #if (DEBUG)
 
@@ -825,8 +827,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-        //				 fprintf(stderr,"VdotV too large %e %d
-        //%e %e %e\n",VdotV,igrid,exp(X[1]),X[2],X[3]);
+       fprintf(stderr,"VdotV too large %e %d
+            %e %e %e\n",VdotV,igrid,exp(X[1]),X[2],X[3]);
         VdotV = 0;
     }
 
@@ -902,21 +904,20 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
 
-    double Rhigh = 1; // R_HIGH;
-    double Rlow = 1;  // R_LOW;
+    double Rhigh = 3; // R_HIGH;
+    double Rlow = 3;  // R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
     double two_temp_gam =
         0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
 
-    Thetae_unit = (two_temp_gam - 1.) * (MPoME) / (trat + 1);
+    Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
 
-    (*modvar).theta_e = (uu / rho) * Thetae_unit;
+    (*modvar).theta_e = 10;//(uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50. || (*modvar).theta_e<1e-2) { // excludes all spine emmission
-        (*modvar).n_e = smalll;
-        (*modvar).theta_e = smalll;
+    if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50 || (*modvar).theta_e>20) { // excludes all spine emmission
+        (*modvar).n_e = 0;
         return 0;
     }
     return 1;

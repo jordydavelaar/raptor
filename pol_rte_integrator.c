@@ -441,7 +441,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     lower_index(X_u, k_u, k_d);
 
     // Compute the photon frequency in the plasma frame:
-    nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
+    nu_p = frequency;//freq_in_plasma_frame(modvar.U_u, k_d);
 
     if(nu_p<0)
 	fprintf(stderr,"issue with nu_p\n");

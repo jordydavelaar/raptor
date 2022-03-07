@@ -313,6 +313,8 @@ double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u) {
 
     //    return result;
 
+    return M_PI/2.;
+
     // NEW VERSION
     double B, k, mu;
 

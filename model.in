@@ -1,15 +1,15 @@
 MBH         	(g)		1.233e43
-M_UNIT      	(g)		2.739e25
+M_UNIT      	(g)		6e+27
 ABSORPTION	(-)		1
 TEMP_MODEL	(-)		NONE
 SPHERICAL_ACC   (-)             0
 
 IMG_WIDTH   	(pixels)	100
 IMG_HEIGHT  	(pixels)	100
-CAM_SIZE_X  	(Rg)		20
-CAM_SIZE_Y  	(Rg)		20
+CAM_SIZE_X  	(Rg)		40
+CAM_SIZE_Y  	(Rg)		40
 FREQS_PER_DEC	(-)		1
 FREQ_MIN	(Hz)		230.e9
 FREQ_MAX	(Hz)		230.e9
-STEPSIZE	(-)		0.005
+STEPSIZE	(-)		0.02
 MAX_LEVEL	(-)    		1

@@ -39,8 +39,8 @@ char inputfile[100];
 #define RAD_TRANS (1)
 
 #define num_frequencies 1
-#define num_pixels_1d 10
-#define tot_pixels 100
+#define num_pixels_1d 100
+#define tot_pixels 10000
 int num_blocks, tot_blocks, tot_blocks_alloc;
 double BLOCK_SIZE_X, BLOCK_SIZE_Y;
 int max_level;
@@ -85,7 +85,7 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKSBHAC)
+#define metric (MKSN)
 #if (metric == BL || metric == KS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \

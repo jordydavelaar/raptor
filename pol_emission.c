@@ -39,8 +39,7 @@ double I_V(double x) {
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B) {
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                       (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
-                      theta_e +
-                  1.0;
+                      theta_e;
 
     double x = nu / nu_c;
 
@@ -52,8 +51,7 @@ double j_I(double theta_e, double n_e, double nu, double B, double theta_B) {
 double j_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                       (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
-                      theta_e +
-                  1.0;
+                      theta_e;
 
     double x = nu / nu_c;
 
@@ -65,8 +63,7 @@ double j_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 double j_V(double theta_e, double n_e, double nu, double B, double theta_B) {
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                       (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
-                      theta_e +
-                  1.0;
+                      theta_e;
 
     double x = nu / nu_c;
 
