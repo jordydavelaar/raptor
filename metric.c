@@ -189,7 +189,7 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
     l[0] = 1;
     l[1] = (r * X_u[1] + a * X_u[2]) * idel; //(r2+a2);
     l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
-    l[3] = (X_u[3]) / (r);
+    l[3] = (X_u[3]) / (r + 1e-3);
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {

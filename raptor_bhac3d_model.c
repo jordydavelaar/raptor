@@ -276,9 +276,14 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     double X_u[4];
     double g_dd[4][4], g_uu[4][4];
     X_u[0] = 0;
-    X_u[1] = Xgrid[0]; // - dxc[0];
-    X_u[2] = Xgrid[1]; // - dxc[0];
-    X_u[3] = Xgrid[2]; // - dxc[0];
+    X_u[1] = X[0]; // - dxc[0];
+    X_u[2] = X[1]; // - dxc[0];
+    X_u[3] = X[2]; // - dxc[0];
+
+    double r_current=get_r(X);
+    if(r_current<1.)
+	return;
+
 
     metric_dd(X_u, g_dd);
     metric_uu(X_u, g_uu);
@@ -373,23 +378,24 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
     if (VdotV > 1.)
         fprintf(stderr, "issues with conserved %e %e %e\n", VdotV, gammaf,
-                conserved[LFAC][c], );
+                conserved[LFAC][c]);
 
 #if (DEBUG)
 
+
     if (prim[UU] < 0) {
         fprintf(stderr, "U %e gam %e XI %e LFAC %e lor %e RHO %e\n", prim[UU],
-                neqpar[0], conserved[XI][c], conserved[LFAC][c], lor,
+                neqpar[0], conserved[XI][c], conserved[LFAC][c], gammaf,
                 prim[KRHO]);
         exit(1);
     }
 
-    if (isnan(lor)) {
+    if (isnan(gammaf)) {
         fprintf(stderr, "VdotV %e lfac %e lor %e\n", VdotV, conserved[LFAC][c],
-                lor);
+                gammaf);
         fprintf(stderr, "\n");
 
-        fprintf(stderr, "lor %e vdotv %e lfac %e XI %e Bsq %e BS %e\n", lor,
+        fprintf(stderr, "lor %e vdotv %e lfac %e XI %e Bsq %e BS %e\n", gammaf,
                 VdotV, conserved[LFAC][c], conserved[XI][c], Bsq, BS);
         fprintf(stderr, "xi? %e %e\n",
                 conserved[LFAC][c] * conserved[LFAC][c] * prim[KRHO] *
@@ -401,7 +407,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
         fprintf(stderr, "dxc %e %e %e\n", dxc[0], dxc[1], dxc[2]);
         //		exit(1);
     }
-    if (isnan(lor))
+    if (isnan(gammaf))
         exit(1);
 #endif
 }
@@ -659,6 +665,9 @@ void init_grmhd_data(char *fname) {
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
+            double r=get_r(Xgrid[i][c]);
+            if(r>1){
+
             calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block, Xbar[i][c]);
 
 //		fprintf(stderr,"x %e %e\n",Xgrid[i][c][0],Xbar[i][c][0]);
@@ -684,6 +693,7 @@ void init_grmhd_data(char *fname) {
             p[B1][i][c][0] = prim[B1];
             p[B2][i][c][0] = prim[B2];
             p[B3][i][c][0] = prim[B3];
+}
             //                 count++;
         }
         //	exit(1);
@@ -768,6 +778,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     if (X[2] < 0.)
         X[2] = M_PI + X[2];
 #endif
+
+    double r = get_r(X);
+    if(r<1.)
+	return 0;
 
     // X[3]=fmod(X[3],2*M_PI);
     double smalll = 1.e-6;
@@ -890,7 +904,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     (*modvar).B = sqrt(Bsq) * B_unit;
 
 #if (DEBUG)
-    if (isnan(Bsq) || isnan(*B)) {
+    if (isnan(Bsq) || isnan((*modvar).B)) {
         double R2 = Xgrid[igrid][c][1] * Xgrid[igrid][c][1] +
                     Xgrid[igrid][c][2] * Xgrid[igrid][c][2] +
                     Xgrid[igrid][c][3] * Xgrid[igrid][c][3];
@@ -899,7 +913,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                      sqrt((R2 - a2) * (R2 - a2) +
                           4. * a2 * Xgrid[igrid][c][3] * Xgrid[igrid][c][3])) *
                     0.5;
-        fprintf(stderr, "B isnan r %e rmin %e\n", sqrt(r2), cutoff_inner);
+        fprintf(stderr, "B isnan r %e rmin %e\n", sqrt(r2), CUTOFF_INNER);
         fprintf(stderr, "B isnan X %e %e %e %e\n", X[0], X[1], X[2], X[3]);
         fprintf(stderr, "B isnan Xgrid %e %e %e\n", Xgrid[igrid][c][0],
                 Xgrid[igrid][c][1], Xgrid[igrid][c][2]);
@@ -908,7 +922,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                 (*modvar).B_u[3], (*modvar).U_u[0], (*modvar).U_u[1],
                 (*modvar).U_u[2], (*modvar).U_u[3]);
         fprintf(stderr, "B isnan Bp %e %e %e\n", Bp[1], Bp[2], Bp[3]);
-        fprintf(stderr, "B isnan gV_u %e %e %e\n", gV_u[1], gV_u[2], gV_u[3]);
         fprintf(stderr, "B isnan V_u %e %e %e\n", V_u[1], V_u[2], V_u[3]);
         fprintf(stderr, "B isnan VdotV %e\n", VdotV);
         fprintf(stderr, "B isnan lapse %e\n", sqrt(-g_uu[0][0]));
@@ -937,10 +950,12 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50 ||
+    if ((Bsq / (rho + 1e-20) > 1.) || r > 50 ||
         (*modvar).theta_e > 20) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
+
+    fprintf(stderr,"emission!\n");
     return 1;
 }
