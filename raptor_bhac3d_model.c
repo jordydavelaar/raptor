@@ -270,15 +270,15 @@ void calc_coord(int c, int *nx, int ndimini, double *lb, double *dxc_block,
     }
 }
 
-void _uvert2prim(double prim[8], double **conserved, int c, double X[3],
-                 double Xgrid[3], double dxc[3]) {
+void convert2prim(double prim[8], double **conserved, int c, double X[3],
+                  double Xgrid[3], double dxc[3]) {
 
     double X_u[4];
     double g_dd[4][4], g_uu[4][4];
     X_u[0] = 0;
-    X_u[1] = X[0]; // - dxc[0];
-    X_u[2] = X[1]; // - dxc[0];
-    X_u[3] = X[2]; // - dxc[0];
+    X_u[1] = Xgrid[0]; // - dxc[0];
+    X_u[2] = Xgrid[1]; // - dxc[0];
+    X_u[3] = Xgrid[2]; // - dxc[0];
 
     metric_dd(X_u, g_dd);
     metric_uu(X_u, g_uu);
@@ -373,7 +373,7 @@ void _uvert2prim(double prim[8], double **conserved, int c, double X[3],
 
     if (VdotV > 1.)
         fprintf(stderr, "issues with conserved %e %e %e\n", VdotV, gammaf,
-                conserved[LFAC][c]);
+                conserved[LFAC][c], );
 
 #if (DEBUG)
 
@@ -423,8 +423,7 @@ void init_grmhd_data(char *fname) {
     ng[2] = 1;
     hslope = 1.0;
 
-
-#if(metric==MKSBHAC)
+#if (metric == MKSBHAC)
     nxlone[0] = 128;
     nxlone[1] = 48;
     nxlone[2] = 48;
@@ -437,8 +436,7 @@ void init_grmhd_data(char *fname) {
     xprobmin[1] = 0.;
     xprobmin[2] = 0.;
 
-
-#elif(metric==CKS)
+#elif (metric == CKS)
 
     nxlone[0] = 96;
     nxlone[1] = 96;
@@ -453,7 +451,7 @@ void init_grmhd_data(char *fname) {
     xprobmin[2] = -2000;
 #else
 
-    fprintf(stderr,"Not a metric supported by BHAC. Aborting...\n");
+    fprintf(stderr, "Not a metric supported by BHAC. Aborting...\n");
     exit(1);
 
 #endif
@@ -465,7 +463,6 @@ void init_grmhd_data(char *fname) {
     stopx[1] = xprobmax[0];
     stopx[2] = xprobmax[1];
     stopx[3] = xprobmax[2];
-
 
     double buffer[1];
     unsigned int buffer_i[1];
@@ -674,8 +671,8 @@ void init_grmhd_data(char *fname) {
             }
 #endif
             double prim[8];
-            _uvert2prim(prim, values, c, Xbar[i][c], Xgrid[i][c],
-                        block_info[i].dxc_block);
+            convert2prim(prim, values, c, Xbar[i][c], Xgrid[i][c],
+                         block_info[i].dxc_block);
 
             p[KRHO][i][c][0] = prim[KRHO];
             p[UU][i][c][0] = prim[UU];
