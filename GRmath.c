@@ -41,14 +41,14 @@ void lower_index(const double X_u[4], double V_u[4], double V_d[4]) {
     V_d[3] = 0.;
 
     // Lower the index of X_u
-    int i, j; // Einstein summation over index j
+    // Einstein summation over index j
     LOOP_ij V_d[i] += g_dd[i][j] * V_u[j];
 }
 
 // Lowers two indices on a rank (2, 0) tensor: T_uu -> T_dd at location X_u.
 void lower_two_indices(double N_uu[4][4], double N_dd[4][4], double X_u[4]) {
     double g_dd[4][4];
-    int i, j, k, l;
+
     LOOP_ij N_dd[i][j] = 0.;
     metric_dd(X_u, g_dd);
 
@@ -93,7 +93,26 @@ void raise_index(const double X_u[4], double V_d[4], double V_u[4]) {
     V_u[3] = 0.;
 
     // Raise the index of X_d
-    int i, j; // Einstein summation over index j
+    // Einstein summation over index j
+    LOOP_ij V_u[i] += g_uu[i][j] * V_d[j];
+}
+
+// Raises the index of the covariant vector V_d, storing the results in a
+// contravariant one (V_u), based on the metric at position X_u
+// Uses MKS BHAC metric. Needed for CKS coordinates.
+void raise_index_KS(const double X_u[4], double V_d[4], double V_u[4]) {
+    // Obtain the contravariant metric g_uu at X_u
+    double g_uu[4][4];
+    metric_KS_uu(X_u, g_uu);
+
+    // Initialize V_u
+    V_u[0] = 0.;
+    V_u[1] = 0.;
+    V_u[2] = 0.;
+    V_u[3] = 0.;
+
+    // Raise the index of X_d
+    // Einstein summation over index j
     LOOP_ij V_u[i] += g_uu[i][j] * V_d[j];
 }
 
@@ -102,7 +121,7 @@ void raise_index(const double X_u[4], double V_d[4], double V_u[4]) {
 void normalize_null(double X_u[4], double k_u[4]) {
     // Obtain the covariant metric at X_u
     double g_dd[4][4];
-    int i, j;
+
     LOOP_ij g_dd[i][j] = 0.;
     metric_dd(X_u, g_dd);
 
@@ -153,7 +172,7 @@ double four_velocity_norm(double X_u[4], double U_u[4]) {
 
     // Compute the norm
     double norm = 0.;
-    int i, j; // Einstein summation over indices i and j
+    // Einstein summation over indices i and j
     LOOP_ij norm += g_dd[i][j] * U_u[i] * U_u[j];
 
     return norm;
@@ -166,7 +185,7 @@ double inner_product(double *X_u, double *A_u, double *B_u) {
 
     // Compute the dot produt
     double dotproduct = 0.;
-    int i, j; // Einstein summation over indices i and j
+    // Einstein summation over indices i and j
     LOOP_ij dotproduct += g_dd[i][j] * A_u[i] * B_u[j];
 
     return dotproduct;
@@ -183,7 +202,6 @@ void BL_to_KS_u(double *BLphoton_u, double *KSphoton_u) {
     double trans[4][4];
     double X_u[4], U_u[4];
 
-    int i, j;
     LOOP_i {
         X_u[i] = BLphoton_u[i];
         U_u[i] = BLphoton_u[i + 4];
@@ -237,7 +255,6 @@ void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u) {
     double trans[4][4];
     double X_u[4], U_u[4];
 
-    int i, j;
     LOOP_i {
         X_u[i] = KSphoton_u[i];
         U_u[i] = KSphoton_u[i + 4];
@@ -301,7 +318,7 @@ void CKS_to_KS(double *X_CKS_u, double *X_KS_u) {
     double Xbh[4] = {0}; // not needed for this transform...
                          // X_u should already be centered on a BH
     LOOP_i Xbh[i] = 0;
-    double r = get_rCoord(X_CKS_u, Xbh, a);
+    double r = get_r(X_CKS_u);
 
     X_KS_u[0] = X_CKS_u[0];
     X_KS_u[1] = r;
@@ -312,7 +329,7 @@ void CKS_to_KS(double *X_CKS_u, double *X_KS_u) {
 
 void KS_to_CKS_u(double *KScoords, double *CKScoords) {
     double trans[4][4];
-    int i, j;
+
     LOOP_ij trans[i][j] = 0;
     double X_KS_u[4], U_KS[4];
     double X_CKS_u[4], U_CKS[4];
@@ -323,8 +340,8 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
     double r = X_KS_u[1];
     double th = X_KS_u[2];
     double phi = X_KS_u[3];
-    double BLcoords[8];
-    KS_to_CKS(X_KS_u, X_CKS_u, a);
+
+    KS_to_CKS(X_KS_u, X_CKS_u);
 
     trans[0][0] = 1;
     trans[1][1] = sin(th) * cos(phi);
@@ -357,7 +374,7 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
 // Compute the photon frequency in the plasma frame:
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]) {
     double nu_plasmaframe = 0.;
-    int i;
+
     LOOP_i nu_plasmaframe += Uplasma_u[i] * k_d[i];
     nu_plasmaframe *=
         -(ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) / PLANCK_CONSTANT;

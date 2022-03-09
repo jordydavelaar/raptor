@@ -50,7 +50,6 @@ double determ(double matrix[][4], int n) {
 void create_tetrad(double X_u[], double k_u[], double U_u[],
                    double tetrad_u[][4]) {
     // Summation indices:
-    int i, j, k, l;
 
     // Obtain relevant metric terms:
     double g_uu[4][4], g_dd[4][4];
@@ -95,7 +94,7 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
 
     // 3. If spacelike, OK.
     // 4. If not, flip sign of b_u[0]? Or just create new b_u?
-    while (inner_product(X_u, b_u, b_u) < 0.1 ) {
+    while (inner_product(X_u, b_u, b_u) < 0.1) {
         LOOP_i b_u[i] = 1. / sqrt(3.) * (double)rand() / (double)RAND_MAX;
     }
 
@@ -163,9 +162,8 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
 void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
                             double Bs_u[], double tetrad_u[][4]) {
     // Summation indices:
-    int i, j, k, l;
     double b_u[4];
-    LOOP_i b_u[i]=Bs_u[i]*B_unit;
+    LOOP_i b_u[i] = Bs_u[i] * B_unit;
 
     // Obtain relevant metric terms:
     double g_uu[4][4], g_dd[4][4];
@@ -228,7 +226,6 @@ void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
     double b_d[4];
     lower_index(X_u, b_u, b_d);
 
-
     LOOP_i e_u_perp[i] = 0.;
     LOOP_ijkl e_u_perp[i] +=
         (-1. / sqrt(-g) * eps[i][j][k][l] * U_d[j] * k_d[k] * b_d[l]) /
@@ -264,7 +261,6 @@ double tetrad_identity_eta(const double X_u[4], const double tetrad_u[4][4],
     double g_dd[4][4];
     metric_dd(X_u, g_dd);
 
-    int i, j;
     LOOP_ij result += g_dd[i][j] * tetrad_u[i][a] * tetrad_u[j][b];
 
     return result;
@@ -280,7 +276,6 @@ double tetrad_identity_g(const double tetrad_u[][4], const int mu,
 
     double result = 0.;
 
-    int i, j;
     LOOP_ij result += eta_uu[i][j] * tetrad_u[mu][i] * tetrad_u[nu][j];
 
     return result;
@@ -292,7 +287,6 @@ double tetrad_identity_sum_latin(const double tetrad_u[4][4],
 
     double result = 0.;
 
-    int i;
     LOOP_i result += tetrad_u[mu][i] * tetrad_d[nu][i];
 
     return result;
@@ -304,7 +298,6 @@ double tetrad_identity_sum_greek(const double tetrad_u[4][4],
 
     double result = 0.;
 
-    int i;
     LOOP_i result += tetrad_u[i][a] * tetrad_d[i][b];
 
     return result;
@@ -318,8 +311,6 @@ void create_tetrad_d(const double X_u[], const double tetrad_u[][4],
         {0., 0., 1., 0.},
         {0., 0., 0., 1.},
     };
-
-    int i, j, k, l;
 
     // Obtain relevant metric terms:
     double g_uu[4][4], g_dd[4][4];
@@ -363,7 +354,7 @@ double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]) {
     metric_dd(X_u, g_dd);
 
     double tetrad_d[4][4];
-    int i, j;
+
     LOOP_ij tetrad_d[i][j] = 0.;
     create_tetrad_d(X_u, tetrad_u, tetrad_d);
 

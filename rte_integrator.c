@@ -16,7 +16,7 @@ double radiative_transfer(double *lightpath, int steps, double frequency) {
     double I_current = 0.;
     double j_nu = 0.;
     double pitch_ang, nu_p, dl_current;
-    int i;
+
     double X_u[4], k_u[4], k_d[4];
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
 

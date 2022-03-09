@@ -16,7 +16,7 @@ void f_parallel(const double y[], double complex f_u[], double fvector[],
                 double complex f_u_vector[]) {
     // Create variable (on the stack) for the connection
     double gamma_udd[4][4][4];
-    int i, j, k; // Einstein summation over indices v and w
+    // Einstein summation over indices v and w
 
     LOOP_ijk gamma_udd[i][j][k] = 0.;
 
@@ -128,13 +128,26 @@ void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
 // NOTE: works only in Kerr metric
 // Ziri's suggestion: construct U vecs
 void construct_U_vector(const double X_u[], double U_u[]) {
-    // Obtain relevant metric terms:
+// Obtain relevant metric terms:
+#if (metric == CKS)
+    double U_KS[4];
+    double X_KS[4];
+
+    CKS_to_KS(X_u, X_KS);
+
+    double g_uu[4][4];
+    metric_KS_uu(X_KS, g_uu);
+    double g_uu00 = g_uu[0][0];
+    double g_uu03 = g_uu[0][3];
+    double g_uu33 = g_uu[3][3];
+
+#else
     double g_uu[4][4];
     metric_uu(X_u, g_uu);
     double g_uu00 = g_uu[0][0];
     double g_uu03 = g_uu[0][3];
     double g_uu33 = g_uu[3][3];
-
+#endif
     // Observer/plasma wave vector:
     double U_d[4] = {-1., 0., 0., 0.};
     double B__ = -g_uu03 * U_d[0] / g_uu33;
@@ -142,9 +155,31 @@ void construct_U_vector(const double X_u[], double U_u[]) {
 
     // Properly normalize U_u:
     U_d[3] = B__ + sqrt(B__ * B__ + C__);
-    int i;
+
+#if (metric == CKS)
+    LOOP_i {
+        U_KS[i] = 0.;
+        U_u[i] = 0;
+    }
+    raise_index_KS(X_KS, U_d, U_KS);
+
+    double coordKS[8];
+    double coordCKS[8];
+
+    LOOP_i {
+        coordKS[i] = X_KS[i];
+        coordKS[i + 4] = U_KS[i];
+    }
+
+    KS_to_CKS_u(coordKS, coordCKS);
+
+    LOOP_i U_u[i] = coordCKS[i + 4];
+
+#else
     LOOP_i U_u[i] = 0.;
     raise_index(X_u, U_d, U_u);
+
+#endif
 }
 
 // NEW FUNCTIONS JUNE 2021
@@ -153,7 +188,7 @@ void construct_U_vector(const double X_u[], double U_u[]) {
 // Transform f_tetrad_u to f_u
 void f_tetrad_to_f(double complex *f_u, double tetrad_u[][4],
                    double complex *f_tetrad_u) {
-    int i, j;
+
     LOOP_i f_u[i] = 0.;
     LOOP_ij f_u[i] += tetrad_u[i][j] * f_tetrad_u[j];
 }
@@ -161,7 +196,7 @@ void f_tetrad_to_f(double complex *f_u, double tetrad_u[][4],
 // Transform f_u to f_tetrad_u
 void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4],
                    double complex *f_u) {
-    int i, j;
+
     LOOP_i f_tetrad_u[i] = 0.;
     LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
 }
@@ -411,7 +446,6 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
                           double complex S_A[], double *Iinv,
                           double *Iinv_pol) {
 
-    int i;
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
     double pitch_ang, nu_p;
     // Unpolarized: 1) Create light path by integration. 2) For each
@@ -443,7 +477,6 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // Compute the photon frequency in the plasma frame:
     nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
-
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
 
@@ -455,8 +488,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     create_observer_tetrad(X_u, k_u, modvar.U_u, modvar.B_u, tetrad_u);
     create_tetrad_d(X_u, tetrad_u, tetrad_d);
 
-//    check_tetrad_compact(X_u, tetrad_u);
-//exit(1);
+    //    check_tetrad_compact(X_u, tetrad_u);
+    // exit(1);
 
     // FROM F VECTOR TO STOKES (when applicable)
     ////////////////////////////////////////////
@@ -511,7 +544,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
 void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
                               double complex *f_obs_tetrad_u) {
-    int i, j;
+
     double cam_up_u[4] = {0., 0., 0., -1.};
     double U_obs_u[4] = {0., 0., 0., 0.};
     double obs_tetrad_u[4][4], obs_tetrad_d[4][4];
@@ -532,7 +565,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
                                   double *p, int PRINT_POLAR, double *IQUV) {
     int path_counter;
     double dl_current;
-    int i, j;
+
     double X_u[4], k_u[4], k_d[4];
 
     double Iinv, Iinv_pol;
@@ -558,8 +591,8 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         modvar.B_d[i] = 0;
         modvar.U_d[i] = 0;
     }
-    modvar.igrid_c=-1;
-    
+    modvar.igrid_c = -1;
+
     // Move backward along constructed lightpath
     for (path_counter = steps - 1; path_counter > 0; path_counter--) {
         // Current position, wave vector, and dlambda

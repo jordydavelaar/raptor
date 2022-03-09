@@ -36,6 +36,11 @@ void BL_lower_index(const double X_u[4], double V_u[4], double V_d[4]);
 // contravariant one (V_u), based on the metric at position X_u
 void raise_index(const double X_u[4], double V_d[4], double V_u[4]);
 
+// Raises the index of the covariant vector V_d, storing the results in a
+// contravariant one (V_u), based on the metric at position X_u
+// Needed for CKS coordinates
+void raise_index_KS(const double X_u[4], double V_d[4], double V_u[4]);
+
 // Adjusts y[4] = U_u[0] so that y describes a lightray/null geodesic
 void normalize_null(double X_u[4], double U_u[4]);
 
@@ -110,6 +115,9 @@ void metric_dd(const double X_u[4], double g_dd[4][4]);
 
 // Computes the inverse metric at location X
 void metric_uu(const double X_u[4], double g_uu[4][4]);
+
+// Computes the inverse metric at location X
+void metric_KS_uu(const double X_u[4], double g_uu[4][4]);
 
 // Computes the Christoffel symbols at location X numerically (general metric)
 void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]);

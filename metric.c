@@ -15,7 +15,7 @@
 // Returns the covariant metric g_dd at location X_u
 void metric_dd(const double X_u[4], double g_dd[4][4]) {
     // Initialize: set all elements to 0
-    int i, j;
+
     LOOP_ij g_dd[i][j] = 0.;
 
 #if (metric == CAR) // Minkowski metric
@@ -208,7 +208,7 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
 // Returns the contravariant metric g_uu at location X
 void metric_uu(const double X_u[4], double g_uu[4][4]) {
     // Initialize: set all elements to 0
-    int i, j;
+
     LOOP_ij g_uu[i][j] = 0.;
 
 #if (metric == CAR) // Minkowski metric
@@ -393,54 +393,41 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 
 #endif
 }
-/*
-// Returns the partial derivative of metric element g_dd[alpha][beta] w.r.t.
-// direction 'dir'
-double part_deriv_metric_dd(const double X_u[4], int dir, int alpha, int beta) {
-    // Temporary variable X_u_temp will be modified, leaving original X_u intact
-    double X_u_temp[4] = {X_u[0], X_u[1], X_u[2], X_u[3]};
-    double g_dd[4][4];
 
-    // Get metric_dd at X + delta(dir), g_ab1[][]...
-    X_u_temp[dir] += delta_num;
-    metric_dd(X_u_temp, g_dd);
-    double plusdelta = g_dd[alpha][beta];
+// Returns the contravariant metric g_uu at location X
+void metric_KS_uu(const double X_u[4], double g_uu[4][4]) {
+    // Initialize: set all elements to 0
 
-    // ...and X - delta(dir), g_ab2[][]
-    X_u_temp[dir] -= 2. * delta_num;
-    metric_dd(X_u_temp, g_dd);
-    double minusdelta = g_dd[alpha][beta];
+    LOOP_ij g_uu[i][j] = 0.;
 
-    // Return the numerical derivative (central difference rule)
-    return (plusdelta - minusdelta) / (2. * delta_num);
+    double r = exp(X_u[1]);
+    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
+
+    double sinth = sin(theta);
+    double sin2th = sinth * sinth;
+    double costh = cos(theta);
+
+    double irho2 = 1. / (r * r + a * a * costh * costh);
+
+    double hfac = 1 + (1. - hslope) * cos(2. * X_u[2]);
+
+    g_uu[0][0] = -1. - 2. * r * irho2;
+    g_uu[0][1] = 2. * irho2;
+
+    g_uu[1][0] = g_uu[0][1];
+    g_uu[1][1] = irho2 * (r * (r - 2.) + a * a) / (r * r);
+    g_uu[1][3] = a * irho2 / r;
+
+    g_uu[2][2] = irho2 / (hfac * hfac);
+
+    g_uu[3][1] = g_uu[1][3];
+    g_uu[3][3] = irho2 / (sin2th);
 }
-
-// Computers the Christoffel symbols at location X numerically
-// (Requires the metric to be specified everywhere!)
-void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
-    // CASE 0: Minkowski metric
-    //////////////////////
-    int i, j, k;
-    LOOP_ijk gamma_udd[i][j][k] = 0.;
-
-    // Obtain metric at current position (contravariant form)
-    double g_uu[4][4];
-    metric_uu(X_u, g_uu);
-
-    // Solve the Christoffel connection equation
-    int alpha;
-    for (alpha = 0; alpha < 4; alpha++)
-        LOOP_ijk // Index summation over k
-            gamma_udd[alpha][i][j] += 0.5 * g_uu[alpha][k] *
-                                      (part_deriv_metric_dd(X_u, j, k, i) +
-                                       part_deriv_metric_dd(X_u, i, k, j) -
-                                       part_deriv_metric_dd(X_u, k, i, j));
-}*/
 
 // Computes the Christoffel symbols at location X numerically
 // (Requires the metric to be specified everywhere!)
 void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
-    int i, j, k;
+
     double dg[4][4][4];
 
     LOOP_ijk {
@@ -506,7 +493,7 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
     //      LOOP_ijk fprintf(stderr,"dg %e\n",dg[i][j][k]);
 
     for (alpha = 0; alpha < 4; alpha++) {
-        for (k = 0; k < 4; k++) {
+        for (int k = 0; k < 4; k++) {
             gamma_udd[alpha][0][0] +=
                 g_uu[alpha][k] * (0.5 * (2. * dg[0][k][0] - dg[k][0][0]));
             gamma_udd[alpha][0][1] +=
@@ -553,7 +540,7 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
 void connection_udd(const double X_u[4], double gamma[4][4][4]) {
     // CASE 0: Minkowski metric
     //////////////////////
-    int i, j, k;
+
     LOOP_ijk gamma[i][j][k] = 0.;
 
 #if (metric == CAR)
@@ -1121,7 +1108,6 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
         sqrt((-k_u[0] * k_d[0] - k_u[2] * k_d[2] - k_u[3] * k_d[3]) / g_dd_11);
 
     // Normalize the photon wavevector with cam_freq in Hz
-    int i;
     //    LOOP_i k_u[i] *= PLANCK_CONSTANT * cam_freq /
     //                   (ELECTRON_MASS * SPEED_OF_LIGHT*SPEED_OF_LIGHT);
 
@@ -1163,20 +1149,15 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 #endif
 
 #if (metric == CKS)
-    double k_KS[4], k_CKS[4], X_KS[4], X_CKS[4];
+    double photon_u_KS[8];
 
     LOOP_i {
-        X_KS[i] = photon_u[i];
-        k_KS[i] = photon_u[i + 4];
+        photon_u_KS[i] = photon_u[i];
+        photon_u_KS[i + 4] = photon_u[i + 4];
     }
 
-    KS_to_CKS(X_KS, X_CKS);
-    KS_to_CKS_u(k_KS, k_CKS);
+    KS_to_CKS_u(photon_u_KS, photon_u);
 
-    LOOP_i {
-        photon_u[i] = X_CKS[i];
-        photon_u[i + 4] = k_CKS[i];
-    }
 #endif
     // printf("\n INITIAL NORM = %+.15e", inner_product(Xcam_u, k_u, k_u));
 }

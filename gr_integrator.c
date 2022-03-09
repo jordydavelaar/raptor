@@ -90,7 +90,6 @@ void verlet_step(double *y, void (*f)(double *, double *), double dl) {
 
     // Step 2: Compute X_u(lambda + dlambda) and the temporary four-velocity
     // (Eq 14a, 14b)
-    int i;
     LOOP_i {
         yshift[i] += dl * yshift[i + DIM] + 0.5 * dl * dl * fvector[i + DIM];
         yshift[i + DIM] = yshift[i + DIM] + fvector[i + DIM] * dl;
@@ -141,7 +140,7 @@ void f_geodesic(double *y, double *fvector) {
     connection_num_udd(X_u, gamma_udd);
 
     // Compute 4-acceleration using the geodesic equation
-    int i, j, k; // Einstein summation over indices v and w
+    // Einstein summation over indices v and w
     LOOP_ijk A_u[i] -= gamma_udd[i][j][k] * U_u[j] * U_u[k];
 
     // Update fvector
@@ -154,7 +153,7 @@ void f_geodesic(double *y, double *fvector) {
 // Integrate the null geodesic defined by "photon_u"
 void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner) {
-    int i, q;
+    int q;
     double t_init = 0.;
     double dlambda_adaptive;
     int theta_turns = 0;

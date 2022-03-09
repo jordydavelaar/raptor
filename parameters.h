@@ -20,7 +20,7 @@
 #include <time.h>
 
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #define BHAC3D (1)
@@ -80,8 +80,7 @@ extern double Thetae_unit;
 #define MKSBHAC                                                                \
     (6) // BHAC style MKS coords          x1=log(r), x2=th/pi, and x3=phi
 #define MKSN (6) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
-#define CKS (6) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
-
+#define CKS (6)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 
 extern double a, Q;
 extern double R0; // Parameter for MKS coords
@@ -180,22 +179,21 @@ double JANSKY_FACTOR; // Factor to scale image output
 /////////
 
 #define DIM 4
-#define LOOP_i for (i = 0; i < DIM; i++)
+#define LOOP_i for (int i = 0; i < DIM; i++)
 #define LOOP_ij                                                                \
-    for (i = 0; i < DIM; i++)                                                  \
-        for (j = 0; j < DIM; j++)
+    for (int i = 0; i < DIM; i++)                                              \
+        for (int j = 0; j < DIM; j++)
 #define LOOP_kl                                                                \
-    for (k = 0; k < DIM; k++)                                                  \
-        for (l = 0; l < DIM; l++)
+    for (int k = 0; k < DIM; k++)                                              \
+        for (int l = 0; l < DIM; l++)
 #define LOOP_ijk                                                               \
-    for (i = 0; i < DIM; i++)                                                  \
-        for (j = 0; j < DIM; j++)                                              \
-            for (k = 0; k < DIM; k++)
+    for (int i = 0; i < DIM; i++)                                              \
+        for (int j = 0; j < DIM; j++)                                          \
+            for (int k = 0; k < DIM; k++)
 #define LOOP_ijkl                                                              \
-    for (i = 0; i < DIM; i++)                                                  \
-        for (j = 0; j < DIM; j++)                                              \
-            for (k = 0; k < DIM; k++)                                          \
-                for (l = 0; l < DIM; l++)
-
+    for (int i = 0; i < DIM; i++)                                              \
+        for (int j = 0; j < DIM; j++)                                          \
+            for (int k = 0; k < DIM; k++)                                      \
+                for (int l = 0; l < DIM; l++)
 
 #endif // PARAMETERS_H
