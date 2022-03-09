@@ -79,15 +79,15 @@ extern double Thetae_unit;
     (5) // HARM3D MKS coords        x1=log(r), x2=th/pi, and x3=phi/2pi
 #define MKSBHAC                                                                \
     (6) // BHAC style MKS coords          x1=log(r), x2=th/pi, and x3=phi
-#define MKSN (6) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
-#define CKS (6)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
+#define MKSN (7) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
+#define CKS (8)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 
 extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
 #define metric (CKS)
-#if (metric == BL || metric == KS)
+#if (metric == BL || metric == KS || metric==CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
        metric == MKSBHAC || metric == MKSN)

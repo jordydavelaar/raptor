@@ -421,6 +421,10 @@ void init_grmhd_data(char *fname) {
     ng[0] = 1;
     ng[1] = 1;
     ng[2] = 1;
+    hslope = 1.0;
+
+
+#if(metric==MKSBHAC)
     nxlone[0] = 128;
     nxlone[1] = 48;
     nxlone[2] = 48;
@@ -433,14 +437,35 @@ void init_grmhd_data(char *fname) {
     xprobmin[1] = 0.;
     xprobmin[2] = 0.;
 
-    startx[1] = .17;
-    stopx[1] = 8.1117280833;
-    startx[2] = 0.;
-    stopx[2] = M_PI;
-    startx[3] = 0.;
-    stopx[3] = 2. * M_PI;
 
-    hslope = 1.0;
+#elif(metric==CKS)
+
+    nxlone[0] = 96;
+    nxlone[1] = 96;
+    nxlone[2] = 384;
+
+    xprobmax[0] = 500;
+    xprobmax[1] = 500;
+    xprobmax[2] = 2000.;
+
+    xprobmin[0] = -500;
+    xprobmin[1] = -500;
+    xprobmin[2] = -2000;
+#else
+
+    fprintf(stderr,"Not a metric supported by BHAC. Aborting...\n");
+    exit(1);
+
+#endif
+
+    startx[1] = xprobmin[0];
+    startx[2] = xprobmin[1];
+    startx[3] = xprobmin[2];
+
+    stopx[1] = xprobmax[0];
+    stopx[2] = xprobmax[1];
+    stopx[3] = xprobmax[2];
+
 
     double buffer[1];
     unsigned int buffer_i[1];

@@ -21,7 +21,7 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
 #if (metric == CAR) // Minkowski metric
 
     g_dd[0][0] = -1.;
-    for (i = 1; i < DIM; i++)
+    for (int i = 1; i < DIM; i++)
         g_dd[i][i] = 1.;
 
 #elif (metric == BL || metric == MBL) // (modified) Boyer-Lindquist coordinates
@@ -191,8 +191,8 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
     l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
     l[3] = (X_u[3]) / (r);
 
-    for (i = 0; i < 4; i++) {
-        for (j = 0; j < 4; j++) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
             if (i == j && i == 0)
                 g_dd[i][j] = -1. + f * l[i] * l[j];
             else if (i == j && i != 0)
@@ -214,7 +214,7 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 #if (metric == CAR) // Minkowski metric
 
     g_uu[0][0] = -1.;
-    for (i = 1; i < 4; i++)
+    for (int i = 1; i < 4; i++)
         g_uu[i][i] = 1.;
 
 #elif (metric == BL || metric == MBL) // (modified) Boyer-Lindqust coordinates
@@ -380,8 +380,8 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
     l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
     l[3] = (X_u[3]) / (r);
 
-    for (i = 0; i < 4; i++) {
-        for (j = 0; j < 4; j++) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
             if (i == j && i == 0)
                 g_uu[i][j] = -1. - f * l[i] * l[j];
             else if (i == j && i != 0)
