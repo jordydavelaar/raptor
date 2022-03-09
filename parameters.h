@@ -140,7 +140,7 @@ double CAM_SIZE_Y;
 
 #define OUTER_BOUND_POL (1000.) // Stop polarized integration beyond this radius
 
-#define delta_num (1.e-4) // Used for numerical derivatives
+#define delta_num (1.e-9) // Used for numerical derivatives
 #define max_steps (1e5)   // Maximum number of integration steps
 
 double STEPSIZE;
@@ -195,6 +195,5 @@ double JANSKY_FACTOR; // Factor to scale image output
             for (k = 0; k < DIM; k++)                                          \
                 for (l = 0; l < DIM; l++)
 
-#include "raptor_bhac3d_model.h"
 
 #endif // PARAMETERS_H

@@ -240,7 +240,7 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
 
     int STIFF = 0;
 
-    double STIFFTHRESH = 0.99;
+    double STIFFTHRESH = 0.90;
 
     if (res1 > STIFFTHRESH || res2 > STIFFTHRESH || res3 > STIFFTHRESH ||
         res4 > STIFFTHRESH)
@@ -441,10 +441,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     lower_index(X_u, k_u, k_d);
 
     // Compute the photon frequency in the plasma frame:
-    nu_p = frequency;//freq_in_plasma_frame(modvar.U_u, k_d);
+    nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
-    if(nu_p<0)
-	fprintf(stderr,"issue with nu_p\n");
 
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
@@ -456,6 +454,9 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // false.
     create_observer_tetrad(X_u, k_u, modvar.U_u, modvar.B_u, tetrad_u);
     create_tetrad_d(X_u, tetrad_u, tetrad_d);
+
+//    check_tetrad_compact(X_u, tetrad_u);
+//exit(1);
 
     // FROM F VECTOR TO STOKES (when applicable)
     ////////////////////////////////////////////

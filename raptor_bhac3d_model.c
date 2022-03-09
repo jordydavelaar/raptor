@@ -5,6 +5,7 @@
 
 #include "functions.h"
 #include "parameters.h"
+#include "raptor_bhac3d_model.h"
 
 void init_model() {
     // Set physical units
@@ -368,8 +369,10 @@ void _uvert2prim(double prim[8], double **conserved, int c, double X[3],
             VdotV += g_dd[i][j] * prim[U1 + i - 1] * prim[U1 + j - 1];
         }
     }
-    double gammaf = 1./sqrt(1-VdotV)
-    if(gammaf !=
+    double gammaf = 1./sqrt(1-VdotV);
+
+    if(VdotV>1.)
+	fprintf(stderr,"issues with conserved %e %e %e\n",VdotV,gammaf,conserved[LFAC][c]);
 
 #if (DEBUG)
 
@@ -451,40 +454,48 @@ void init_grmhd_data(char *fname) {
     }
 
     long int offset;
-    int j = 0;
-    int levmaxini, ndimini, ndirini, nwini, nws, neqparini, it, t;
+
+    int levmaxini, ndimini, ndirini, nwini, nws, neqparini, it;
+    double t;
     fseek(file_id, 0, SEEK_END);
     offset = -36 - 4; // -4; // 7 int, 1 double = 7 * 4 + 1*8 = 56?
     fseek(file_id, offset, SEEK_CUR);
 
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "nleafs %d %d\n", j, buffer_i[0]);
     nleafs = buffer_i[0];
+    fprintf(stderr, "nleafs %d\n", nleafs);
 
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "levmax %d %d\n", j, buffer_i[0]);
     levmaxini = buffer_i[0];
+    fprintf(stderr, "levmax %d\n", levmaxini);
+
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "ndim %d %d\n", j, buffer_i[0]);
     ndimini = buffer_i[0];
+    fprintf(stderr, "ndim %d\n",ndimini);
+
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "ndir %d %d\n", j, buffer_i[0]);
     ndirini = buffer_i[0];
+    fprintf(stderr, "ndir %d\n", ndirini);
+
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "nw %d %d\n", j, buffer_i[0]);
     nwini = buffer_i[0];
+    fprintf(stderr, "nw %d\n",nwini);
+
     fread(buffer_i, sizeof(int), 1, file_id);
-    printf("nws %d\n", buffer_i[0]);
     nws = buffer_i[0];
+    printf("nws %d\n",nws);
+
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "neqpar+nspecialpar %d %d\n", j, buffer_i[0]);
     neqparini = buffer_i[0];
+    fprintf(stderr, "neqpar+nspecialpar %d \n",neqparini);
+
     fread(buffer_i, sizeof(int), 1, file_id);
-    fprintf(stderr, "it %d %d\n", j, buffer_i[0]);
     it = buffer_i[0];
+    fprintf(stderr, "it %d\n", it);
+
     fread(buffer, sizeof(double), 1, file_id);
-    fprintf(stderr, "t %d %g\n", j, buffer[0]);
     t = buffer[0];
+    fprintf(stderr, "t %e\n", t);
 
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
@@ -722,7 +733,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
     int i, c;
-    double r;
 
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
@@ -776,22 +786,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     c = find_cell(X, block_info, igrid, Xgrid);
 
-    double Xcent[4];
-
-    Xcent[0] = 0.;
-    Xcent[1] = Xbar[igrid][c][0];
-    Xcent[2] = Xbar[igrid][c][1];
-    Xcent[3] = Xbar[igrid][c][2];
-    r = get_r(Xcent);
-    /*
-        if (r < (1. + sqrt(1 - a * a)) * (1 + 5e-2)) {
-            fprintf(stderr, "inside horizon\n");
-            return 0;
-        }
-    */
-    metric_uu(Xcent, g_uu); // cell centered, nearest neighbour so need metric
+    metric_uu(X, g_uu); // cell centered, nearest neighbour so need metric
                             // at cell position
-    metric_dd(Xcent, g_dd);
+    metric_dd(X, g_dd);
 
     // inteprolatie van je primitieve variabelen
     rho = p[KRHO][igrid][c][0];
@@ -828,8 +825,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-       fprintf(stderr,"VdotV too large %e %d
-            %e %e %e\n",VdotV,igrid,exp(X[1]),X[2],X[3]);
+       fprintf(stderr,"VdotV too large %e %d %e %e %e\n",VdotV,igrid,exp(X[1]),X[2],X[3]);
         VdotV = 0;
     }
 
@@ -843,7 +839,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         (*modvar).U_u[i] = V_u[i] * lfac - shift[i] * lfac / alpha;
     }
 
-    lower_index(Xcent, (*modvar).U_u, (*modvar).U_d);
+    lower_index(X, (*modvar).U_u, (*modvar).U_d);
+
 
     (*modvar).B_u[0] = 0;
     for (i = 1; i < NDIM; i++) {
@@ -859,7 +856,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
             (Bp[i] + alpha * (*modvar).B_u[0] * (*modvar).U_u[i]) / lfac;
     }
 
-    lower_index(Xcent, (*modvar).B_u, (*modvar).B_d);
+    lower_index(X, (*modvar).B_u, (*modvar).B_d);
 
     // magnetic field
     double Bsq = fabs((*modvar).B_u[0] * (*modvar).B_d[0] +
@@ -905,17 +902,17 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
 
-    double Rhigh = 3; // R_HIGH;
-    double Rlow = 3;  // R_LOW;
+    double Rhigh = 1; // R_HIGH;
+    double Rlow = 1;  // R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-    double two_temp_gam =
-        0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
+//    double two_temp_gam =
+  //      0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
 
     Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
 
-    (*modvar).theta_e = 10; //(uu / rho) * Thetae_unit;
+    (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
     if ((Bsq / (rho + 1e-20) > 1.) || exp(X[1]) > 50 ||
         (*modvar).theta_e > 20) { // excludes all spine emmission

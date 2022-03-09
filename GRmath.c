@@ -302,20 +302,7 @@ double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]) {
 
 // See eqn 73 in Dexter 2016
 double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u) {
-    double b_dot_k = inner_product(X_u, B_u, k_u);
-    double b_dot_b = inner_product(X_u, B_u, B_u);
-    double k_dot_u = inner_product(X_u, k_u, Uplasma_u);
 
-    // Compute and clamp result (result can slightly exceed domain of acos due
-    // to numerics)
-    double result = acos(b_dot_k / (-k_dot_u * sqrt(fabs(b_dot_b) + 1.e-15)));
-    result = fmax(fmin(result, M_PI), 0.);
-
-    //    return result;
-
-    return M_PI/2.;
-
-    // NEW VERSION
     double B, k, mu;
 
     B = sqrt(fabs(inner_product(X_u, B_u, B_u)));

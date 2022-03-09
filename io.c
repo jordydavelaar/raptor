@@ -61,8 +61,8 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
                       double *frequencies, double factor) {
 
     hid_t file_id, dataset_id, dataspace_id;
-    hsize_t dims[2];
     herr_t status;
+    hsize_t dims[2];
     double dA;
 
     file_id = H5Fcreate(hdf5_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

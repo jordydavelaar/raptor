@@ -95,7 +95,7 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
 
     // 3. If spacelike, OK.
     // 4. If not, flip sign of b_u[0]? Or just create new b_u?
-    while (inner_product(X_u, b_u, b_u) < 0.1) {
+    while (inner_product(X_u, b_u, b_u) < 0.1 ) {
         LOOP_i b_u[i] = 1. / sqrt(3.) * (double)rand() / (double)RAND_MAX;
     }
 
@@ -161,9 +161,11 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
 // Creates a tetrad whose Y-axis is aligned with vector b_u
 // (useful when we have such an orienting vector, e.g., observer)
 void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
-                            double b_u[], double tetrad_u[][4]) {
+                            double Bs_u[], double tetrad_u[][4]) {
     // Summation indices:
     int i, j, k, l;
+    double b_u[4];
+    LOOP_i b_u[i]=Bs_u[i]*B_unit;
 
     // Obtain relevant metric terms:
     double g_uu[4][4], g_dd[4][4];
@@ -225,6 +227,7 @@ void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
     // Need b_d
     double b_d[4];
     lower_index(X_u, b_u, b_d);
+
 
     LOOP_i e_u_perp[i] = 0.;
     LOOP_ijkl e_u_perp[i] +=
@@ -417,7 +420,7 @@ double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]) {
     if (isnan(result))
         fprintf(stderr, "position of nan is %e %e %e\n", exp(X_u[1]), X_u[2],
                 X_u[3]);
-    // printf("\nTetrad identities (should be close to zero): %+.15e", result);
+    printf("\nTetrad identities (should be close to zero): %+.15e", result);
     return result;
 }
 

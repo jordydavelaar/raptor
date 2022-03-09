@@ -81,9 +81,9 @@ def plot_data(folder,tstart,tend):
             beta=((np.reshape(images['beta'][i],(pixels,pixels))))
 
             figure_I=axs[0][0].pcolormesh(alpha,beta,(array_I/max_I)**0.5,vmin=0,vmax=1,cmap='afmhot',shading='auto')
-            figure_Q=axs[1][0].pcolormesh(alpha,beta,(array_Q/max_Q),vmin=-lim/10.,vmax=lim/10.,cmap='RdBu',shading='auto')
-            figure_U=axs[0][1].pcolormesh(alpha,beta,(array_U/max_U),vmin=-lim/10.,vmax=lim/10.,cmap='RdBu',shading='auto')
-            figure_V=axs[1][1].pcolormesh(alpha,beta,(array_V/(max_V)),vmin=-lim,vmax=lim,cmap='RdBu',shading='auto')
+            figure_Q=axs[1][0].pcolormesh(alpha,beta,np.sign(array_Q)*(np.abs(array_Q/max_Q))**0.5,vmin=-1,vmax=1,cmap='RdBu',shading='auto')
+            figure_U=axs[0][1].pcolormesh(alpha,beta,np.sign(array_U)*(np.abs(array_U/max_U))**0.5,vmin=-1.,vmax=1.,cmap='RdBu',shading='auto')
+            figure_V=axs[1][1].pcolormesh(alpha,beta,np.sign(array_V)*(np.abs(array_V/max_V))**0.5,vmin=-1,vmax=1,cmap='RdBu',shading='auto')
 
         #plt.colorbar(figure_I,label="I")
         #plt.colorbar(figure_Q,label="I")

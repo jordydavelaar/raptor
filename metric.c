@@ -6,7 +6,7 @@
  */
 #include "functions.h"
 #include "parameters.h"
-#include "raptor_harm3d_model.h" // We need hslope from here - ought to move it to constants.h!!
+//#include "raptor_harm3d_model.h" // We need hslope from here - ought to move it to constants.h!!
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -440,7 +440,6 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
 // (Requires the metric to be specified everywhere!)
 void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
     int i, j, k;
-    double temp[4][4][4];
     double dg[4][4][4];
 
     LOOP_ijk {
@@ -951,19 +950,28 @@ void connection_udd(const double X_u[4], double gamma[4][4][4]) {
     gamma[3][3][2] = gamma[3][2][3];
     gamma[3][3][3] = (-a * r1sth2 * rho22 + a3 * sth4 * fac1) * irho23;
 
-#elif (metric == MKSHARM) //  (Modified) Kerr-Schild metric
+#elif (metric == MKSHARM || metric==MKSBHAC) //  (Modified) Kerr-Schild metric
 
     double r = R0 + exp(X_u[1]);
     double r2 = r * r;
     double rprime = exp(X_u[1]);
     double rprime2 = rprime * rprime;
     double rprimeprime = rprime;
+#if(metric==MKSHARM)
     double theta =
         M_PI * X_u[2] + 0.5 * (1. - hslope) * sin(2. * M_PI * X_u[2]);
     double thetaprime = M_PI * (1. + (1. - hslope) * cos(2. * M_PI * X_u[2]));
     double thetaprime2 = thetaprime * thetaprime;
     double thetaprimeprime =
         -2. * M_PI * M_PI * (1. - hslope) * sin(2. * M_PI * X_u[2]);
+#else
+    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
+    double thetaprime = (1. + (1. - hslope) * cos(2. * X_u[2]));
+    double thetaprime2 = thetaprime * thetaprime;
+    double thetaprimeprime =
+        -2. *  (1. - hslope) * sin(2. *  X_u[2]);
+#endif
+
     double costh = cos(theta);
     double cos2th = costh * costh;
     double sinth = sin(theta);
@@ -1132,7 +1140,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 //    LOOP_i printf("\n%+.15e", photon_u[i+4]);
 
 // Convert k_u to the coordinate system that is currently used
-#if (metric == KS || metric == MKS || metric == MKSHARM)
+#if (metric == KS || metric == MKS || metric == MKSHARM || metric==MKSN)
 
     double KSphoton_u[8];
     BL_to_KS_u(photon_u, KSphoton_u);
@@ -1152,6 +1160,8 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
                         photon_u[2]); // We only transform theta - r is
                                       // already exponential and R0 = 0
 #endif
+
+
 
     LOOP_i Xcam_u[i] = photon_u[i];
     LOOP_i k_u[i] = photon_u[i + 4];
