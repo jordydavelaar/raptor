@@ -80,12 +80,14 @@ extern double Thetae_unit;
 #define MKSBHAC                                                                \
     (6) // BHAC style MKS coords          x1=log(r), x2=th/pi, and x3=phi
 #define MKSN (6) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
+#define CKS (6) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
+
 
 extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKSHARM)
+#define metric (CKS)
 #if (metric == BL || metric == KS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
