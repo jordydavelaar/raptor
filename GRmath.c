@@ -286,6 +286,74 @@ void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u) {
     }
 }
 
+void KS_to_CKS(double *X_KS_u, double *X_CKS_u, double a) {
+
+    X_CKS_u[0] = X_KS_u[0];
+    X_CKS_u[1] =
+        (X_KS_u[1] * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * sin(X_KS_u[2]);
+    X_CKS_u[2] =
+        (X_KS_u[1] * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * sin(X_KS_u[2]);
+    X_CKS_u[3] = X_KS_u[1] * cos(X_KS_u[2]);
+}
+
+void CKS_to_KS(double *X_CKS_u, double *X_KS_u, double a) {
+
+    double Xbh[4] = {0}; // not needed for this transform...
+                         // X_u should already be centered on a BH
+    LOOP_i Xbh[i] = 0;
+    double r = get_rCoord(X_CKS_u, Xbh, a);
+
+    X_KS_u[0] = X_CKS_u[0];
+    X_KS_u[1] = r;
+    X_KS_u[2] = acos(X_CKS_u[3] / r);
+    X_KS_u[3] =
+        atan2(r * X_CKS_u[2] + a * X_CKS_u[1], r * X_CKS_u[1] - a * X_CKS_u[2]);
+}
+
+void KS_to_CKS_u(double *KScoords, double *CKScoords, double a) {
+    double trans[4][4];
+    int i, j;
+    LOOP_ij trans[i][j] = 0;
+    double X_KS_u[4], U_KS[4];
+    double X_CKS_u[4], U_CKS[4];
+    LOOP_i X_KS_u[i] = KScoords[i];
+    LOOP_i U_KS[i] = KScoords[i + 4];
+    LOOP_i U_CKS[i] = 0;
+
+    double r = X_KS_u[1];
+    double th = X_KS_u[2];
+    double phi = X_KS_u[3];
+    double BLcoords[8];
+    KS_to_CKS(X_KS_u, X_CKS_u, a);
+
+    trans[0][0] = 1;
+    trans[1][1] = sin(th) * cos(phi);
+    trans[1][2] = sin(th) * sin(phi);
+    trans[1][3] = cos(th);
+
+    trans[2][1] =
+        (X_KS_u[1] * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * cos(X_KS_u[2]);
+    trans[2][2] =
+        (X_KS_u[1] * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * cos(X_KS_u[2]);
+    trans[2][3] = -r * sin(th);
+
+    trans[3][1] =
+        -(X_KS_u[1] * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * sin(X_KS_u[2]);
+    trans[3][2] =
+        (X_KS_u[1] * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * sin(X_KS_u[2]);
+
+    for (int i = 0; i < 4; i++) {
+        for (int k = 0; k < 4; k++) {
+            U_CKS[i] += trans[k][i] * U_KS[k];
+        }
+    }
+
+    LOOP_i {
+        CKScoords[i] = X_CKS_u[i];
+        CKScoords[i + 4] = U_CKS[i];
+    }
+}
+
 // Compute the photon frequency in the plasma frame:
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]) {
     double nu_plasmaframe = 0.;
