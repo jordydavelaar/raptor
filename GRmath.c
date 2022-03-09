@@ -286,7 +286,7 @@ void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u) {
     }
 }
 
-void KS_to_CKS(double *X_KS_u, double *X_CKS_u, double a) {
+void KS_to_CKS(double *X_KS_u, double *X_CKS_u) {
 
     X_CKS_u[0] = X_KS_u[0];
     X_CKS_u[1] =
@@ -296,7 +296,7 @@ void KS_to_CKS(double *X_KS_u, double *X_CKS_u, double a) {
     X_CKS_u[3] = X_KS_u[1] * cos(X_KS_u[2]);
 }
 
-void CKS_to_KS(double *X_CKS_u, double *X_KS_u, double a) {
+void CKS_to_KS(double *X_CKS_u, double *X_KS_u) {
 
     double Xbh[4] = {0}; // not needed for this transform...
                          // X_u should already be centered on a BH
@@ -310,7 +310,7 @@ void CKS_to_KS(double *X_CKS_u, double *X_KS_u, double a) {
         atan2(r * X_CKS_u[2] + a * X_CKS_u[1], r * X_CKS_u[1] - a * X_CKS_u[2]);
 }
 
-void KS_to_CKS_u(double *KScoords, double *CKScoords, double a) {
+void KS_to_CKS_u(double *KScoords, double *CKScoords) {
     double trans[4][4];
     int i, j;
     LOOP_ij trans[i][j] = 0;

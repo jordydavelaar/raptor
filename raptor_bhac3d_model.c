@@ -3,9 +3,9 @@
  *
  */
 
+#include "raptor_bhac3d_model.h"
 #include "functions.h"
 #include "parameters.h"
-#include "raptor_bhac3d_model.h"
 
 void init_model() {
     // Set physical units
@@ -369,10 +369,11 @@ void _uvert2prim(double prim[8], double **conserved, int c, double X[3],
             VdotV += g_dd[i][j] * prim[U1 + i - 1] * prim[U1 + j - 1];
         }
     }
-    double gammaf = 1./sqrt(1-VdotV);
+    double gammaf = 1. / sqrt(1 - VdotV);
 
-    if(VdotV>1.)
-	fprintf(stderr,"issues with conserved %e %e %e\n",VdotV,gammaf,conserved[LFAC][c]);
+    if (VdotV > 1.)
+        fprintf(stderr, "issues with conserved %e %e %e\n", VdotV, gammaf,
+                conserved[LFAC][c]);
 
 #if (DEBUG)
 
@@ -471,7 +472,7 @@ void init_grmhd_data(char *fname) {
 
     fread(buffer_i, sizeof(int), 1, file_id);
     ndimini = buffer_i[0];
-    fprintf(stderr, "ndim %d\n",ndimini);
+    fprintf(stderr, "ndim %d\n", ndimini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     ndirini = buffer_i[0];
@@ -479,15 +480,15 @@ void init_grmhd_data(char *fname) {
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nwini = buffer_i[0];
-    fprintf(stderr, "nw %d\n",nwini);
+    fprintf(stderr, "nw %d\n", nwini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nws = buffer_i[0];
-    printf("nws %d\n",nws);
+    printf("nws %d\n", nws);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     neqparini = buffer_i[0];
-    fprintf(stderr, "neqpar+nspecialpar %d \n",neqparini);
+    fprintf(stderr, "neqpar+nspecialpar %d \n", neqparini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     it = buffer_i[0];
@@ -787,7 +788,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     c = find_cell(X, block_info, igrid, Xgrid);
 
     metric_uu(X, g_uu); // cell centered, nearest neighbour so need metric
-                            // at cell position
+                        // at cell position
     metric_dd(X, g_dd);
 
     // inteprolatie van je primitieve variabelen
@@ -825,7 +826,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-       fprintf(stderr,"VdotV too large %e %d %e %e %e\n",VdotV,igrid,exp(X[1]),X[2],X[3]);
+        fprintf(stderr, "VdotV too large %e %d %e %e %e\n", VdotV, igrid,
+                exp(X[1]), X[2], X[3]);
         VdotV = 0;
     }
 
@@ -840,7 +842,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     lower_index(X, (*modvar).U_u, (*modvar).U_d);
-
 
     (*modvar).B_u[0] = 0;
     for (i = 1; i < NDIM; i++) {
@@ -907,8 +908,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-//    double two_temp_gam =
-  //      0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
+    //    double two_temp_gam =
+    //      0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
 
     Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
 

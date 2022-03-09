@@ -51,6 +51,15 @@ void BL_to_KS_u(double *BLphoton_u, double *KSphoton_u);
 // Transform a contravariant vector from KS to BL coordinates
 void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u);
 
+// Convert KS to CKS coordinates
+void KS_to_CKS(double *X_KS_u, double *X_CKS_u);
+
+// Convert CKS to KS coordinates
+void CKS_to_KS(double *X_CKS_u, double *X_KS_u);
+
+// Transform a contravariant vector from KS to CKS coordinates
+void KS_to_CKS_u(double *KScoords, double *CKScoords);
+
 // Return the photon frequency in the co-moving frame of the plasma
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
 

@@ -6,7 +6,8 @@
  */
 #include "functions.h"
 #include "parameters.h"
-//#include "raptor_harm3d_model.h" // We need hslope from here - ought to move it to constants.h!!
+//#include "raptor_harm3d_model.h" // We need hslope from here - ought to move
+// it to constants.h!!
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -950,14 +951,14 @@ void connection_udd(const double X_u[4], double gamma[4][4][4]) {
     gamma[3][3][2] = gamma[3][2][3];
     gamma[3][3][3] = (-a * r1sth2 * rho22 + a3 * sth4 * fac1) * irho23;
 
-#elif (metric == MKSHARM || metric==MKSBHAC) //  (Modified) Kerr-Schild metric
+#elif (metric == MKSHARM || metric == MKSBHAC) //  (Modified) Kerr-Schild metric
 
     double r = R0 + exp(X_u[1]);
     double r2 = r * r;
     double rprime = exp(X_u[1]);
     double rprime2 = rprime * rprime;
     double rprimeprime = rprime;
-#if(metric==MKSHARM)
+#if (metric == MKSHARM)
     double theta =
         M_PI * X_u[2] + 0.5 * (1. - hslope) * sin(2. * M_PI * X_u[2]);
     double thetaprime = M_PI * (1. + (1. - hslope) * cos(2. * M_PI * X_u[2]));
@@ -968,8 +969,7 @@ void connection_udd(const double X_u[4], double gamma[4][4][4]) {
     double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
     double thetaprime = (1. + (1. - hslope) * cos(2. * X_u[2]));
     double thetaprime2 = thetaprime * thetaprime;
-    double thetaprimeprime =
-        -2. *  (1. - hslope) * sin(2. *  X_u[2]);
+    double thetaprimeprime = -2. * (1. - hslope) * sin(2. * X_u[2]);
 #endif
 
     double costh = cos(theta);
@@ -1140,7 +1140,8 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 //    LOOP_i printf("\n%+.15e", photon_u[i+4]);
 
 // Convert k_u to the coordinate system that is currently used
-#if (metric == KS || metric == MKS || metric == MKSHARM || metric==MKSN)
+#if (metric == KS || metric == MKS || metric == MKSHARM || metric == MKSN ||   \
+     metric == CKS)
 
     double KSphoton_u[8];
     BL_to_KS_u(photon_u, KSphoton_u);
@@ -1161,11 +1162,22 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
                                       // already exponential and R0 = 0
 #endif
 
+#if (metric == CKS)
+    double k_KS[4], k_CKS[4], X_KS[4], X_CKS[4];
 
+    LOOP_i {
+        X_KS[i] = photon_u[i];
+        k_KS[i] = photon_u[i + 4];
+    }
 
-    LOOP_i Xcam_u[i] = photon_u[i];
-    LOOP_i k_u[i] = photon_u[i + 4];
+    KS_to_CKS(X_KS, X_CKS);
+    KS_to_CKS_u(k_KS, k_CKS);
 
+    LOOP_i {
+        photon_u[i] = X_CKS[i];
+        photon_u[i + 4] = k_CKS[i];
+    }
+#endif
     // printf("\n INITIAL NORM = %+.15e", inner_product(Xcam_u, k_u, k_u));
 }
 
