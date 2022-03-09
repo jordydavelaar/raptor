@@ -240,7 +240,7 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
 
     int STIFF = 0;
 
-    double STIFFTHRESH = 0.90;
+    double STIFFTHRESH = 0.99;
 
     if (res1 > STIFFTHRESH || res2 > STIFFTHRESH || res3 > STIFFTHRESH ||
         res4 > STIFFTHRESH)
