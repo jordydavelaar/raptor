@@ -1,9 +1,6 @@
 *.o
 *.out
 *.dat
-output*
-figures
-slurm*
 RAPTOR
 harm3d.txt
 .DS_Store
