@@ -306,22 +306,21 @@ void KS_to_BL_u(double *KSphoton_u, double *BLphoton_u) {
 void KS_to_CKS(double *X_KS_u, double *X_CKS_u) {
 
     X_CKS_u[0] = X_KS_u[0];
+
+    double r = (X_KS_u[1]);
     X_CKS_u[1] =
-        (X_KS_u[1] * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * sin(X_KS_u[2]);
+        (r * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * sin(X_KS_u[2]);
     X_CKS_u[2] =
-        (X_KS_u[1] * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * sin(X_KS_u[2]);
-    X_CKS_u[3] = X_KS_u[1] * cos(X_KS_u[2]);
+        (r * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * sin(X_KS_u[2]);
+    X_CKS_u[3] = r * cos(X_KS_u[2]);
 }
 
 void CKS_to_KS(double *X_CKS_u, double *X_KS_u) {
 
-    double Xbh[4] = {0}; // not needed for this transform...
-                         // X_u should already be centered on a BH
-    LOOP_i Xbh[i] = 0;
     double r = get_r(X_CKS_u);
 
     X_KS_u[0] = X_CKS_u[0];
-    X_KS_u[1] = r;
+    X_KS_u[1] = (r);
     X_KS_u[2] = acos(X_CKS_u[3] / r);
     X_KS_u[3] =
         atan2(r * X_CKS_u[2] + a * X_CKS_u[1], r * X_CKS_u[1] - a * X_CKS_u[2]);
@@ -337,7 +336,7 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
     LOOP_i U_KS[i] = KScoords[i + 4];
     LOOP_i U_CKS[i] = 0;
 
-    double r = X_KS_u[1];
+    double r = (X_KS_u[1]);
     double th = X_KS_u[2];
     double phi = X_KS_u[3];
 
@@ -349,15 +348,15 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
     trans[1][3] = cos(th);
 
     trans[2][1] =
-        (X_KS_u[1] * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * cos(X_KS_u[2]);
+        (r * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * cos(X_KS_u[2]);
     trans[2][2] =
-        (X_KS_u[1] * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * cos(X_KS_u[2]);
+        (r * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * cos(X_KS_u[2]);
     trans[2][3] = -r * sin(th);
 
     trans[3][1] =
-        -(X_KS_u[1] * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * sin(X_KS_u[2]);
+        -(r * sin(X_KS_u[3]) - a * cos(X_KS_u[3])) * sin(X_KS_u[2]);
     trans[3][2] =
-        (X_KS_u[1] * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * sin(X_KS_u[2]);
+        (r * cos(X_KS_u[3]) + a * sin(X_KS_u[3])) * sin(X_KS_u[2]);
 
     for (int i = 0; i < 4; i++) {
         for (int k = 0; k < 4; k++) {

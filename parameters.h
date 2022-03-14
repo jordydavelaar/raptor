@@ -89,7 +89,7 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (CKS)
+#define metric (MKSHARM)
 #if (metric == BL || metric == KS || metric==CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \

@@ -135,11 +135,13 @@ void construct_U_vector(const double X_u[], double U_u[]) {
 
     CKS_to_KS(X_u, X_KS);
 
+
     double g_uu[4][4];
     metric_KS_uu(X_KS, g_uu);
     double g_uu00 = g_uu[0][0];
     double g_uu03 = g_uu[0][3];
     double g_uu33 = g_uu[3][3];
+
 
 #else
     double g_uu[4][4];
@@ -155,6 +157,7 @@ void construct_U_vector(const double X_u[], double U_u[]) {
 
     // Properly normalize U_u:
     U_d[3] = B__ + sqrt(B__ * B__ + C__);
+
 
 #if (metric == CKS)
     LOOP_i {
@@ -488,9 +491,6 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     create_observer_tetrad(X_u, k_u, modvar.U_u, modvar.B_u, tetrad_u);
     create_tetrad_d(X_u, tetrad_u, tetrad_d);
 
-    //    check_tetrad_compact(X_u, tetrad_u);
-    // exit(1);
-
     // FROM F VECTOR TO STOKES (when applicable)
     ////////////////////////////////////////////
 
@@ -523,6 +523,10 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     *Iinv = S_A[0];
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
+
+//    fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
+//    fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);
+//    check_tetrad_identities(X_u, tetrad_u);
 
     // We have now updated the Stokes vector using plasma at current
     // position. Only do stuff below this line IF S_A[0] > 1.e-40. If
@@ -605,7 +609,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         // PLASMA INTEGRATION STEP
         //////////////////////////
 
-        double r_current = logscale ? exp(X_u[1]) : X_u[1];
+        double r_current = get_r(X_u);
 
         // Check whether the ray is currently in the GRMHD simulation volume
         if (get_fluid_params(X_u, &modvar) && r_current < OUTER_BOUND_POL) {

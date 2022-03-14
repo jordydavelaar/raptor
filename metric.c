@@ -400,7 +400,10 @@ void metric_KS_uu(const double X_u[4], double g_uu[4][4]) {
 
     LOOP_ij g_uu[i][j] = 0.;
 
-    double r = exp(X_u[1]);
+    double r = (X_u[1]);
+
+    hslope=1;
+
     double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
 
     double sinth = sin(theta);
@@ -1127,7 +1130,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
 // Convert k_u to the coordinate system that is currently used
 #if (metric == KS || metric == MKS || metric == MKSHARM || metric == MKSN ||   \
-     metric == CKS)
+     metric == CKS || metric == MKSBHAC)
 
     double KSphoton_u[8];
     BL_to_KS_u(photon_u, KSphoton_u);
@@ -1155,6 +1158,8 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
         photon_u_KS[i] = photon_u[i];
         photon_u_KS[i + 4] = photon_u[i + 4];
     }
+
+    
 
     KS_to_CKS_u(photon_u_KS, photon_u);
 

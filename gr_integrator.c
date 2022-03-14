@@ -110,17 +110,32 @@ void verlet_step(double *y, void (*f)(double *, double *), double dl) {
 // Ref. DOLENCE & MOSCIBRODZKA 2009
 double stepsize(double X_u[4], double U_u[4]) {
     double SMALL = 1.e-40;
+#if(metric==CKS)
+    double dlx1 = STEPSIZE  / (fabs(U_u[1]) + SMALL * SMALL);
+    double dlx2 =
+        STEPSIZE  / (fabs(U_u[2]) + SMALL * SMALL);
+    double dlx3 = STEPSIZE / (fabs(U_u[3]) + SMALL * SMALL);
+#else
+#if(metric==MKSHARM)
+  double pf = 1.;
+#else
+  double pf=M_PI;
+#endif
 
     double dlx1 = STEPSIZE / (fabs(U_u[1]) + SMALL * SMALL);
     double dlx2 =
-        STEPSIZE * fmin(X_u[2], M_PI - X_u[2]) / (fabs(U_u[2]) + SMALL * SMALL);
+        STEPSIZE *fmin(X_u[2],pf-X_u[2])/ (fabs(U_u[2]) + SMALL * SMALL);
     double dlx3 = STEPSIZE / (fabs(U_u[3]) + SMALL * SMALL);
-
+#endif
     double idlx1 = 1. / (fabs(dlx1) + SMALL * SMALL);
     double idlx2 = 1. / (fabs(dlx2) + SMALL * SMALL);
     double idlx3 = 1. / (fabs(dlx3) + SMALL * SMALL);
-
+#if(metric==CKS)
+    double r = get_r(X_u);
+    return -sqrt(r) / (idlx1 + idlx2 + idlx3);
+#else
     return -1. / (idlx1 + idlx2 + idlx3);
+#endif
 }
 
 // The function to be used by the integrator for GR geodesic calculations.
@@ -167,6 +182,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     // Current r-coordinate
     double r_current = get_r(X_u);
 
+
     // Reset lambda and steps
     double lambda = 0.;
     *steps = 0;
@@ -194,6 +210,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             X_u[i] = photon_u[i];
             k_u[i] = photon_u[i + 4];
         }
+
 
         // Possibly terminate ray to eliminate higher order images
         if (thetadot_prev * photon_u[6] < 0. && *steps > 2)
@@ -223,6 +240,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 #endif
         LOOP_i X_u[i] = photon_u[i];
+        LOOP_i k_u[i] = photon_u[i+4];
         // Advance (affine) parameter lambda
         lambda += fabs(dlambda_adaptive);
         r_current = get_r(X_u);

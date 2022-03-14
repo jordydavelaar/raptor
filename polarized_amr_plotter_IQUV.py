@@ -71,6 +71,9 @@ def plot_data(folder,tstart,tend):
             if(min_V>current_V):
                 min_V=current_V
 
+        print(max_Q,max_U,max_V)
+        print(min_Q,min_U,min_V)
+
         for i in range(0,len(images[data_I_id])):
             pixels=int(np.sqrt(len(images[data_I_id][i])))
             array_I=((np.reshape(images[data_I_id][i],(pixels,pixels))))

@@ -20,7 +20,7 @@ void init_model() {
 }
 
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
-    double small = 1e-14;
+    double small = 1e-12;
 
     for (int igrid = 0; igrid < nleafs; igrid++) {
         if (x[1] + small >= block_info[igrid].lb[0] &&
@@ -429,7 +429,7 @@ void init_grmhd_data(char *fname) {
     ng[2] = 1;
     hslope = 1.0;
 
-#if (metric == MKSBHAC)
+#if (metric == MKSBHAC || metric==MKSN)
     nxlone[0] = 128;
     nxlone[1] = 48;
     nxlone[2] = 48;
@@ -770,7 +770,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
 
-#if (metric != CKS)
+#if (metric == MKSBHAC || metric==MKSN)
     X[3] = fmod(X[3], 2 * M_PI);
     X[2] = fmod(X[2], M_PI);
     if (X[3] < 0.)
@@ -813,9 +813,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                 X[1], X[2], X[3]);
         exit(1);
     }
-    if (igrid >= 3840) {
-        fprintf(stderr, "issues with igrid %d\n", igrid);
-        exit(1);
+
+    if(igrid>=7192){
+	fprintf(stderr,"running out of grid!");
+    	return 0;
     }
 
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
@@ -950,12 +951,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
+
     if ((Bsq / (rho + 1e-20) > 1.) || r > 50 ||
         (*modvar).theta_e > 20) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
 
-    fprintf(stderr,"emission!\n");
+
     return 1;
 }
