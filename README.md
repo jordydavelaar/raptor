@@ -23,7 +23,7 @@ export RAPTOR=/path/to/code
 
 It is recommended to add this to your bash/zsh profiles.
 
-To compile, first make a *copy* of the *run* directory outside of the code directory. Compile *only* if the run directory is outside of the code directory to keep a clean example present.
+To compile, first make a *copy* of the *RAPTOR/run* directory outside of the code directory. Compile *only* if the run directory is outside of the code directory to keep a clean example present.
 
 # Running RAPTOR
 
