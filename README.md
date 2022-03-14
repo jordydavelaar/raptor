@@ -12,13 +12,15 @@ Bronzwaer, Younsi, Davelaar et al. 2020, 641, A126
 
 RAPTOR needs hdf5, gsl, and openmp libraries.
 
-RAPTOR is compilied via a makefile. This makefile needs the enviroment variable RAPTOR
+RAPTOR is compilied via a makefile. This makefile needs the enviroment variable "RAPTOR" which can be set via,
 
 ```
 export RAPTOR=/path/to/code
 ```
 
-To compile, make a *copy* of the *run* directory outside of the code directory. Compile *only* if the run directory is outside of the code directory to keep a clean example present.
+It is recommended to add this to your bash/zsh profiles.
+
+To compile, first make a *copy* of the *run* directory outside of the code directory. Compile *only* if the run directory is outside of the code directory to keep a clean example present.
 
 # Running RAPTOR
 
