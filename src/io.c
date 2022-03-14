@@ -15,8 +15,8 @@ void output_files(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies],
                   double frequencies[num_frequencies]) {
     struct stat st = {0};
-    char spec_folder[256] = "";
-    strncpy(spec_folder, inputfile, strlen(inputfile) - 3);
+    char spec_folder[256] = "output";
+
     // JANSKY_FACTOR=1;
     if (stat(spec_folder, &st) == -1) {
         mkdir(spec_folder, 0700);
