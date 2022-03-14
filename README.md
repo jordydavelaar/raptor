@@ -75,4 +75,6 @@ The model file contains the following parameters
 
 The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies. Python scripts are provided in the *python* directory that explain how to read in and generate figures. 
 
-
+<p align="center">
+  <img src="docs/output_example.png" width="500" title="hover text">
+</p>
