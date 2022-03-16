@@ -3,7 +3,7 @@
  *
  */
 
-#include "raptor_bhac3d_model.h"
+#include "raptor_model.h"
 #include "functions.h"
 #include "parameters.h"
 

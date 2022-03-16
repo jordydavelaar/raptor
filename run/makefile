@@ -1,20 +1,31 @@
 
-CC = h5cc -Isrc -Imodel
+CC = h5cc -I$(RAPTOR)/src -I$(PWD)
 CFLAGS = -fopenmp  -std=c99  -lm -lgsl -Wall
-LDFLAGS = -lm -lgsl
+LDFLAGS = -fopenmp -lm -lgsl
 
-VPATH=src
-CPATH=$(RAPTOR)/src
+VPATH=$(RAPTOR)/src:
+CPATH=$(RAPTOR)/src:
 
-SRC=main.c core.c io.c GRmath.c gr_integrator.c rte_integrator.c pol_rte_integrator.c metric.c emission.c pol_emission.c tetrad.c raptor_model.c utilities.c camera.c
-OBJ=main.o core.o io.o GRmath.o gr_integrator.o rte_integrator.o pol_rte_integrator.o metric.o emission.o pol_emission.o tetrad.o raptor_model.o utilities.o camera.o
+OBJDIR=build
 
-grmhd: $(OBJ) makefile
-	$(CC) $(CFLAGS) -o RAPTOR $(OBJ) $(LDFLAGS)
+TARGET=RAPTOR
+
+SOURCES=main.c core.c io.c GRmath.c gr_integrator.c rte_integrator.c pol_rte_integrator.c metric.c emission.c pol_emission.c tetrad.c raptor_model.c utilities.c camera.c
+OBJECTS := $(patsubst %.c,$(OBJDIR)/%.o,$(SOURCES))
+
+all: create_directories $(SOURCES) $(TARGET)
+	@echo "Done compiling" $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+
+create_directories:
+	@test -d $(OBJDIR) || mkdir -v $(OBJDIR)
 
 
-$(OBJ): makefile functions.h parameters.h raptor_model.h
+$(OBJECTS): $(OBJDIR)/%.o: %.c
+	$(CC) $(CFLAGS)  -c $^ -o $@
+
 
 clean:
-	rm *.o
-	rm RAPTOR
+	rm -rf $(OBJDIR)/$(OBJECTS) $(TARGET)
