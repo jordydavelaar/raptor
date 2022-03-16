@@ -9,7 +9,7 @@
  * J. Davelaar.
  */
 
-#include "raptor_harm3d_model.h"
+#include "raptor_model.h"
 #include "functions.h"
 #include "parameters.h"
 #include <math.h>
