@@ -113,7 +113,7 @@ double M_UNIT;
 //////////////////////
 
 double CAM_FREQ;
-int TIME_INIT;
+double TIME_INIT;
 double INCLINATION;
 
 // SED parameters

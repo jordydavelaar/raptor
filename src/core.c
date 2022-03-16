@@ -45,7 +45,7 @@ void read_model(char *argv[]) {
 
     // Second argument: GRMHD file
     sscanf(argv[2], "%s", GRMHD_FILE);
-    sscanf(argv[3], "%d", TIME_INIT);
+    sscanf(argv[3], "%lf", TIME_INIT);
 
     printf("Model parameters:\n");
     printf("MBH \t\t= %g \n", MBH);
