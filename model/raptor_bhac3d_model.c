@@ -939,7 +939,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
 
-    double Rhigh = 1; // R_HIGH;
+    double Rhigh = 100; // R_HIGH;
     double Rlow = 1;  // R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
@@ -952,7 +952,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
 
-    if ((Bsq / (rho + 1e-20) > 1.) || r > 50 ||
+    if ((Bsq / (rho + 1e-20) > 5.) || r > 2000 ||
         (*modvar).theta_e > 20) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
