@@ -25,6 +25,9 @@ struct GRMHD {
     double n_e;
     double B;
     double theta_e;
+    double sigma;
+    double dx_local;
+    int igrid_c;
 };
 
 double ****econ;
