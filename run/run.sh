@@ -9,4 +9,4 @@
 OMP_STACKSIZE=20m
 export OMP_STACKSIZE
 
-./RAPTOR model.in harm3d.txt 163 0
+./RAPTOR model.in harm3d.txt 0
