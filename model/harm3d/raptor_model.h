@@ -54,6 +54,7 @@ double Ladv, dMact;
 #define B3 7
 
 #define TP_OVER_TE (0.)
+double R_HIGH, R_LOW;
 
 /* some coordinate parameters */
 double R0, Rin, Rh, Rout, Rms;
