@@ -54,9 +54,9 @@ The model file contains the following parameters
 
 Model dependent parameters;
 
-```MBH``` - Black hole mass
+```MBH``` - Black hole mass in gram
 
-```M_UNIT``` - Mass scaling
+```M_UNIT``` - Mass scaling in gram
 
 ```R_HIGH``` - Temperature ratio parameter based on Moscibrodzka et al. 2016
 
@@ -65,21 +65,19 @@ Model dependent parameters;
 
 Camera dependent parameters
 
-```INCLINATION``` - Observer inclination
+```INCLINATION``` - Observer inclination in degrees
 
 ```IMG_WIDTH``` - Amount of pixels in the x direction
 
 ```IMG_HEIGHT``` - Amount of pixels in the y direction
 
-```CAM_SIZE_X``` - The FOV in the x direction
+```CAM_SIZE_X``` - The FOV in the x direction in GM/c^2
 
-```CAM_SIZE_Y``` - The FOV in the y direction
-
-```NUM_FREQ``` - Numbers of frequency in total
+```CAM_SIZE_Y``` - The FOV in the y direction in GM/c^2
 
 ```FREQS_PER_DEC``` - The amount of frequencies per logaritmic decade
 
-```FREQ_MIN``` - Starting frequencies of the frequency array
+```FREQ_MIN``` - Starting frequencies of the frequency array in Hz
 
 ```STEPSIZE``` - Stepsize scaling
 
