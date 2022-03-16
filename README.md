@@ -30,7 +30,7 @@ To setup a RAPTOR run, first create a run directory. Copy setup.sh to the run di
 ./setup.sh <raptor-model>
 ```
 
-where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. This setup script deletes itself when successfully used. For recompiling the code used ```make all```.   
+where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. This setup should only be used for initialization of a setup folder, it should not run when a model file is present. For recompiling the code used ```make all```.   
 
 # Running RAPTOR
 
