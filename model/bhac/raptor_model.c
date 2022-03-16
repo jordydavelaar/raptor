@@ -280,10 +280,9 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     X_u[2] = X[1]; // - dxc[0];
     X_u[3] = X[2]; // - dxc[0];
 
-    double r_current=get_r(X);
-    if(r_current<1.)
-	return;
-
+    double r_current = get_r(X);
+    if (r_current < 1.)
+        return;
 
     metric_dd(X_u, g_dd);
     metric_uu(X_u, g_uu);
@@ -382,7 +381,6 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
 #if (DEBUG)
 
-
     if (prim[UU] < 0) {
         fprintf(stderr, "U %e gam %e XI %e LFAC %e lor %e RHO %e\n", prim[UU],
                 neqpar[0], conserved[XI][c], conserved[LFAC][c], gammaf,
@@ -429,7 +427,7 @@ void init_grmhd_data(char *fname) {
     ng[2] = 1;
     hslope = 1.0;
 
-#if (metric == MKSBHAC || metric==MKSN)
+#if (metric == MKSBHAC || metric == MKSN)
     nxlone[0] = 128;
     nxlone[1] = 48;
     nxlone[2] = 48;
@@ -665,35 +663,36 @@ void init_grmhd_data(char *fname) {
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
-            double r=get_r(Xgrid[i][c]);
-            if(r>1){
+            double r = get_r(Xgrid[i][c]);
+            if (r > 1) {
 
-            calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block, Xbar[i][c]);
+                calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block,
+                               Xbar[i][c]);
 
 //		fprintf(stderr,"x %e %e\n",Xgrid[i][c][0],Xbar[i][c][0]);
 //		fprintf(stderr,"y %e %e\n",Xgrid[i][c][1],Xbar[i][c][1]);
 //		fprintf(stderr,"z %e %e\n",Xgrid[i][c][2],Xbar[i][c][2]);
 #if (DEBUG)
-            if (isnan(Xgrid[i][c][0])) {
-                fprintf(stderr, "%d %d", c, i);
-                exit(1);
-            }
+                if (isnan(Xgrid[i][c][0])) {
+                    fprintf(stderr, "%d %d", c, i);
+                    exit(1);
+                }
 #endif
-            double prim[8];
-            convert2prim(prim, values, c, Xbar[i][c], Xgrid[i][c],
-                         block_info[i].dxc_block);
+                double prim[8];
+                convert2prim(prim, values, c, Xbar[i][c], Xgrid[i][c],
+                             block_info[i].dxc_block);
 
-            p[KRHO][i][c][0] = prim[KRHO];
-            p[UU][i][c][0] = prim[UU];
+                p[KRHO][i][c][0] = prim[KRHO];
+                p[UU][i][c][0] = prim[UU];
 
-            p[U1][i][c][0] = prim[U1];
-            p[U2][i][c][0] = prim[U2];
-            p[U3][i][c][0] = prim[U3];
+                p[U1][i][c][0] = prim[U1];
+                p[U2][i][c][0] = prim[U2];
+                p[U3][i][c][0] = prim[U3];
 
-            p[B1][i][c][0] = prim[B1];
-            p[B2][i][c][0] = prim[B2];
-            p[B3][i][c][0] = prim[B3];
-}
+                p[B1][i][c][0] = prim[B1];
+                p[B2][i][c][0] = prim[B2];
+                p[B3][i][c][0] = prim[B3];
+            }
             //                 count++;
         }
         //	exit(1);
@@ -770,7 +769,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
 
-#if (metric == MKSBHAC || metric==MKSN)
+#if (metric == MKSBHAC || metric == MKSN)
     X[3] = fmod(X[3], 2 * M_PI);
     X[2] = fmod(X[2], M_PI);
     if (X[3] < 0.)
@@ -780,8 +779,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 #endif
 
     double r = get_r(X);
-    if(r<1.)
-	return 0;
+    if (r < 1.)
+        return 0;
 
     // X[3]=fmod(X[3],2*M_PI);
     double smalll = 1.e-6;
@@ -814,9 +813,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         exit(1);
     }
 
-    if(igrid>=7192){
-	fprintf(stderr,"running out of grid!");
-    	return 0;
+    if (igrid >= 7192) {
+        fprintf(stderr, "running out of grid!");
+        return 0;
     }
 
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
@@ -939,8 +938,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
 
-    double Rhigh = 100; // R_HIGH;
-    double Rlow = 1;  // R_LOW;
+    double Rhigh = R_HIGH;
+    double Rlow = R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
@@ -951,13 +950,11 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-
     if ((Bsq / (rho + 1e-20) > 5.) || r > 2000 ||
         (*modvar).theta_e > 20) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
-
 
     return 1;
 }

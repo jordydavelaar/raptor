@@ -23,7 +23,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-
 #define BHAC3D (1)
 #define HARM3D (0)
 
@@ -31,10 +30,6 @@
 
 #define NDIM 4
 #define NPRIM 8
-//#if (HARM3D)
-//#include "raptor_harm3d_model.h"
-//#elif (BHAC3D)
-//#endif
 
 char inputfile[100];
 #define IMGFILE (1)
@@ -89,8 +84,8 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (CKS)
-#if (metric == BL || metric == KS || metric==CKS)
+#define metric (MKSHARM)
+#if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
        metric == MKSBHAC || metric == MKSN)
