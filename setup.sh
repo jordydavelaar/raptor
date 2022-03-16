@@ -22,18 +22,20 @@ cp $RAPTOR/run/* .
 if [ "$1" == "bhac" ] ;
 then
 	cp $RAPTOR/model/bhac/* .
-fi
 
-if  [ "$1" == "harm3d" ] ;
+elif  [ "$1" == "harm3d" ] ;
 then
-       	cp $RAPTOR/model/harm3d/*.c .
+ cp $RAPTOR/model/harm3d/* .
+else
+ echo "no grmhd model picked. Aborting."
+ return 1
 fi
 
 echo "Succesfully initialized."
 echo " "
 
 echo "Start compilation"
-echo " " 
+echo " "
 make all
 
 echo " "

@@ -1,6 +1,6 @@
 # RAPTOR++
 
-This is the developer branch of RAPTOR. 
+This is the developer branch of RAPTOR.
 Contributors; Thomas Bronzwaer, Jordy Davelaar, Ziri Younsi.
 
 Code related papers;
@@ -23,14 +23,21 @@ export RAPTOR=/path/to/code
 
 It is recommended to add this to your bash/zsh profiles.
 
-To compile, first make a *copy* of the *RAPTOR/run* directory outside of the code directory. Compile *only* if the run directory is outside of the code directory to keep a clean example present.
+To setup a RAPTOR run, first create a run directory. Copy setup.sh to the run directory. Run setup.sh
+
+
+```
+./setup.sh <raptor-model>
+```
+
+where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. This setup script deletes itself when successfully used. For recompiling the code used ```make all```.   
 
 # Running RAPTOR
 
 RAPTOR run command is given by
 
 ```
-./RAPTOR model.in <path/to/grmhd/file> inclination output-index
+./RAPTOR model.in <path/to/grmhd/file> output-index
 ```
 
 ```  model.in ```  contains model parameters. See below for an explanation
@@ -45,16 +52,20 @@ The model.in file allows to pass on code specific variables that are not needed 
 
 The model file contains the following parameters
 
+Model dependent parameters;
 
 ```MBH``` - Black hole mass
 
 ```M_UNIT``` - Mass scaling
 
-```ABSORPTION``` - Currently not used by the code
+```R_HIGH``` - Temperature ratio parameter based on Moscibrodzka et al. 2016
 
-```TEMP_MODEL``` - Currently not used by the code
+```R_LOW``` - Temperature ratio parameter based on Moscibrodzka et al. 2016
 
-```SPHERICAL_ACC``` - Currently not used by the code
+
+Camera dependent parameters
+
+```INCLINATION``` - Observer inclination
 
 ```IMG_WIDTH``` - Amount of pixels in the x direction
 
@@ -64,11 +75,11 @@ The model file contains the following parameters
 
 ```CAM_SIZE_Y``` - The FOV in the y direction
 
+```NUM_FREQ``` - Numbers of frequency in total
+
 ```FREQS_PER_DEC``` - The amount of frequencies per logaritmic decade
 
 ```FREQ_MIN``` - Starting frequencies of the frequency array
-
-```FREQ_MAX``` - Currently not used by the code
 
 ```STEPSIZE``` - Stepsize scaling
 
@@ -76,7 +87,7 @@ The model file contains the following parameters
 
 # Output
 
-The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies. Python scripts are provided in the *python* directory that explain how to read in and generate figures. 
+The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies. Python scripts are provided in the *python* directory that explain how to read in and generate figures.
 
 <p align="center">
   <img src="docs/output_example.png" width="500" title="hover text">
