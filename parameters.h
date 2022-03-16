@@ -23,9 +23,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define BHAC3D (1)
-#define HARM3D (0)
-
 #define DEBUG (1)
 
 #define NDIM 4
