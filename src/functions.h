@@ -10,7 +10,7 @@
 #define FUNCTIONS_H
 
 #include "parameters.h"
-#include "raptor_bhac3d_model.h"
+#include "raptor_model.h"
 #include <stdio.h>
 // CORE.C
 /////////
