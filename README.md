@@ -42,7 +42,7 @@ RAPTOR run command is given by
 
 ```  model.in ```  contains model parameters. See below for an explanation
 
-``` Inclination ``` set the inclination between  the line of sight of the observer and the angular momentum axis of the black hole and is in degrees.
+``` <path/to/grmhd/file> ``` path to grmhd file one wants to run
 
 ``` output-index ``` is an integer that allows the user to set the output index of the writen hdf5 file.
 
