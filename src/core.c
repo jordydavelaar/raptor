@@ -38,6 +38,7 @@ void read_model(char *argv[]) {
     fscanf(input, "%s %s %lf", temp, temp2, &CAM_SIZE_X);
     fscanf(input, "%s %s %lf", temp, temp2, &CAM_SIZE_Y);
 
+    fscanf(input, "%s %s %d", temp, temp2, &num_frequencies);
     fscanf(input, "%s %s %d", temp, temp2, &FREQS_PER_DEC);
     fscanf(input, "%s %s %lf", temp, temp2, &FREQ_MIN);
     fscanf(input, "%s %s %lf", temp, temp2, &STEPSIZE);

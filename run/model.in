@@ -8,6 +8,7 @@ IMG_WIDTH	(pixels)	100
 IMG_HEIGHT	(pixels)	100
 CAM_SIZE_X	(Rg)		20
 CAM_SIZE_Y	(Rg)		20
+NUM_FREQ (-) 1
 FREQS_PER_DEC	(-)		1
 FREQ_MIN	(Hz)		230.e9
 STEPSIZE	(-)		0.05
