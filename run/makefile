@@ -14,8 +14,6 @@ SOURCES=main.c core.c io.c GRmath.c gr_integrator.c rte_integrator.c pol_rte_int
 OBJECTS := $(patsubst %.c,$(OBJDIR)/%.o,$(SOURCES))
 
 all: create_directories $(SOURCES) $(TARGET)
-	@echo " "
-	@echo "Done compiling" $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@

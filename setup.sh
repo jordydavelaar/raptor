@@ -11,7 +11,7 @@ then
 	echo "Code dir is empty, set RAPTOR enviroment variable first"
 	echo "export RAPTOR=/path/to/code"
 	echo "Aborting..."
-	return 1
+	exit
 else
 	echo "Code located at $RAPTOR"
 	echo " "
@@ -28,7 +28,7 @@ then
  cp $RAPTOR/model/harm3d/* .
 else
  echo "no grmhd model picked. Aborting."
- return 1
+ exit
 fi
 
 echo "Succesfully initialized."
@@ -36,7 +36,17 @@ echo " "
 
 echo "Start compilation"
 echo " "
+
 make all
+
+if [ $? -ne 0 ]; 
+then 
+    echo "Compilations unsuccesful" 
+    exit
+else 
+    echo "Compilations succesful" 
+fi
+
 
 echo " "
 echo "Deleting setup.sh to ensure you dont overwrite model files from src"
