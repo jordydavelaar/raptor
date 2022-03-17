@@ -12,6 +12,65 @@
 #include <stdlib.h>
 
 // Updates the vector y (containing position/velocity) by one RK4 step.
+void rk45_step(double *y, void (*f)(double *, double *), double *dt) {
+    // Array containing all "update elements" (4 times Nelements because RK4)
+    double dx[DIM * 2 * 6];
+
+    // Create a copy of the "y vector" that can be shifted for the
+    // separate function calls made by RK4
+    double yshift[DIM * 2] = {y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]};
+
+    // fvector contains f(yshift), as applied to yshift (the 'current' y
+    // during RK steps). It is used to compute the 'k-coefficients' (dx)
+    double fvector[DIM * 2];
+
+    // Compute the RK4 update coefficients ('K_n' in lit., 'dx' here)
+    int i, q;
+    double weights[6] = {1. / 4., 3. / 8., 12. / 13.,
+                         1.,      1. / 2., 0.}; // Weights used for updating y
+
+    for (q = 0; q < 6; q++) {
+        f(yshift, fvector); // Apply function f to current y to obtain fvector
+        for (i = 0; i < DIM * 2; i++) {
+            dx[q * DIM * 2 + i] = dt * fvector[i]; // Use fvector to fill dx
+            yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q]; // Update y
+        }
+    }
+
+    double ch[6] = {16. / 135.,      0.,          6656. / 12825.,
+                    28561. / 56430., -9. / 50. /, 2. / 55.};
+    double ct[6] = {1. / 360.,       0.,       -128. / 4275.,
+                    -2197. / 75240., 1. / 50., 2. / 55.};
+
+    // Update the y-vector (light ray)
+    for (i = 0; i < DIM * 2; i++) {
+        err[i] =
+            fabs(ct[0] * dx[0 * DIM * 2 + i] + ct[1] * dx[1 * DIM * 2 + i] +
+                 ct[2] * dx[2 * DIM * 2 + i] + ct[3] * dx[3 * DIM * 2 + i] +
+                 ct[4] * dx[4 * DIM * 2 + i] + ct[5] * dx[5 * DIM * 2 + i]);
+    }
+
+    double err_tot = err[0] + err[1] + err[2];
+    double tol = 1e-4;
+
+    if (err_tot > tol) {
+        *dt = 0.9 * (*dt) * pow(tol / err_tot, 1. / 5.);
+        rk45_step(y, f, dt);
+    }
+    if (err_tot < tol / 10.) {
+        *dt = 0.9 * (*dt) * pow(tol / err_tot, 1. / 5.);
+        rk45_step(y, f, dt);
+    }
+
+    for (i = 0; i < DIM * 2; i++) {
+        y[i] =
+            y[i] + (ch[0] * dx[0 * DIM * 2 + i] + ch[1] * dx[1 * DIM * 2 + i] +
+                    ch[2] * dx[2 * DIM * 2 + i] + ch[3] * dx[3 * DIM * 2 + i] +
+                    ch[4] * dx[4 * DIM * 2 + i] + ch[5] * dx[5 * DIM * 2 + i]);
+    }
+}
+
+// Updates the vector y (containing position/velocity) by one RK4 step.
 void rk4_step(double *y, void (*f)(double *, double *), double dt) {
     // Array containing all "update elements" (4 times Nelements because RK4)
     double dx[DIM * 2 * 4];
@@ -110,27 +169,26 @@ void verlet_step(double *y, void (*f)(double *, double *), double dl) {
 // Ref. DOLENCE & MOSCIBRODZKA 2009
 double stepsize(double X_u[4], double U_u[4]) {
     double SMALL = 1.e-40;
-#if(metric==CKS)
-    double dlx1 = STEPSIZE  / (fabs(U_u[1]) + SMALL * SMALL);
-    double dlx2 =
-        STEPSIZE  / (fabs(U_u[2]) + SMALL * SMALL);
+#if (metric == CKS)
+    double dlx1 = STEPSIZE / (fabs(U_u[1]) + SMALL * SMALL);
+    double dlx2 = STEPSIZE / (fabs(U_u[2]) + SMALL * SMALL);
     double dlx3 = STEPSIZE / (fabs(U_u[3]) + SMALL * SMALL);
 #else
-#if(metric==MKSHARM)
-  double pf = 1.;
+#if (metric == MKSHARM)
+    double pf = 1.;
 #else
-  double pf=M_PI;
+    double pf = M_PI;
 #endif
 
     double dlx1 = STEPSIZE / (fabs(U_u[1]) + SMALL * SMALL);
     double dlx2 =
-        STEPSIZE *fmin(X_u[2],pf-X_u[2])/ (fabs(U_u[2]) + SMALL * SMALL);
+        STEPSIZE * fmin(X_u[2], pf - X_u[2]) / (fabs(U_u[2]) + SMALL * SMALL);
     double dlx3 = STEPSIZE / (fabs(U_u[3]) + SMALL * SMALL);
 #endif
     double idlx1 = 1. / (fabs(dlx1) + SMALL * SMALL);
     double idlx2 = 1. / (fabs(dlx2) + SMALL * SMALL);
     double idlx3 = 1. / (fabs(dlx3) + SMALL * SMALL);
-#if(metric==CKS)
+#if (metric == CKS)
     double r = get_r(X_u);
     return -sqrt(r) / (idlx1 + idlx2 + idlx3);
 #else
@@ -170,18 +228,16 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner) {
     int q;
     double t_init = 0.;
-    double dlambda_adaptive;
+    double dlambda_adaptive = 0.1;
     int theta_turns = 0;
     double thetadot_prev;
     double X_u[4], k_u[4];
     double photon_u[8];
-
     // Create initial ray conditions
     initialize_photon(alpha, beta, photon_u, t_init);
     LOOP_i X_u[i] = photon_u[i];
     // Current r-coordinate
     double r_current = get_r(X_u);
-
 
     // Reset lambda and steps
     double lambda = 0.;
@@ -211,7 +267,6 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             k_u[i] = photon_u[i + 4];
         }
 
-
         // Possibly terminate ray to eliminate higher order images
         if (thetadot_prev * photon_u[6] < 0. && *steps > 2)
             theta_turns += 1;
@@ -220,10 +275,11 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             (beta > 0. && theta_turns > (max_order + 1)))
             TERMINATE = 1;
 
-        // Compute adaptive step size
-        // dlambda_adaptive = -STEPSIZE;
+// Compute adaptive step size
+// dlambda_adaptive = -STEPSIZE;
+#if (int_method != RK45)
         dlambda_adaptive = stepsize(X_u, k_u);
-
+#endif
         // Enter current position/velocity/dlambda into lightpath
         for (q = 0; q < 8; q++)
             lightpath[*steps * 9 + q] = photon_u[q];
@@ -238,9 +294,13 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
         verlet_step(photon_u, &f_geodesic, dlambda_adaptive);
 
+#elif (int_method == RK45)
+
+    rk45_step(photon_u, &f_geodesic, &dlambda_adaptive);
+
 #endif
         LOOP_i X_u[i] = photon_u[i];
-        LOOP_i k_u[i] = photon_u[i+4];
+        LOOP_i k_u[i] = photon_u[i + 4];
         // Advance (affine) parameter lambda
         lambda += fabs(dlambda_adaptive);
         r_current = get_r(X_u);

@@ -144,7 +144,8 @@ double STEPSIZE;
 #define horizon_marg (1.e-5) // Stop tracing at this distance from E.H. [BL]
 #define VER (1)              //
 #define RK4 (2)              //
-#define int_method (2)       // method of integration 2=Verlet, 4-RK4
+#define RK45 (3)
+#define int_method (2) // method of integration 2=Verlet, 4-RK4
 
 // CONSTANTS
 ////////////
