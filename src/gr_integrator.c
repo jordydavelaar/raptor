@@ -97,10 +97,8 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
     }
 
-    double ch[6] = {16. / 135.,      0.,        6656. / 12825.,
-                    28561. / 56430., -9. / 50., 2. / 55.};
-    double ct[6] = {1. / 360.,       0.,       -128. / 4275.,
-                    -2197. / 75240., 1. / 50., 2. / 55.};
+    double ch[6] = {47. / 450., 0., 12. / 25., 32. / 225., 1. / 30., 6. / 25.};
+    double ct[6] = {-1. / 150., 0., 3. / 100., -16. / 75., -1. / 20., 6. / 25.};
 
     // Update the y-vector (light ray)
     double errmax = -1;
