@@ -58,7 +58,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     }
 
     q = 3;
-    double b41 = 69.. / 128.;
+    double b41 = 69. / 128.;
     double b42 = -243. / 128.;
     double b43 = 135. / 64.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
