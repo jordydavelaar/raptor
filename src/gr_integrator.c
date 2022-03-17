@@ -28,42 +28,102 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     // Compute the RK4 update coefficients ('K_n' in lit., 'dx' here)
     int i, q;
     double weights[6] = {1. / 4., 3. / 8., 12. / 13.,
-                         1.,  1. / 2., 0.}; // Weights used for updating y
-
-    for (q = 0; q < 6; q++) {
-        f(yshift, fvector); // Apply function f to current y to obtain fvector
-        for (i = 0; i < DIM * 2; i++) {
-            dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-            yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q]; // Update y
-        }
+                         1.,      1. / 2., 0.}; // Weights used for updating y
+    // this is incorrect im missing the cross terms...
+    q = 0;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
+        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q]; // Update y
     }
 
-    double ch[6] = {16. / 135.,      0.,          6656. / 12825.,
-                    28561. / 56430., -9. / 50. , 2. / 55.};
+    q = 1;
+    double b21 = 2. / 9.;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
+        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
+                    b21 * dx[0 * DIM * 2 + i]; // Update y
+    }
+
+    q = 2;
+    double b31 = 1. / 12.;
+    double b32 = 1. / 4.;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
+        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
+                    b31 * dx[0 * DIM * 2 + i] +
+                    b32 * dx[1 * DIM * 2 + i]; // Update y
+    }
+
+    q = 3;
+    double b41 = 69.. / 128.;
+    double b42 = -243. / 128.;
+    double b43 = 135. / 64.;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
+        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
+                    b41 * dx[0 * DIM * 2 + i] + b42 * dx[1 * DIM * 2 + i] +
+                    b43 * dx[2 * DIM * 2 + i]; // Update y
+    }
+
+    q = 4;
+    double b51 = -17. / 12.;
+    double b52 = 27. / 4.;
+    double b53 = -27. / 4.;
+    double b54 = 16. / 15.;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
+        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
+                    b51 * dx[0 * DIM * 2 + i] + b52 * dx[1 * DIM * 2 + i] +
+                    b53 * dx[2 * DIM * 2 + i] +
+                    b54 * dx[3 * DIM * 2 + i]; // Update y
+    }
+
+    q = 5;
+    double b61 = 65. / 432.;
+    double b62 = -5. / 16.;
+    double b63 = 13. / 16.;
+    double b64 = 4. / 27.;
+    double b65 = 5. / 144.;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
+        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
+                    b61 * dx[0 * DIM * 2 + i] + b62 * dx[1 * DIM * 2 + i] +
+                    b63 * dx[2 * DIM * 2 + i] + b64 * dx[3 * DIM * 2 + i] +
+                    b65 * dx[5 * DIM * 2 + i]; // Update y
+    }
+
+    double ch[6] = {16. / 135.,      0.,        6656. / 12825.,
+                    28561. / 56430., -9. / 50., 2. / 55.};
     double ct[6] = {1. / 360.,       0.,       -128. / 4275.,
                     -2197. / 75240., 1. / 50., 2. / 55.};
 
     // Update the y-vector (light ray)
-    double errmax=-1;
+    double errmax = -1;
     for (i = 0; i < DIM * 2; i++) {
         err[i] =
             fabs(ct[0] * dx[0 * DIM * 2 + i] + ct[1] * dx[1 * DIM * 2 + i] +
                  ct[2] * dx[2 * DIM * 2 + i] + ct[3] * dx[3 * DIM * 2 + i] +
                  ct[4] * dx[4 * DIM * 2 + i] + ct[5] * dx[5 * DIM * 2 + i]);
-	if(err[i]>errmax)
-		errmax =err[i];
+        if (err[i] > errmax)
+            errmax = err[i];
     }
 
     double tol = 1e-3;
 
     if (errmax > tol && bl) {
         *dt = 0.9 * (*dt) * pow(tol / errmax, 1. / 5.);
-        rk45_step(y, f, dt,0);
+        rk45_step(y, f, dt, 0);
     }
 
     if (errmax < tol / 10. && bl) {
         *dt = 1.5 * (*dt);
-        rk45_step(y, f, dt,0);
+        rk45_step(y, f, dt, 0);
     }
 
     for (i = 0; i < DIM * 2; i++) {
@@ -300,7 +360,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 #elif (int_method == RK45)
 
-    rk45_step(photon_u, &f_geodesic, &dlambda_adaptive,1);
+    rk45_step(photon_u, &f_geodesic, &dlambda_adaptive, 1);
 #endif
         LOOP_i X_u[i] = photon_u[i];
         LOOP_i k_u[i] = photon_u[i + 4];
