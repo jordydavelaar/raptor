@@ -1,0 +1,21 @@
+run met
+
+./RAPTOR model.in 2000 20
+
+indat geval is:
+t=2000
+inc=20
+
+in de folder
+
+/vol/astro4/bhc_theory/jordyd/PhD/VR-project/rad-trans/
+
+zijn 10.000 GRMHD simulatie files te vinden
+
+check het pad van de input file in : raptor_BHAC3D_model.c
+
+in die file kun je ook de fit parameters Rhigh and Rlow aanpassen
+
+zorg ook dat je de distance (parameters.h) en de mass van BH (model.in) aanpast. beide moeten in cgs eenheden
+
+output komt in en folder output (maak deze aan), er is een python script dat kan plotte, let op deze moet je aanpassen voor welke file je wil inlezen en wat de resolutie is. 
