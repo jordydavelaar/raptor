@@ -88,7 +88,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
         yshift[i] = y[i] + b61 * dx[0 * DIM * 2 + i] +
                     b62 * dx[1 * DIM * 2 + i] + b63 * dx[2 * DIM * 2 + i] +
                     b64 * dx[3 * DIM * 2 + i] +
-                    b65 * dx[5 * DIM * 2 + i]; // Update y
+                    b65 * dx[4 * DIM * 2 + i]; // Update y
     }
 
     q = 5;
