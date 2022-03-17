@@ -29,47 +29,41 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     int i, q;
     double weights[6] = {1. / 4., 3. / 8., 12. / 13.,
                          1.,      1. / 2., 0.}; // Weights used for updating y
-    // this is incorrect im missing the cross terms...
+
+    // slightly more cumbersome than rk4, since we now have non-zero crossterms
+    // in the Butcher tablue
     q = 0;
+    double b21 = 2. / 9.;
+
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
-        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q]; // Update y
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i];     // Use fvector to fill dx
+        yshift[i] = y[i] + b21 * dx[0 * DIM * 2 + i]; // Update y
     }
 
     q = 1;
-    double b21 = 2. / 9.;
-    f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
-        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
-                    b21 * dx[0 * DIM * 2 + i]; // Update y
-    }
-
-    q = 2;
     double b31 = 1. / 12.;
     double b32 = 1. / 4.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
-                    b31 * dx[0 * DIM * 2 + i] +
+        yshift[i] = y[i] + b31 * dx[0 * DIM * 2 + i] +
                     b32 * dx[1 * DIM * 2 + i]; // Update y
     }
 
-    q = 3;
+    q = 2;
     double b41 = 69.. / 128.;
     double b42 = -243. / 128.;
     double b43 = 135. / 64.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
-                    b41 * dx[0 * DIM * 2 + i] + b42 * dx[1 * DIM * 2 + i] +
+        yshift[i] = y[i] + b41 * dx[0 * DIM * 2 + i] +
+                    b42 * dx[1 * DIM * 2 + i] +
                     b43 * dx[2 * DIM * 2 + i]; // Update y
     }
 
-    q = 4;
+    q = 3;
     double b51 = -17. / 12.;
     double b52 = 27. / 4.;
     double b53 = -27. / 4.;
@@ -77,13 +71,12 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
-                    b51 * dx[0 * DIM * 2 + i] + b52 * dx[1 * DIM * 2 + i] +
-                    b53 * dx[2 * DIM * 2 + i] +
+        yshift[i] = y[i] + b51 * dx[0 * DIM * 2 + i] +
+                    b52 * dx[1 * DIM * 2 + i] + b53 * dx[2 * DIM * 2 + i] +
                     b54 * dx[3 * DIM * 2 + i]; // Update y
     }
 
-    q = 5;
+    q = 4;
     double b61 = 65. / 432.;
     double b62 = -5. / 16.;
     double b63 = 13. / 16.;
@@ -92,10 +85,16 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
-        yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q] +
-                    b61 * dx[0 * DIM * 2 + i] + b62 * dx[1 * DIM * 2 + i] +
-                    b63 * dx[2 * DIM * 2 + i] + b64 * dx[3 * DIM * 2 + i] +
+        yshift[i] = y[i] + b61 * dx[0 * DIM * 2 + i] +
+                    b62 * dx[1 * DIM * 2 + i] + b63 * dx[2 * DIM * 2 + i] +
+                    b64 * dx[3 * DIM * 2 + i] +
                     b65 * dx[5 * DIM * 2 + i]; // Update y
+    }
+
+    q = 5;
+    f(yshift, fvector); // Apply function f to current y to obtain fvector
+    for (i = 0; i < DIM * 2; i++) {
+        dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
     }
 
     double ch[6] = {16. / 135.,      0.,        6656. / 12825.,
@@ -136,7 +135,8 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
 
 // Updates the vector y (containing position/velocity) by one RK4 step.
 void rk4_step(double *y, void (*f)(double *, double *), double dt) {
-    // Array containing all "update elements" (4 times Nelements because RK4)
+    // Array containing all "update elements" (4 times Nelements because
+    // RK4)
     double dx[DIM * 2 * 4];
 
     // Create a copy of the "y vector" that can be shifted for the
@@ -151,7 +151,8 @@ void rk4_step(double *y, void (*f)(double *, double *), double dt) {
     int i, q;
     double weights[4] = {0.5, 0.5, 1., 0.}; // Weights used for updating y
     for (q = 0; q < 4; q++) {
-        f(yshift, fvector); // Apply function f to current y to obtain fvector
+        f(yshift,
+          fvector); // Apply function f to current y to obtain fvector
         for (i = 0; i < DIM * 2; i++) {
             dx[q * DIM * 2 + i] = dt * fvector[i]; // Use fvector to fill dx
             yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q]; // Update y
@@ -167,7 +168,8 @@ void rk4_step(double *y, void (*f)(double *, double *), double dt) {
 
 // Updates the vector y (containing position/velocity) by one RK2 step.
 void rk2_step(double *y, void (*f)(double *, double *), double dt) {
-    // Array containing all "update elements" (2 times Nelements because RK2)
+    // Array containing all "update elements" (2 times Nelements because
+    // RK2)
     double dx[DIM * 2 * 2];
 
     // Create a copy of the "y vector" that can be shifted for the
@@ -182,7 +184,8 @@ void rk2_step(double *y, void (*f)(double *, double *), double dt) {
     int i, q;
     double weights[2] = {0.5, 0.}; // Weights used for updating y
     for (q = 0; q < 2; q++) {
-        f(yshift, fvector); // Apply function f to current y to obtain fvector
+        f(yshift,
+          fvector); // Apply function f to current y to obtain fvector
         for (i = 0; i < DIM * 2; i++) {
             dx[q * DIM * 2 + i] = dt * fvector[i]; // Use fvector to update dx
             yshift[i] = y[i] + dx[q * DIM * 2 + i] * weights[q]; // Update y
@@ -194,8 +197,8 @@ void rk2_step(double *y, void (*f)(double *, double *), double dt) {
         y[i] = y[i] + dx[1 * DIM * 2 + i]; // y_n+1 = y_n + k2 + O(h^3)
 }
 
-// Updates the vector y (containing position/velocity) using 'velocity Verlet'
-// Ref: Dolence et al 2009 eqn 14a-14d
+// Updates the vector y (containing position/velocity) using 'velocity
+// Verlet' Ref: Dolence et al 2009 eqn 14a-14d
 void verlet_step(double *y, void (*f)(double *, double *), double dl) {
     // Create a copy of the "y vector" that can be shifted for the
     // separate function calls made by RK2
@@ -229,8 +232,8 @@ void verlet_step(double *y, void (*f)(double *, double *), double dl) {
     }
 }
 
-// Returns an appropriate stepsize dlambda, which depends on position & velocity
-// Ref. DOLENCE & MOSCIBRODZKA 2009
+// Returns an appropriate stepsize dlambda, which depends on position &
+// velocity Ref. DOLENCE & MOSCIBRODZKA 2009
 double stepsize(double X_u[4], double U_u[4]) {
     double SMALL = 1.e-40;
 #if (metric == CKS)
@@ -266,8 +269,8 @@ void f_geodesic(double *y, double *fvector) {
     // Create variable (on the stack) for the connection
     double gamma_udd[4][4][4];
 
-    // Initialize position, four-velocity, and four-acceleration vectors based
-    // on values of y
+    // Initialize position, four-velocity, and four-acceleration vectors
+    // based on values of y
     double X_u[4] = {y[0], y[1], y[2], y[3]}; // X
     double U_u[4] = {y[4], y[5], y[6], y[7]}; // dX/dLambda
     double A_u[4] = {0., 0., 0., 0.};         // d^2X/dLambda^2
