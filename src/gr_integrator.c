@@ -115,7 +115,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
             errmax = err[i];
     }
 
-    double tol = 1e-3;
+    double tol = 1e-4;
 
     if (errmax > tol && bl) {
         *dt = 0.9 * (*dt) * pow(tol / errmax, 1. / 5.);
