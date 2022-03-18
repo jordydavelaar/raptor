@@ -32,8 +32,9 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
 
     // slightly more cumbersome than rk4, since we now have non-zero crossterms
     // in the Butcher tablue
+    // also U_u and A_u are shifted differently.
     q = 0;
-    double b21 = 2. / 9.;
+    double b21 = 1. / 5.;
 
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
@@ -42,8 +43,8 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     }
 
     q = 1;
-    double b31 = 1. / 12.;
-    double b32 = 1. / 4.;
+    double b31 = 3. / 40.;
+    double b32 = 9. / 40.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
@@ -52,9 +53,9 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     }
 
     q = 2;
-    double b41 = 69. / 128.;
-    double b42 = -243. / 128.;
-    double b43 = 135. / 64.;
+    double b41 = 3. / 10.;
+    double b42 = -9. / 10.;
+    double b43 = 6. / 5.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
@@ -64,10 +65,10 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     }
 
     q = 3;
-    double b51 = -17. / 12.;
-    double b52 = 27. / 4.;
-    double b53 = -27. / 5.;
-    double b54 = 16. / 15.;
+    double b51 = -11. / 54.;
+    double b52 = 5. / 2.;
+    double b53 = -70. / 27.;
+    double b54 = 35. / 27.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
@@ -77,11 +78,11 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     }
 
     q = 4;
-    double b61 = 65. / 432.;
-    double b62 = -5. / 16.;
-    double b63 = 13. / 16.;
-    double b64 = 4. / 27.;
-    double b65 = 5. / 144.;
+    double b61 = 1631. / 55296.;
+    double b62 = 175. / 512.;
+    double b63 = 575. / 13824.;
+    double b64 = 44275. / 110592.;
+    double b65 = 253. / 4096.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
     for (i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
@@ -97,16 +98,19 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
     }
 
-    double ch[6] = {47. / 450., 0., 12. / 25., 32. / 225., 1. / 30., 6. / 25.};
-    double ct[6] = {-1. / 150., 0., 3. / 100., -16. / 75., -1. / 20., 6. / 25.};
+    double ch[6] = {37. / 378., 0, 250. / 621., 125. / 594., 0., 512. / 1771.};
+    double ct[6] = {2825. / 27648., 0.,     18575. / 48384., 13525. / 55296.,
+                    277. / 14336.,  1. / 4.};
 
     // Update the y-vector (light ray)
     double errmax = -1;
     for (i = 0; i < DIM * 2; i++) {
-        err[i] =
-            fabs(ct[0] * dx[0 * DIM * 2 + i] + ct[1] * dx[1 * DIM * 2 + i] +
-                 ct[2] * dx[2 * DIM * 2 + i] + ct[3] * dx[3 * DIM * 2 + i] +
-                 ct[4] * dx[4 * DIM * 2 + i] + ct[5] * dx[5 * DIM * 2 + i]);
+        err[i] = fabs((ch[0] - ct[0]) * dx[0 * DIM * 2 + i] +
+                      (ch[1] - ct[1]) * dx[1 * DIM * 2 + i] +
+                      (ch[2] - ct[2]) * dx[2 * DIM * 2 + i] +
+                      (ch[3] - ct[3]) * dx[3 * DIM * 2 + i] +
+                      (ch[4] - ct[4]) * dx[4 * DIM * 2 + i] +
+                      (ch[5] - ct[5]) * dx[5 * DIM * 2 + i]);
         if (err[i] > errmax)
             errmax = err[i];
     }
