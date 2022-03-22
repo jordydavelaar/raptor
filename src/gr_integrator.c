@@ -11,8 +11,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-//Updates y with a recursive RKF method. Combines a 4th and 5th order RK step
-//Uses error estimate to perform an updated step if error too large.
+// Updates y with a recursive RKF method. Combines a 4th and 5th order RK step
+// Uses error estimate to perform an updated step if error too large.
 void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     // Array containing all "update elements" (4 times Nelements because RK4)
     double dx[DIM * 2 * 6];
@@ -21,7 +21,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     // separate function calls made by RK4
     double yshift[DIM * 2] = {y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]};
     double yold[DIM * 2] = {y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]};
-    
+
     // fvector contains f(yshift), as applied to yshift (the 'current' y
     // during RK steps). It is used to compute the 'k-coefficients' (dx)
     double fvector[DIM * 2];
@@ -30,7 +30,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     // slightly more cumbersome than rk4, since we now have non-zero crossterms
     // in the Butcher tablue
     // also U_u and A_u are shifted differently.
-    q = 0;
+    int q = 0;
     double b21 = 1. / 5.;
 
     f(yshift, fvector); // Apply function f to current y to obtain fvector
@@ -120,26 +120,26 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
                     ch[4] * dx[4 * DIM * 2 + i] + ch[5] * dx[5 * DIM * 2 + i]);
     }
 
-    
-    for (i = 0; i < DIM ; i++) {
-        double yscal = fabs(ch[0] * dx[0 * DIM * 2 + i] + ch[1] * dx[1 * DIM * 2 + i] +
-                    ch[2] * dx[2 * DIM * 2 + i] + ch[3] * dx[3 * DIM * 2 + i] +
-                    ch[4] * dx[4 * DIM * 2 + i] + ch[5] * dx[5 * DIM * 2 + i]);
+    for (i = 0; i < DIM; i++) {
+        double yscal =
+            fabs(ch[0] * dx[0 * DIM * 2 + i] + ch[1] * dx[1 * DIM * 2 + i] +
+                 ch[2] * dx[2 * DIM * 2 + i] + ch[3] * dx[3 * DIM * 2 + i] +
+                 ch[4] * dx[4 * DIM * 2 + i] + ch[5] * dx[5 * DIM * 2 + i]);
 
-	err[i]= err[i]/yscal;
+        err[i] = err[i] / yscal;
         if (err[i] > errmax)
             errmax = err[i];
     }
-//    errmax/=tol;
+    //    errmax/=tol;
 
-    if (errmax>tol &&  bl) {
-	(*dt) =- fmax(0.001*fabs(*dt), 0.84 * fabs(*dt) * powf( tol/errmax, 1. / 4.));
+    if (errmax > tol && bl) {
+        (*dt) = -fmax(0.001 * fabs(*dt),
+                      0.84 * fabs(*dt) * powf(tol / errmax, 1. / 4.));
         rk45_step(yold, f, dt, 0);
-    
-    for (i = 0; i < DIM * 2; i++) {
-       	y[i] =
-            yold[i] ;
-    }
+
+        for (i = 0; i < DIM * 2; i++) {
+            y[i] = yold[i];
+        }
     }
 }
 
@@ -355,10 +355,9 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             (beta > 0. && theta_turns > (max_order + 1)))
             TERMINATE = 1;
 
-// Compute educational guess for an adaptive step size
-// dlambda_adaptive = -STEPSIZE;
+        // Compute educational guess for an adaptive step size
+        // dlambda_adaptive = -STEPSIZE;
         dlambda_adaptive = stepsize(X_u, k_u);
-
 
         // Advance ray/particle
 #if (int_method == RK4)
@@ -371,7 +370,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 #elif (int_method == RK45)
 
-        rk45_step(photon_u, &f_geodesic, &dlambda_adaptive, 1);
+    rk45_step(photon_u, &f_geodesic, &dlambda_adaptive, 1);
 #endif
 
         lightpath[*steps * 9 + 8] = fabs(dlambda_adaptive);
