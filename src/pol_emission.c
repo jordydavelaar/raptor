@@ -14,6 +14,7 @@
 
 // POLARIZED COEFFICIENTS
 /////////////////////////
+//kappa implementation started
 
 // Dexter (2016) A.18
 double I_I(double x) {
