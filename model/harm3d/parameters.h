@@ -61,6 +61,15 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
+// DISTRIBUTION CHOISES 
+//////////////////
+#define kappa (0) // kappa distribution
+#define thermal (1) // thermal distribution
+#define DF (kappa)  // Distribution function
+
+
+
+
 // METRIC PARAMETERS
 ////////////////////
 
