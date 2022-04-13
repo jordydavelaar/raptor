@@ -21,6 +21,16 @@ double f_m(double X) {
                0.5 * (1. + tanh(10. * log(X / 120.)));
 }
 
+double planck_function(double nu, double THETA_e) {
+    double T = THETA_e * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT /
+               BOLTZMANN_CONSTANT;
+    return 2. * PLANCK_CONSTANT * nu * nu * nu /
+           (SPEED_OF_LIGHT * SPEED_OF_LIGHT) * 1. /
+           (exp(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T)) - 1.);
+}
+
+
+
 // Bessel function approximations:
 double bessel_appr(int n, double x) {
     if (n == 0)
@@ -280,7 +290,10 @@ double A_I(double theta_e, double n_e, double nu, double B, double theta_B) {
 		return pow((pow(A_I_low_kappa, -A_x_I) + pow(A_I_high_kappa, -A_x_I)), -1. / A_x_I)*A_S_factor_I;
 		}
 	double A_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B) {
-		?
+		
+    		double B_nu = planck_function(nu, THETA_e); // Planck function
+    		return j_I_thermal / B_nu;
+
 		}
 	if(DF==kappa)
 		return A_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
@@ -305,7 +318,9 @@ double A_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 		return pow((pow(A_Q_low_kappa, -A_x_Q) + pow(A_Q_high_kappa, -A_x_Q)), -1. / A_x_Q)*A_S_factor_Q;
 		}
 	double A_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B) {
-    		?
+    		
+    		double B_nu = planck_function(nu, THETA_e); // Planck function
+    		return j_Q_thermal / B_nu;
 		}
 	if(DF==kappa)
 		return A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
@@ -331,7 +346,9 @@ double A_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 		return pow((pow(A_V_low_kappa, -A_x_V) + pow(A_V_high_kappa, -A_x_V)), -1. / A_x_V)*A_S_factor_V;
 		}
 	double A_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B) {
-    		?
+    		
+    		double B_nu = planck_function(nu, THETA_e); // Planck function
+    		return j_V_thermal / B_nu;
 		}
 
 	if(DF==kappa)
