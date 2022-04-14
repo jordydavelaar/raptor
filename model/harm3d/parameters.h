@@ -33,7 +33,7 @@ char inputfile[100];
 #define SPECFILE (1)
 #define RAD_TRANS (1)
 
-#define num_frequencies 10
+#define num_frequencies 21
 #define num_pixels_1d 10
 #define tot_pixels 100
 int num_blocks, tot_blocks, tot_blocks_alloc;
