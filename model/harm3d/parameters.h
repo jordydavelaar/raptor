@@ -89,6 +89,7 @@ extern double R0; // Parameter for MKS coords
 #define logscale (1) // Modified BL/KS coordinates; logarithmic radius
 #endif
 
+
 // MODEL PARAMETERS
 ///////////////////
 
