@@ -101,9 +101,10 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
     g_dd[3][1] = g_dd[1][3];
     g_dd[3][3] =
         sin2th * (rho2 + a * a * sin2th * (1. + 2. * r / rho2)) * pfac * pfac;
+
 #elif (metric == MKSBHAC)
     double r = exp(X_u[1]);
-    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
+    double theta = X_u[2] + 0.5 * hslope * sin(2. * X_u[2]);
 
     double sinth = sin(theta);
     double sin2th = sinth * sinth;
@@ -113,7 +114,7 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
 
     tfac = 1.;
     rfac = r;
-    hfac = 1 + (1. - hslope) * cos(2. * X_u[2]);
+    hfac = 1 + hslope * cos(2. * X_u[2]);
     pfac = 1.;
 
     g_dd[0][0] = (-1. + 2. * r / rho2) * tfac * tfac;
@@ -292,7 +293,7 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 #elif (metric == MKSBHAC)
 
     double r = exp(X_u[1]);
-    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
+    double theta = X_u[2] + 0.5 * hslope * sin(2. * X_u[2]);
 
     double sinth = sin(theta);
     double sin2th = sinth * sinth;
@@ -300,7 +301,7 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 
     double irho2 = 1. / (r * r + a * a * costh * costh);
 
-    double hfac = 1 + (1. - hslope) * cos(2. * X_u[2]);
+    double hfac = 1 + hslope * cos(2. * X_u[2]);
 
     g_uu[0][0] = -1. - 2. * r * irho2;
     g_uu[0][1] = 2. * irho2;
@@ -402,7 +403,7 @@ void metric_KS_uu(const double X_u[4], double g_uu[4][4]) {
 
     double r = (X_u[1]);
 
-    hslope=1;
+    hslope = 1;
 
     double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
 
@@ -1141,7 +1142,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
 #endif
 
-#if (metric == MKSHARM)
+#if (metric == MKSHARM || metric == MKSBHAC)
     photon_u[2] =
         Xg2_approx_rand(photon_u[2]); // We only transform theta - r is
                                       // already exponential and R0 = 0
@@ -1158,8 +1159,6 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
         photon_u_KS[i] = photon_u[i];
         photon_u_KS[i + 4] = photon_u[i + 4];
     }
-
-    
 
     KS_to_CKS_u(photon_u_KS, photon_u);
 
@@ -1250,12 +1249,28 @@ void initialize_photon_perspective(double alpha, double beta,
 // Returns the value of f(Xg2) given some value for Xr2. For the correct Xg2,
 // we have f(Xg2) = 0.
 double f_Xg2(double Xg2, double Xr2) {
+#if (metric == MKSHARM)
+
     return M_PI * Xg2 + 0.5 * (1. - hslope) * sin(2. * M_PI * Xg2) - Xr2;
+
+#elif (metric == MKSBHAC)
+
+    return Xg2 + 0.5 * hslope * sin(2. * Xg2) - Xr2;
+
+#endif
 }
 
 // Returns the value of f'(Xg2).
 double f_primed_Xg2(double Xg2) {
+#if (metric == MKSHARM)
+
     return M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
+
+#elif (metric == MKSBHAC)
+
+    return 1 + hslope * cos(2. * Xg2);
+
+#endif
 }
 
 // This function does "one Newton-Raphson step", i.e. it returns the NEW,
@@ -1272,12 +1287,27 @@ double NR_stepX(double Xg2_0, double Xr2) {
 // Returns the value of f(Ug2) given some value for Ur2. For the correct Ug2,
 // we have f(Ug2) = 0.
 double f_Ug2(double Ug2, double Ur2, double Xg2) {
+#if (metric == MKSHARM)
+
     return M_PI * Ug2 * (1. + (1. - hslope) * cos(2. * M_PI * Xg2)) - Ur2;
+
+#elif (metric == MKSBHAC)
+
+    return Ug2 * (1. + hslope * cos(2. * Xg2)) - Ur2;
+
+#endif
 }
 
 // Returns the value of f'(Ug2).
 double f_primed_Ug2(double Ug2, double Xg2) {
+#if (metric == MKSHARM)
     return M_PI * (1. + (1. - hslope) * cos(2. * M_PI * Xg2));
+
+#elif (metric == MKSBHAC)
+
+    return (1. + hslope * cos(2. * Xg2));
+
+#endif
 }
 
 // This function does "one Newton-Raphson step", i.e. it returns the NEW,
