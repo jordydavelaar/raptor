@@ -91,8 +91,7 @@ int main(int argc, char *argv[]) {
         for (int f = 0; f < num_frequencies; f++) {
             fscanf(input, "%d", &frequencies[f]);
         }
-    #endif
-    }           
+    #endif           
         
     int block = 0;
 
