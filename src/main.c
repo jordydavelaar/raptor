@@ -76,12 +76,22 @@ int main(int argc, char *argv[]) {
 
     init_camera(&intensityfield);
 
-    for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-        frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
-        energy_spectrum[f] = 0.;
-        printf("freq = %+.15e\n", frequencies[f]);
-    }
-
+    #if (FREQS == LOG)
+        for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+            frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
+            energy_spectrum[f] = 0.;
+            printf("freq = %+.15e\n", frequencies[f]);
+        }
+    #elif (FREQS == FILE)
+        FILE *input;
+        input = fopen("./frequencies.txt", "r");
+        if (input == NULL) {
+            printf("Cannot read input file");
+            // return 1;
+        for (int f = 0; f < num_frequencies; f++) {
+            fscanf(input, "%d", &frequencies[f]);
+        }
+        
     int block = 0;
 
     while (block < tot_blocks) {
