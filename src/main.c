@@ -76,13 +76,13 @@ int main(int argc, char *argv[]) {
 
     init_camera(&intensityfield);
 
-    #if (FREQS == LOG)
+    #if (FREQS == FREQLOG)
         for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
             frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
             energy_spectrum[f] = 0.;
             printf("freq = %+.15e\n", frequencies[f]);
         }
-    #elif (FREQS == FILE)
+    #elif (FREQS == FREQFILE)
         FILE *input;
         input = fopen("./frequencies.txt", "r");
         if (input == NULL) {
