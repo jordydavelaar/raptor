@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     #elif (FREQS == FREQFILE)
         FILE *input;
         input = fopen("./frequencies.txt", "r");
-        if (input == NULL) {
+        if (input == NULL) 
             printf("Cannot read input file");
             // return 1;
         for (int f = 0; f < num_frequencies; f++) {
