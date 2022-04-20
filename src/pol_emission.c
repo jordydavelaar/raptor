@@ -21,8 +21,8 @@ double f_m(double X) {
                0.5 * (1. + tanh(10. * log(X / 120.)));
 }
 
-double planck_function(double nu, double THETA_e) {
-    double T = THETA_e * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT /
+double planck_function(double nu, double theta_e) {
+    double T = theta_e * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT /
                BOLTZMANN_CONSTANT;
     return 2. * PLANCK_CONSTANT * nu * nu * nu /
            (SPEED_OF_LIGHT * SPEED_OF_LIGHT) * 1. /
