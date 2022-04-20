@@ -35,10 +35,10 @@ char inputfile[100];
 
 #define num_frequencies 25
 
-#define LOGSCALING (0)
-#define FILE (1)
+#define FREQFILE (0)
+#define FREQLOG (1)
 
-#define FREQS (FILE)
+#define FREQS (FREQFILE)
 
 #define num_pixels_1d 10
 #define tot_pixels 100
