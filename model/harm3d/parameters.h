@@ -33,7 +33,7 @@ char inputfile[100];
 #define SPECFILE (1)
 #define RAD_TRANS (1)
 
-#define num_frequencies 25
+#define num_frequencies 8
 
 #define FREQFILE (0)
 #define FREQLOG (1)
