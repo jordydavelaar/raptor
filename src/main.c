@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
             printf("Cannot read input file");
             // return 1;
         for (int f = 0; f < num_frequencies; f++) {
-            fscanf(input, "%d", &frequencies[f]);
+            fscanf(input, "%lf", &frequencies[f]);
         }
     #endif           
         
