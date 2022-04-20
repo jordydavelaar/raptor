@@ -63,9 +63,9 @@ extern double Thetae_unit;
 
 // DISTRIBUTION CHOISES 
 //////////////////
-#define kappa (0) // kappa distribution
-#define thermal (1) // thermal distribution
-#define DF (kappa)  // Distribution function
+#define KAPPA (0) // kappa distribution
+#define TH (1) // thermal distribution
+#define DF (KAPPA)  // Distribution function
 
 
 
