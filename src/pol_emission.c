@@ -289,7 +289,7 @@ double B_nu = planck_function(nu, theta_e); // Planck function
 double A_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_I_thermal) {
     		return j_I_thermal / B_nu;
 		}
-double A_I(double theta_e, double n_e, double nu, double B, double theta_B) {
+double A_I(double theta_e, double n_e, double nu, double B, double theta_B, double j_I_thermal) {
 	#if(DF==KAPPA)
 		return A_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
@@ -312,7 +312,7 @@ double A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta
 double A_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_Q_thermal) {
     		return j_Q_thermal / B_nu;
 		}
-double A_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
+double A_Q(double theta_e, double n_e, double nu, double B, double theta_B, double j_Q_thermal) {
 	#if(DF==KAPPA)
 		return A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
@@ -337,7 +337,7 @@ double A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta
 double A_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_V_thermal) {
     		return j_V_thermal / B_nu;
 		}
-double A_V(double theta_e, double n_e, double nu, double B, double theta_B) {
+double A_V(double theta_e, double n_e, double nu, double B, double theta_B, double j_V_thermal) {
 	#if(DF==KAPPA)
 		return A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
