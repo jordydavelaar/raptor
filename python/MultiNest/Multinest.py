@@ -70,24 +70,23 @@ def Initialize_modelin(params_modelin):
 def Set_parameters():
     	# Load parameters from 'MultiNestRAPTORinput.txt'
 	_, params = np.loadtxt('MultiNestRAPTORinput.txt', dtype=str, delimiter='=', unpack=True)
-	params = params[0:27].astype(float)
+	params = params.astype(float)
        	# Set global variables
 	global MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, IR, Coreshift
-	MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, IR, Coreshift = params[0:7].astype(int)
-	#global MBH, M_UNIT, Rhigh, i, data_number
-	global MBH, M_UNIT, Rhigh, i
+	MBH_var, M_UNIT_var, Rhigh_var, i_var = params[0:4].astype(int)
+	global MBH, M_UNIT, Rhigh, i, data_number
 	if not MBH_var:
-		MBH = params[7]
+		MBH = params[4]
 	if not M_UNIT_var:
-		M_UNIT = params[8]
+		M_UNIT = params[5]
 	if not Rhigh_var:
-		Rhigh = params[9]
+		Rhigh = params[6]
 	if not i_var:
-		i = params[11]
+		i = params[8]
 	#data_number = params[26]
-	#data_number = 0
+	data_number = 0
     	# Initialize input files RAPTOR
-	Initialize_modelin(params[7:20])
+	Initialize_modelin(params[4:20])
 
 def Set_modelin(MBH, M_UNIT,Rhigh,i):
         # Set MBH, M_UNIT, Rhigh and i in 'model.in'
