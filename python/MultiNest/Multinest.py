@@ -114,7 +114,6 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
     	# Write output to 'Run-name_flux.txt'
         f = open("%s_Flux.txt"%(sys.argv[1]),'a+')
         f.write(str(Freq)+' '+str(Flux)+'\n')
-       # f.write(' '.join(map(str,Flux))+'\n')
         f.close()
     	# Return flux values
         return Flux
@@ -147,35 +146,30 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
                 i = cube[MBH_var+M_UNIT_var+Rhigh_var+i_var-1]
         Flux = RAPTOR(MBH, M_UNIT, Rhigh, i, data_number)
     	# Calculate chisquared values for radio, IR and Coreshift
-        _, Measurements_Radio = np.loadtxt('specnep.txt').transpose()
+        _, Measurements_Radio = np.loadtxt('spectrum.txt').transpose()
         global num_Radio
-        num_Radio = 21
-      #  Measurements_Radio = np.multiply(Measurements_Radio, 1000)
-#	  Sigma_Radio = np.multiply(Sigma_Radio, 1000)
+        num_Radio = 8
         Chisquare_Radio = 0
         for freqnum in range(num_Radio):
 #            	Chisquare_Radio += (Measurements_Radio[freqnum] - np.log10(Flux[freqnum]))**2  /(2*Sigma_Radio[freqnum]**2)
                 Chisquare_Radio += (Measurements_Radio[freqnum] - Flux[freqnum])**2
 #		Chisquare_Radio += (np.log10(Measurements_Radio[freqnum]) - np.log10(Flux[freqnum]))**2 /(2*(np.log10(Measurements_Radio[freqnum])-np.log10(Measurements_Radio[freqnum] - Sigma_Radio[freqnum]))**2)
-        #        Chisquare_Radio +=(Measurements_Radio[freqnum] - Flux[freqnum])**2
-        # Calculate total chisquared value
-    	#Chisquare_Total = Chisquare_Radio/num_Radio + Chisquare_IR/num_IR + Chisquare_Coreshift/num_Coreshift
     	# Write Chisquared values to 'Run-name_Chisquared.txt'
         f = open("%s_Chisquared.txt"%(sys.argv[1]),'a+')
         f.write("%.15e\t%.15e\t%.15e\t%.15e\t%.15e\n"%(MBH, M_UNIT, Rhigh, i, Chisquare_Radio))
         f.close()
 	# Write all live point info to 'Run-name_livepoints.txt'
-        #livepoints = np.loadtxt('%sphys_live.points'%(sys.argv[1]), dtype=str)
-        #f = open("%s_livepoints.txt"%(sys.argv[1]),'a+')
-        #for i in range(len(livepoints)):
-         #       livepoint_i = livepoints[i]
-          #      livepoint_i = np.append(livepoint_i, np.array([loglike_evaluation]))
-           #     f.write(str(livepoint_i) + '\n')
-       # f.close()
+        livepoints = np.loadtxt('%sphys_live.points'%(sys.argv[1]), dtype=str)
+        f = open("%s_livepoints.txt"%(sys.argv[1]),'a+')
+        for i in range(len(livepoints)):
+                livepoint_i = livepoints[i]
+                livepoint_i = np.append(livepoint_i, np.array([loglike_evaluation]))
+                f.write(str(livepoint_i) + '\n')
+        f.close()
 	# Update Convergence plot
         #os.system('python Convergenceplotter.py %s'%(sys.argv[1]))
     	# Return loglikelihood
-        return - Chisquare_Radio
+        return Chisquare_Radio
 
 ## Main code
 Set_parameters()
