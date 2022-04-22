@@ -126,7 +126,7 @@ def myprior(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_UNI
         	cube[MBH_var+M_UNIT_var-1] = 10**(5*cube[MBH_var+M_UNIT_var-1] + 19)
     	if Rhigh_var: # Rhigh has a log uniform distribution between 10 and 100
         	cube[MBH_var+M_UNIT_var+Rhigh_var-1] = 10**(cube[MBH_var+M_UNIT_var+Rhigh_var-1] + 1)
-    	if i_var: # i has a uniform distribution between 5 and 90
+    	if i_var: # i has a uniform distribution between 12 and 45
         	cube[MBH_var+M_UNIT_var+Rhigh_var+i_var-1] = 33*cube[MBH_var+M_UNIT_var+Rhigh_var+i_var-1] + 12
     	return cube
 
