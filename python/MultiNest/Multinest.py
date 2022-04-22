@@ -86,7 +86,7 @@ def Set_parameters():
 	#data_number = params[26]
 	data_number = 0
     	# Initialize input files RAPTOR
-	Initialize_modelin(params[4:20])
+	Initialize_modelin(params[4:16])
 
 def Set_modelin(MBH, M_UNIT,Rhigh,i):
         # Set MBH, M_UNIT, Rhigh and i in 'model.in'
