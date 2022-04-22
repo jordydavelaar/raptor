@@ -1,20 +1,16 @@
 '''
 Set parameters in 'MultiNestRAPTORinput.txt'
 Check if there are enough lines for the frequencies in file 'img_renderer.c'
-Run this file with command: python MultiNestRAPTOR_SgrA.py Run-name
+Run this file with command: python Multinest.py Run-name
 
 To run this code, one has to have downloaded PyMultiNest
 
 Needed files:
-        MultiNestRAPTOR_SgrA.py
-        sizeflux_v4_5.c   (and compile it with name sizeflux_v4_5)
+        Multinest.py
 	MultiNestRAPTORinput.txt
 	Convergenceplotter.py
-
-Maybe needed files:
-	Observations_Radio.txt
-	Observations_IR.txt
-	Observations_Coreshift.txt
+	
+	spectrum.txt
 
 Not used in this code, but needed to make plots of the best fits afterwards
 	plotterSgrAalles.py
@@ -108,7 +104,6 @@ def Set_modelin(MBH, M_UNIT,Rhigh,i):
 
 def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
         # Set parameter values for RAPTOR:
-        print("running raptor")
         Set_modelin(MBH, M_UNIT, Rhigh,i)
     	# Run RAPTOR
         os.system('./RAPTOR model.in ../harm3d.txt %d'%(data_number))
