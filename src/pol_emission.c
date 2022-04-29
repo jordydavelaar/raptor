@@ -21,13 +21,6 @@ double f_m(double X) {
                0.5 * (1. + tanh(10. * log(X / 120.)));
 }
 
-double planck_function(double nu, double theta_e) {
-    double T = theta_e * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT /
-               BOLTZMANN_CONSTANT;
-    return 2. * PLANCK_CONSTANT * nu * nu * nu /
-           (SPEED_OF_LIGHT * SPEED_OF_LIGHT) * 1. /
-           (exp(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T)) - 1.);
-}
 
 
 
@@ -94,9 +87,17 @@ double rho_Q_thermal(double theta_e, double n_e, double nu, double B, double the
             		6. * theta_e) *
            		sin(theta_B) * sin(theta_B);
 	}
+
+double P_perp = (n_e * ELECTRON_CHARGE * ELECTRON_CHARGE) / (ELECTRON_MASS * SPEED_OF_LIGHT * nuc * sth) 
+				* (power-1) * pow((pow(gamma_min,1-power)-pow(gamma_max, 1-power),-1);
+double rho_Q_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return -P_perp * pow((nuc * sth)/nu,3) * (pow(gamma_min,2-power)/((power/2.)-1)) * (1-pow((2 * nuc * sth * gamma_min * gamma_min)/(3 * nu),(power/2.)-1));
+	}
 double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B){
 	#if(DF==KAPPA)
 		return rho_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return rho_Q_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return rho_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
 }
@@ -145,10 +146,14 @@ double rho_V_thermal(double theta_e, double n_e, double nu, double B, double the
            		pow(2. * M_PI * nu, 3) * (bessel_appr(0, Thetaer) - DeltaJ_5(Xe)) /
            		bessel_appr(2, Thetaer) * cos(theta_B);
 	}
-
+double rho_V_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return 2 * P_perp * ((power+2)/(power+1)) * pow(((nuc*sth)/(nu)),2) * pow(gamma_min, -(power+1)) * log(gamma_min) * cot(theta_e);
+		}
 double rho_V(double theta_e, double n_e, double nu, double B, double theta_B){
 	#if(DF==KAPPA)
 		return rho_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return rho_V_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return rho_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
 }
@@ -184,9 +189,17 @@ double j_I_thermal(double theta_e, double n_e, double nu, double B, double theta
            	SPEED_OF_LIGHT / theta_e / theta_e * I_I(x);
 	}
 
+double J_I_power_factor = 1;
+double J_I_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return  (pow(3,power/2.) * (power-1) * sth) / (2 * (power +1) * (pow(gamma_min,1-power)-pow(gamma_max, 1-power))) *
+		tgamma((3*power-1)/12.) * tgamma((3*power+19)/12.) * pow((nu)/(nuc * sth),-(power-1)/2.) * J_I_power_factor;
+	
+	}
 double J_I(double theta_e, double n_e, double nu, double B, double theta_B) {
 	#if(DF==KAPPA)
 		return J_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return J_I_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return j_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
 }
@@ -218,9 +231,16 @@ double j_Q_thermal(double theta_e, double n_e, double nu, double B, double theta
     	return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
            		SPEED_OF_LIGHT / theta_e / theta_e * I_Q(x);
 	}
+double J_Q_power_factor = -(power+1)/(power+7./3.);						  
+double J_Q_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return  (pow(3,power/2.) * (power-1) * sth) / (2 * (power +1) * (pow(gamma_min,1-power)-pow(gamma_max, 1-power))) *
+		tgamma((3*power-1)/12.) * tgamma((3*power+19)/12.) * pow((nu)/(nuc * sth),-(power-1)/2.) * J_Q_power_factor;
+	}
 double J_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 	#if(DF==KAPPA)
 		return J_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return J_Q_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return j_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
 }
@@ -252,10 +272,17 @@ double j_V_thermal(double theta_e, double n_e, double nu, double B, double theta
            		3. / sqrt(3.) / SPEED_OF_LIGHT / theta_e / theta_e / theta_e *
            		I_V(x);
 	}
-
+double J_V_power_factor = (171./250.) * (pow(power,49./100.)/tan(theta_e)) * pow(nu/(3 * nuc * sth),-1./2.);
+double J_V_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return  (pow(3,power/2.) * (power-1) * sth) / (2 * (power +1) * (pow(gamma_min,1-power)-pow(gamma_max, 1-power))) *
+		tgamma((3*power-1)/12.) * tgamma((3*power+19)/12.) * pow((nu)/(nuc * sth),-(power-1)/2.) * J_V_power_factor;
+	}
+						  
 double J_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 	#if(DF==KAPPA)
 		return J_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		`return J_V_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return j_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
 }
@@ -289,9 +316,16 @@ double B_nu = planck_function(nu, theta_e); // Planck function
 double A_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_I_thermal) {
     		return j_I_thermal / B_nu;
 		}
+double A_I_power_factor = 1;
+double A_I_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return   (pow(3,(power+1)/2.) * (power-1)) / (4 * (pow(gamma_min,1-power)-pow(gamma_max, 1-power))) *
+		tgamma((3*power+2)/12.) * tgamma((3*power+22)/12.) * pow((nu)/(nuc * sth),-(power+2)/2.) * A_I_power_factor;
+	}
 double A_I(double theta_e, double n_e, double nu, double B, double theta_B, double j_I_thermal) {
 	#if(DF==KAPPA)
 		return A_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return A_I_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return A_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_I_thermal);
 }
@@ -312,9 +346,16 @@ double A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta
 double A_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_Q_thermal) {
     		return j_Q_thermal / B_nu;
 		}
+double A_Q_power_factor = -pow(((17 * power/500.) - 43./1250.),43./500.);
+double A_Q_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return   (pow(3,(power+1)/2.) * (power-1)) / (4 * (pow(gamma_min,1-power)-pow(gamma_max, 1-power))) *
+		tgamma((3*power+2)/12.) * tgamma((3*power+22)/12.) * pow((nu)/(nuc * sth),-(power+2)/2.) * A_Q_power_factor;
+	}
 double A_Q(double theta_e, double n_e, double nu, double B, double theta_B, double j_Q_thermal) {
 	#if(DF==KAPPA)
 		return A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return A_Q_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return A_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_Q_thermal);
 }
@@ -337,9 +378,16 @@ double A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta
 double A_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_V_thermal) {
     		return j_V_thermal / B_nu;
 		}
+double A_V_power_factor = pow(((71 * power/100.) + 23./625.),197./500.)	* pow(((31./10.)*pow(sth,-48./25.)-31./10.),64./125.)*pow(nu/(nuc * sth),-1./2.)*sgn(cos(theta_e));
+double A_V_power(double theta_e, double n_e, double nu, double B, double theta_B){
+	return   (pow(3,(power+1)/2.) * (power-1)) / (4 * (pow(gamma_min,1-power)-pow(gamma_max, 1-power))) *
+		tgamma((3*power+2)/12.) * tgamma((3*power+22)/12.) * pow((nu)/(nuc * sth),-(power+2)/2.) * A_V_power_factor;
+	}
 double A_V(double theta_e, double n_e, double nu, double B, double theta_B, double j_V_thermal) {
 	#if(DF==KAPPA)
 		return A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+	#elif(DF==POWER)
+		return A_V_power(double theta_e, double n_e, double nu, double B, double theta_B);
 	#endif(DF==TH)
 		return A_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B, double j_V_thermal);
 }
