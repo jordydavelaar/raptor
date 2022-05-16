@@ -1,7 +1,7 @@
 MBH		(g)	1.233e43
 M_UNIT		(g)	2.739e25
-R_HIGH		(-)	1
 R_LOW		(-)	1
+R_HIGH		(-)	1
 
 INCLINATION	(deg) 	160
 IMG_WIDTH	(pixels)	100

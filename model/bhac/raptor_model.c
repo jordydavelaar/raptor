@@ -822,10 +822,15 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     //		      fprintf(stderr,"igrid %d dxc %e\n",igrid,*dx_local);
 
     c = find_cell(X, block_info, igrid, Xgrid);
+    double X_u[4];
+    X_u[0] = 0;
+    X_u[1] = Xbar[igrid][c][0]; // - dxc[0];
+    X_u[2] = Xbar[igrid][c][1]; // - dxc[0];
+    X_u[3] = Xbar[igrid][c][2]; // - dxc[0];
 
-    metric_uu(X, g_uu); // cell centered, nearest neighbour so need metric
-                        // at cell position
-    metric_dd(X, g_dd);
+    metric_uu(X_u, g_uu); // cell centered, nearest neighbour so need
+                          // metric at cell position
+    metric_dd(X_u, g_dd);
 
     // inteprolatie van je primitieve variabelen
     rho = p[KRHO][igrid][c][0];
