@@ -1,6 +1,5 @@
 '''
 Set parameters in 'MultiNestRAPTORinput.txt'
-Check if there are enough lines for the frequencies in file 'img_renderer.c'
 Run this file with command: python Multinest.py Run-name
 
 To run this code, one has to have downloaded PyMultiNest
@@ -38,11 +37,11 @@ from pymultinest.solve import solve
 from pymultinest.analyse import Analyzer
 
 # Define global variables
-MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, IR, Coreshift = [0,0,0,0,0,0,0]
-num_Radio, num_IR, num_Coreshift, num_indices = [0,0,0,0]
+MBH_var, M_UNIT_var, Rhigh_var, i_var = [0,0,0,0]
+num_Radio, num_indices = [0,0]
 MBH, M_UNIT, Rhigh, i, data_number = [0,0,0,0,0]
 loglike_evaluation = 0
-data_number = 0
+
 # Define functions
 def Initialize_modelin(params_modelin):
 	# Set parameters in 'model.in'
@@ -72,7 +71,7 @@ def Set_parameters():
 	_, params = np.loadtxt('MultiNestRAPTORinput.txt', dtype=str, delimiter='=', unpack=True)
 	params = params.astype(float)
        	# Set global variables
-	global MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, IR, Coreshift
+	global MBH_var, M_UNIT_var, Rhigh_var, i_var
 	MBH_var, M_UNIT_var, Rhigh_var, i_var = params[0:4].astype(int)
 	global MBH, M_UNIT, Rhigh, i, data_number
 	if not MBH_var:
@@ -86,7 +85,7 @@ def Set_parameters():
 	#data_number = params[26]
 	data_number = 0
     	# Initialize input files RAPTOR
-	Initialize_modelin(params[4:16])
+	Initialize_modelin(params[4:17])
 
 def Set_modelin(MBH, M_UNIT,Rhigh,i):
         # Set MBH, M_UNIT, Rhigh and i in 'model.in'
@@ -118,10 +117,10 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
         return Flux
 
 def myprior(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_UNIT_var+Rhigh_var+i_var):
-    	if MBH_var: # MBH has a log uniform distribution between 1.0e39 and 1.0e41 g
-        	cube[MBH_var-1] = 10**(2.0*cube[MBH_var-1] + 39)
-    	if M_UNIT_var: # M_unit has a log uniform distribution between 1e19 and 1e24 g
-        	cube[MBH_var+M_UNIT_var-1] = 10**(5*cube[MBH_var+M_UNIT_var-1] + 19)
+    	if MBH_var: # MBH has a log uniform distribution between 1.0e40 and 1.0e42 g
+        	cube[MBH_var-1] = 10**(2.0*cube[MBH_var-1] + 40)
+    	if M_UNIT_var: # M_unit has a log uniform distribution between 1e19 and 1e25 g
+        	cube[MBH_var+M_UNIT_var-1] = 10**(6*cube[MBH_var+M_UNIT_var-1] + 19)
     	if Rhigh_var: # Rhigh has a log uniform distribution between 10 and 100
         	cube[MBH_var+M_UNIT_var+Rhigh_var-1] = 10**(cube[MBH_var+M_UNIT_var+Rhigh_var-1] + 1)
     	if i_var: # i has a uniform distribution between 12 and 45
