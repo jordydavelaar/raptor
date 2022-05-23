@@ -29,6 +29,9 @@ echo "Copying files"
 if [ "$1" == "bhac" ] ;
 then
 	cp -v -n $RAPTOR/model/bhac/* .
+elif [ "$1" == "bhac-cks" ] ;
+then
+       	cp -v -n $RAPTOR/model/bhac-cks/* .
 elif  [ "$1" == "harm3d" ] ;
 then
         cp -v -n $RAPTOR/model/harm3d/* .
