@@ -16,12 +16,17 @@
 double DeltaJ_5(double X) {
     return 0.43793091 * log(1. + 0.00185777 * pow(X, 1.50316886));
 }
+double get_w(double theta_e){
+	return 	(kappa-3)*theta_e/kappa;
+}
 ////////////
 ///////////////Rho_Q
 
 double rho_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
+	
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double F_factor_K3_5=(1-exp(-pow(X_kappa,0.84)/30.)-sin(X_kappa/10.)*exp(-3*pow(X_kappa,0.471)/2.));
 	double F_factor_K4=(1-exp(-pow(X_kappa,0.84)/18.)-sin(X_kappa/6.)*exp(-7*pow(X_kappa,0.5)/4.));
 	double F_factor_K4_5=(1-exp(-pow(X_kappa,0.84)/12.)-sin(X_kappa/4.)*exp(-2*pow(X_kappa,0.525)));
@@ -83,8 +88,9 @@ double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B){
 ///////////Rho_V
 
 double rho_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double G_factor_K3_5=(1-0.17*log(1+0.447*pow(X_kappa,-1./2.)));
 	double G_factor_K4=(1-0.17*log(1+0.391*pow(X_kappa,-1./2.)));
 	double G_factor_K4_5=(1-0.17*log(1+0.348*pow(X_kappa,-1./2.)));
@@ -110,7 +116,7 @@ double rho_V_kappa(double theta_e, double n_e, double nu, double B, double theta
 	#endif
 		print('error');
 
-    	return 2*n_e*pow(ELECTRON_CHARGE,2)*nuc*cos(theta)/(m*SPEED_OF_LIGHT*pow(nu,2))*bessel_appr(0, double (pow(w,-1)))/(bessel_appr(2, double (pow(w,-1))))*factor_G*factor_V;
+    	return 2*n_e*pow(ELECTRON_CHARGE,2)*nuc*cos(theta_B)/(m*SPEED_OF_LIGHT*pow(nu,2))*bessel_appr(0, double (pow(w,-1)))/(bessel_appr(2, double (pow(w,-1))))*factor_G*factor_V;
 		}
 double rho_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B) {
     	double wp2 = 4. * M_PI * n_e * ELECTRON_CHARGE * ELECTRON_CHARGE / ELECTRON_MASS;
@@ -125,7 +131,7 @@ double rho_V_thermal(double theta_e, double n_e, double nu, double B, double the
 	}
 double rho_V_power(double theta_e, double n_e, double nu, double B, double theta_B){
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	return 2 * P_perp * ((power+2)/(power+1)) * pow(((nuc*sth)/(nu)),2) * pow(gamma_min, -(power+1)) * log(gamma_min) * cot(theta_e);
+	return 2 * P_perp * ((power+2)/(power+1)) * pow(((nuc*sth)/(nu)),2) * pow(gamma_min, -(power+1)) * log(gamma_min) * cot(theta_B);
 		}
 double rho_V(double theta_e, double n_e, double nu, double B, double theta_B){
 	#if(DF==KAPPA)
@@ -138,8 +144,9 @@ double rho_V(double theta_e, double n_e, double nu, double B, double theta_B){
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////J for thermal and kappa
 double J_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double J_low_factor_I=1;
 	double J_high_factor_I=1;
 	double J_S_factor_I=1;
@@ -182,8 +189,9 @@ double J_I(double theta_e, double n_e, double nu, double B, double theta_B) {
 		return j_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
 	}
 double J_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double J_low_factor_Q=0.5;
 	double J_high_factor_Q=(pow((4/5),2.)+kappa/50);
 	double J_S_factor_Q=(-1);
@@ -225,11 +233,12 @@ double J_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 }
 
 double J_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double J_low_factor_V=(pow(0.75,2.)*pow((pow(sth,-12./25.)-1),12./25.)*pow(kappa,-66./125.)*pow(X_kappa,-7./20.)/w);
 	double J_high_factor_V=(pow((7/8),2.)*pow((pow(sth,-5./2.)-1),11./25.)*pow(kappa,-11./25.)*pow(X_kappa,-1./2.)/w);
-	double J_S_factor_V=(sign(cos(theta)));
+	double J_S_factor_V=(sign(cos(theta_B)));
 	double J_x_V=3*pow(kappa,-3./2.);
 	double J_V_low_kappa= pow(X_kappa,1./3.)*sth*4*M_PI* tgamma(kappa - 4. / 3.) /
             				(pow(3, 7. / 3.) * tgamma(kappa - 2.)) * J_low_factor_V;
@@ -270,6 +279,7 @@ double J_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////A for thermal and kappa
 double hyp2F1_f(){
+	double w = get_w(theta_e);
 	double a = kappa - 1. / 3.;
 	double b = kappa + 1.;
 	double c = kappa + 2. / 3.;
@@ -282,8 +292,9 @@ double hyp2F1_f(){
                         gsl_sf_hyperg_2F1(b, c - a, b - a + 1., 1. / (1. - z));
 	}
 double A_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double A_low_factor_I=1;
 	double A_high_factor_I=(pow((3/kappa),19./4.)+(3/5));
 	double A_S_factor_I=1;
@@ -318,8 +329,9 @@ double A_I(double theta_e, double n_e, double nu, double B, double theta_B, doub
 }
 
 double A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B){ 
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double A_low_factor_Q=(25/48);
 	double A_high_factor_Q=(pow(21,2.)*pow(kappa,-pow(12./5.,2.))+(11/20));
 	double A_S_factor_Q=(-1);
@@ -354,12 +366,13 @@ double A_Q(double theta_e, double n_e, double nu, double B, double theta_B, doub
 }
 
 double A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B) {
+	double w = get_w(theta_e);
 	double nuc = ELECTRON_CHARGE * B / (2*M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_e));
+	double X_kappa = nu / (nuc * pow(w*kappa,2) * sin(theta_B));
 	double A_low_factor_V=((77/(100*w))*pow((pow(sth,-114./50.)-1),223./500.)*pow(X_kappa,-7./20.)*pow(kappa,-7./10.));
 	double A_high_factor_V=((143/10)*pow(w,-116./125.)*pow((pow(sth,-41./20.)-1),1./2.)*(pow(13,2)*
 				pow(kappa,-8)+(13/2500)*kappa-(263/5000)+(47/(200*kappa)))*pow(X_kappa,-1./2.));
-	double A_S_factor_V=(sign(cos(theta)));
+	double A_S_factor_V=(sign(cos(theta_B)));
 	double A_x_V=((61./50.)*pow(kappa,-142./125.)+(7./1000.));
 	double A_V_low_kappa= pow(X_kappa, -2. / 3.) * pow(3, 1. / 6.) * (10. / 41.) *
 						2*M_PI / pow(w * kappa, 10. / 3. - kappa) * (kappa - 2.) *
