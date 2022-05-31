@@ -32,6 +32,7 @@ char inputfile[100];
 #define IMGFILE (1)
 #define SPECFILE (1)
 #define RAD_TRANS (1)
+#define POL (1)
 
 #define num_frequencies 1
 #define num_pixels_1d 10
