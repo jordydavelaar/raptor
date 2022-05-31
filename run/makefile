@@ -1,7 +1,7 @@
 
 CC = h5cc -I$(RAPTOR)/src -I$(PWD)
-CFLAGS = -fopenmp  -std=c99  -lm -lgsl -Wall
-LDFLAGS = -fopenmp -lm -lgsl
+CFLAGS = -std=c99  -lm -lgsl -Wall
+LDFLAGS = -lm -lgsl
 
 VPATH=$(RAPTOR)/src:
 CPATH=$(RAPTOR)/src:

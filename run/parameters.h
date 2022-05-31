@@ -32,7 +32,6 @@ char inputfile[100];
 #define IMGFILE (1)
 #define SPECFILE (1)
 #define RAD_TRANS (1)
-#define POL (0)
 
 #define num_frequencies 1
 #define num_pixels_1d 10
@@ -82,7 +81,7 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKSBHAC)
+#define metric (CKS)
 #if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \

@@ -97,9 +97,14 @@ void calculate_image_block(struct Camera *intensityfield,
 
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
         for (int f = 0; f < num_frequencies; f++) {
+#if (POL)
             radiative_transfer_polarized(lightpath2, steps, frequencies[f],
                                          &f_x, &f_y, &p, 0,
                                          (*intensityfield).IQUV[pixel][f]);
+#else
+            radiative_transfer_unpolarized(lightpath2, steps, frequencies[f],
+                                           (*intensityfield).IQUV[pixel][f]);
+#endif
         }
         free(lightpath2);
     }
