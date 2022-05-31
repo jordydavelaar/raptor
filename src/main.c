@@ -81,13 +81,13 @@ int main(int argc, char *argv[]) {
         for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
             frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
             energy_spectrum[f] = 0.;
-            printf("freq = %+.15e\n", frequencies[f]);
+            fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
         }
     #elif (FREQS == FREQFILE)
         FILE *input;
         input = fopen("./frequencies.txt", "r");
         if (input == NULL) 
-            printf("Cannot read input file");
+            fprintf(stderr, "Cannot read input file\n");
             // return 1;
         for (int f = 0; f < num_frequencies; f++) {
             fscanf(input, "%lf", &frequencies[f]);

@@ -705,6 +705,8 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             lower_index(X_u, k_u, k_d);
             pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 
+	    dl_current *= (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /  (PLANCK_CONSTANT * frequency);
+
             // CGS UNITS USED FROM HERE ON OUT
             //////////////////////////////////
             //  if(tau[f] < log(1000.) ) {
@@ -726,9 +728,9 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             double C = Rg * PLANCK_CONSTANT /
                        (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
-            double dtau = (nu_p * aI * dl_current * C + dtau_old);
-            double K_inv = (nu_p * aI);
-            double j_inv = (jI / (nu_p * nu_p));
+            double dtau = (aI * dl_current * C + dtau_old);
+            double K_inv = aI;
+            double j_inv = jI ;
 
             if (jI == jI) { // I_current += exp(-tau) * j_nu /
                             // nu_p / nu_p * dl_current * C;
@@ -745,7 +747,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                     Icurrent = Ii * efac + S * (1. - efac);
                 }
             }
-            dtau_old = dtau;
+            dtau_old = 0;
 
             //      }
         }
