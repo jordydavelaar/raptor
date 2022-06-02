@@ -62,6 +62,25 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
+// DISTRIBUTION CHOISES 
+//////////////////
+#define KAPPA (0) // kappa distribution
+#define TH (1) // thermal distribution
+#define POWER (2) // Power-law distribution
+<<<<<<< HEAD
+#define DF (POWER)  // Distribution function
+#define kappa 5.0
+#define power 2.5
+#define gamma_min 1.
+#define gamma_max 1000.
+=======
+#define DF (KAPPA)  // Distribution function
+#define kappa 3
+
+
+
+
+>>>>>>> 31b05695242104ae561c905288a399c7f2640f3a
 // METRIC PARAMETERS
 ////////////////////
 
@@ -146,8 +165,8 @@ double STEPSIZE;
 #define horizon_marg (1.e-5) // Stop tracing at this distance from E.H. [BL]
 #define VER (1)              //
 #define RK4 (2)              //
-#define RK45 (3)
-#define int_method (2) // method of integration 2=Verlet, 4-RK4
+#define RK45 (3)             //
+#define int_method (2)       // method of integration 2=Verlet, 4-RK4
 
 // CONSTANTS
 ////////////

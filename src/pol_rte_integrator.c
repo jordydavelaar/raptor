@@ -214,10 +214,10 @@ void evaluate_coeffs(double *jI, double *jQ, double *jU, double *jV, double *rQ,
     *rU = 0.;
     *rV = rho_V(THETA_e, n_e, nu_p, B, pitch_ang);
 
-    *aI = absorption_coeff_TH(*jI, nu_p, THETA_e);
-    *aQ = absorption_coeff_TH(*jQ, nu_p, THETA_e);
-    *aU = absorption_coeff_TH(*jU, nu_p, THETA_e);
-    *aV = absorption_coeff_TH(*jV, nu_p, THETA_e);
+    *aI = a_I(THETA_e, n_e, nu_p, B, pitch_ang, *jI);
+    *aQ = a_Q(THETA_e, n_e, nu_p, B, pitch_ang, *jQ);
+    *aU = 0;
+    *aV = a_V(THETA_e, n_e, nu_p, B, pitch_ang, *jV);
 
     // Transform to invariant forms
     *jI /= (nu_p * nu_p);

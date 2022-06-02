@@ -15,7 +15,7 @@ void output_files(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies],
                   double frequencies[num_frequencies]) {
     struct stat st = {0};
-    char spec_folder[256] = "output";
+    char spec_folder[64] = "output";
 
     // JANSKY_FACTOR=1;
     if (stat(spec_folder, &st) == -1) {
@@ -33,7 +33,7 @@ void output_files(struct Camera *intensityfield,
                                                 // Create filenames, open files
 
 #if (IMGFILE)
-        char hdf5_filename[256] = "";
+        char hdf5_filename[512] = "";
         sprintf(hdf5_filename, "%s/img_data_%d.h5", spec_folder,
                 (int)TIME_INIT);
         write_image_hdf5(hdf5_filename, intensityfield, frequencies,
@@ -61,8 +61,8 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
                       double *frequencies, double factor) {
 
     hid_t file_id, dataset_id, dataspace_id;
-    herr_t status;
     hsize_t dims[2];
+    herr_t status;
     double dA;
 
     file_id = H5Fcreate(hdf5_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
