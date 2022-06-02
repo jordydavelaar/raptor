@@ -66,9 +66,11 @@ extern double Thetae_unit;
 #define KAPPA (0) // kappa distribution
 #define TH (1) // thermal distribution
 #define POWER (2) // Power-law distribution
-#define DF (KAPPA)  // Distribution function
-
-
+#define DF (POWER)  // Distribution function
+#define kappa 5.0
+#define power 2.5
+#define gamma_min 1.
+#define gamma_max 1000.
 // METRIC PARAMETERS
 ////////////////////
 
@@ -89,7 +91,7 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKSHARM)
+#define metric (MKSBHAC)
 #if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \

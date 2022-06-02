@@ -34,7 +34,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     double b21 = 1. / 5.;
 
     f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i];     // Use fvector to fill dx
         yshift[i] = y[i] + b21 * dx[0 * DIM * 2 + i]; // Update y
     }
@@ -43,7 +43,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     double b31 = 3. / 40.;
     double b32 = 9. / 40.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
         yshift[i] = y[i] + b31 * dx[0 * DIM * 2 + i] +
                     b32 * dx[1 * DIM * 2 + i]; // Update y
@@ -54,7 +54,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     double b42 = -9. / 10.;
     double b43 = 6. / 5.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
         yshift[i] = y[i] + b41 * dx[0 * DIM * 2 + i] +
                     b42 * dx[1 * DIM * 2 + i] +
@@ -67,7 +67,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     double b53 = -70. / 27.;
     double b54 = 35. / 27.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
         yshift[i] = y[i] + b51 * dx[0 * DIM * 2 + i] +
                     b52 * dx[1 * DIM * 2 + i] + b53 * dx[2 * DIM * 2 + i] +
@@ -81,7 +81,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     double b64 = 44275. / 110592.;
     double b65 = 253. / 4096.;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
         yshift[i] = y[i] + b61 * dx[0 * DIM * 2 + i] +
                     b62 * dx[1 * DIM * 2 + i] + b63 * dx[2 * DIM * 2 + i] +
@@ -91,7 +91,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
 
     q = 5;
     f(yshift, fvector); // Apply function f to current y to obtain fvector
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         dx[q * DIM * 2 + i] = (*dt) * fvector[i]; // Use fvector to fill dx
     }
 
@@ -104,7 +104,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
     double tol = 1e-9;
 
     double errmax = -1;
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         err[i] = fabs((ch[0] - ct[0]) * dx[0 * DIM * 2 + i] +
                       (ch[1] - ct[1]) * dx[1 * DIM * 2 + i] +
                       (ch[2] - ct[2]) * dx[2 * DIM * 2 + i] +
@@ -113,14 +113,14 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
                       (ch[5] - ct[5]) * dx[5 * DIM * 2 + i]);
     }
 
-    for (i = 0; i < DIM * 2; i++) {
+    for (int i = 0; i < DIM * 2; i++) {
         y[i] =
             y[i] + (ch[0] * dx[0 * DIM * 2 + i] + ch[1] * dx[1 * DIM * 2 + i] +
                     ch[2] * dx[2 * DIM * 2 + i] + ch[3] * dx[3 * DIM * 2 + i] +
                     ch[4] * dx[4 * DIM * 2 + i] + ch[5] * dx[5 * DIM * 2 + i]);
     }
 
-    for (i = 0; i < DIM; i++) {
+    for (int i = 0; i < DIM; i++) {
         double yscal =
             fabs(ch[0] * dx[0 * DIM * 2 + i] + ch[1] * dx[1 * DIM * 2 + i] +
                  ch[2] * dx[2 * DIM * 2 + i] + ch[3] * dx[3 * DIM * 2 + i] +
@@ -137,7 +137,7 @@ void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {
                       0.84 * fabs(*dt) * powf(tol / errmax, 1. / 4.));
         rk45_step(yold, f, dt, 0);
 
-        for (i = 0; i < DIM * 2; i++) {
+        for (int i = 0; i < DIM * 2; i++) {
             y[i] = yold[i];
         }
     }

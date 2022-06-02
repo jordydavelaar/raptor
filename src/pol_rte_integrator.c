@@ -208,19 +208,19 @@ void evaluate_coeffs(double *jI, double *jQ, double *jU, double *jV, double *rQ,
                      double *rU, double *rV, double *aI, double *aQ, double *aU,
                      double *aV, double nu_p, double THETA_e, double n_e,
                      double B, double pitch_ang) {
-    *jI = J_I(THETA_e, n_e, nu_p, B, pitch_ang);
-    *jQ = J_Q(THETA_e, n_e, nu_p, B, pitch_ang);
+    *jI = j_I(THETA_e, n_e, nu_p, B, pitch_ang);
+    *jQ = j_Q(THETA_e, n_e, nu_p, B, pitch_ang);
     *jU = 0.;
-    *jV = J_V(THETA_e, n_e, nu_p, B, pitch_ang);
+    *jV = j_V(THETA_e, n_e, nu_p, B, pitch_ang);
 
     *rQ = rho_Q(THETA_e, n_e, nu_p, B, pitch_ang);
     *rU = 0.;
     *rV = rho_V(THETA_e, n_e, nu_p, B, pitch_ang);
 
-    *aI = A_I(THETA_E, n_e, nu_p, B, pitch_ang, J_I);
-    *aQ = A_Q(THETA_E, n_e, nu_p, B, pitch_ang, J_Q);
+    *aI = a_I(THETA_e, n_e, nu_p, B, pitch_ang, *jI);
+    *aQ = a_Q(THETA_e, n_e, nu_p, B, pitch_ang, *jQ);
     *aU = 0;
-    *aV = A_V(THETA_E, n_e, nu_p, B, pitch_ang, J_V);
+    *aV = a_V(THETA_e, n_e, nu_p, B, pitch_ang, *jV);
 
     // Transform to invariant forms
     *jI /= (nu_p * nu_p);
