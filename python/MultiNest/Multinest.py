@@ -165,9 +165,9 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
                 f.write(str(livepoint_i) + '\n')
         f.close()
 	# Update Convergence plot
-        #os.system('python Convergenceplotter.py %s'%(sys.argv[1]))
+        os.system('python3 Convergenceplotter.py %s'%(sys.argv[1]))
     	# Return loglikelihood
-        return Chisquare_Radio
+        return - Chisquare_Radio
 
 ## Main code
 Set_parameters()
@@ -177,7 +177,7 @@ print(parameters)
 n_params = len(parameters)
 prefix = sys.argv[1]
 
-result = pymultinest.run(LogLikelihood=myloglike, Prior=myprior,n_dims=n_params, importance_nested_sampling=False, multimodal=True, evidence_tolerance=0.5, sampling_efficiency=0.8, null_log_evidence=-1e90,outputfiles_basename = prefix, max_iter =5,  max_modes=5, mode_tolerance=-1e90, resume=False, verbose=True, write_output=True, n_live_points=4)
+result = pymultinest.run(LogLikelihood=myloglike, Prior=myprior,n_dims=n_params, importance_nested_sampling=False, multimodal=True, evidence_tolerance=0.5, sampling_efficiency=0.8, null_log_evidence=-1e90,outputfiles_basename = prefix, max_iter = 0,  max_modes=5, mode_tolerance=-1e90, resume=False, verbose=True, write_output=True, n_live_points=100)
 print("gelukt")
 
 # Write for each mode the mean values of the parameters with the standard deviation and the log_evidence with its error to prefix_modes.txt
