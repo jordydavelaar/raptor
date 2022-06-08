@@ -67,20 +67,12 @@ extern double Thetae_unit;
 #define KAPPA (0) // kappa distribution
 #define TH (1) // thermal distribution
 #define POWER (2) // Power-law distribution
-<<<<<<< HEAD
-#define DF (POWER)  // Distribution function
+#define DF (TH)  // Distribution function
 #define kappa 5.0
 #define power 2.5
 #define gamma_min 1.
 #define gamma_max 1000.
-=======
-#define DF (KAPPA)  // Distribution function
-#define kappa 3
 
-
-
-
->>>>>>> 31b05695242104ae561c905288a399c7f2640f3a
 // METRIC PARAMETERS
 ////////////////////
 
