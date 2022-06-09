@@ -759,13 +759,118 @@ void init_storage() {
     return;
 }
 
+void coefficients(double X[NDIM], int igrid, int c, double del[NDIM]) {
+    double phi;
+    /* Map X[3] into sim range, assume startx[3] = 0 */
+
+    double block_start[4];
+    double block_end[4];
+    double block_dx[4];
+    int i, j, k;
+
+    for (int i = 1; i < 4; i++) {
+        block_start[i] = block_info[igrid].lb[i - 1];
+        block_dx[i] = block_info[igrid].dxc_block[i - 1];
+    }
+
+    i = (int)((X[1] - block_start[1]) / block_dx[1] - 0.5 + 1000) - 1000;
+    j = (int)((X[2] - block_start[2]) / block_dx[2] - 0.5 + 1000) - 1000;
+    k = (int)((X[3] - block_start[3]) / block_dx[3] + 1000 - 0.5) - 1000;
+
+    if (i < 0) {
+        del[1] = 0.;
+    } else if (i > nx[1] - 2) {
+        del[1] = 1.;
+    } else {
+        del[1] =
+            (X[1] - ((i + 0.5) * block_dx[1] + block_start[1])) / block_dx[1];
+    }
+
+    if (j < 0) {
+        del[2] = 0.;
+    } else if (j > nx[2] - 2) {
+        del[2] = 1.;
+    } else {
+        del[2] =
+            (X[2] - ((j + 0.5) * block_dx[2] + block_start[2])) / block_dx[2];
+    }
+
+    if (k < 0) {
+        del[3] = 0.;
+    } else if (k > nx[3] - 2) {
+        del[3] = 1.;
+    } else {
+        del[3] =
+            (X[3] - ((k + 0.5) * block_dx[3] + block_start[3])) / block_dx[3];
+    }
+
+    return;
+}
+
+int compute_c(int i, int j, int k) {
+    // computes "c" index for p array given a set of i,j,k indices
+    return i + j * nx[0] + k * nx[0] * nx[1];
+}
+
+double interp_scalar(double *var, int c, double coeff[4]) {
+
+    double interp;
+    int c_ip, c_jp, c_kp;
+    int c_i, c_j, c_k;
+    double b1, b2, b3, del[NDIM];
+    int cindex[2][2][2];
+
+    del[1] = coeff[1];
+    del[2] = coeff[2];
+    del[3] = coeff[3];
+    if (del[1] > 1 || del[2] > 1 || del[3] > 1 || del[1] < 0 || del[2] < 0 ||
+        del[3] < 0)
+        fprintf(stderr, "del[1] %e \n del[2] %e\n del[3] %e\n", del[1], del[2],
+                del[3]);
+
+    c_i = (int)((c % nx[0]));
+    c_j = (int)(fmod((((double)c) / ((double)nx[0])), (double)nx[1]));
+    if (ndimini == 3) {
+        c_k = (int)(((double)c) / ((double)nx[0] * nx[1]));
+    }
+
+    c_ip = c_i + 1;
+    c_jp = c_j + 1;
+    c_kp = c_k + 1;
+
+    b1 = 1. - del[1];
+    b2 = 1. - del[2];
+    b3 = 1. - del[3];
+
+    cindex[0][0][0] = compute_c(c_i, c_j, c_k);
+    cindex[1][0][0] = compute_c(c_ip, c_j, c_k);
+    cindex[0][1][0] = compute_c(c_i, c_jp, c_k);
+    cindex[0][0][1] = compute_c(c_i, c_j, c_kp);
+    cindex[1][1][0] = compute_c(c_ip, c_jp, c_k);
+    cindex[1][0][1] = compute_c(c_ip, c_j, c_kp);
+    cindex[0][1][1] = compute_c(c_i, c_jp, c_kp);
+    cindex[1][1][1] = compute_c(c_ip, c_jp, c_kp);
+
+    interp = var[cindex[0][0][0]][0] * b1 * b2 +
+             var[cindex[0][1][0]][0] * b1 * del[2] +
+             var[cindex[1][0][0]][0] * del[1] * b2 +
+             var[cindex[1][1][0]][0] * del[1] * del[2];
+
+    /* Now interpolate above in x3 */
+    interp = b3 * interp + del[3] * (var[cindex[0][0][1]][0] * b1 * b2 +
+                                     var[cindex[0][1][1]][0] * b1 * del[2] +
+                                     var[cindex[1][0][1]][0] * del[1] * b2 +
+                                     var[cindex[1][1][1]][0] * del[1] * del[2]);
+
+    return interp;
+}
 // Get the flud parameters in the local co-moving plasma frame.
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
     int i, c;
-
+    double del[NDIM];
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
 
@@ -827,8 +932,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                         // at cell position
     metric_dd(X, g_dd);
 
+    coefficients(X, igrid, c, del);
+
     // inteprolatie van je primitieve variabelen
-    rho = p[KRHO][igrid][c][0];
+    rho = interp_scalar(p[KRHO][igrid], c, del); // p[KRHO][igrid][c][0];
     uu = p[UU][igrid][c][0];
     // bepalen van de plasma number density en electron temperatuur
     (*modvar).n_e = rho * Ne_unit + smalll;
