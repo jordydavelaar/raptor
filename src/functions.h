@@ -264,7 +264,7 @@ void init_grmhd_data(char *fname);
 
 void init_storage();
 
-double interp_scalar(double ***var, int i, int j, int k, double coeff[4]);
+double interp_scalar(double **var, int c, double coeff[4]);
 
 void Xtoijk(double *X, int *i, int *j, int *k, double *del);
 

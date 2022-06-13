@@ -23,7 +23,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 #define NDIM 4
 #define NPRIM 8
@@ -32,15 +32,14 @@ char inputfile[100];
 #define IMGFILE (1)
 #define SPECFILE (1)
 #define RAD_TRANS (1)
-#define POL (0)
+#define POL (1)
 
-
-#define num_frequencies 5
+#define num_frequencies 1
 
 #define FREQFILE (0)
 #define FREQLOG (1)
 
-#define FREQS (FREQFILE)
+#define FREQS (FREQLOG)
 
 #define num_pixels_1d 10
 #define tot_pixels 100

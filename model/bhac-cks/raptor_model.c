@@ -1,3 +1,4 @@
+
 /*
  * raptor_BHAC_AMR_model.c
  *
@@ -482,7 +483,7 @@ void init_grmhd_data(char *fname) {
 
     long int offset;
 
-    int levmaxini, ndimini, ndirini, nwini, nws, neqparini, it;
+    int levmaxini, ndirini, nwini, nws, neqparini, it;
     double t;
     fseek(file_id, 0, SEEK_END);
     offset = -36 - 4; // -4; // 7 int, 1 double = 7 * 4 + 1*8 = 56?
@@ -527,7 +528,6 @@ void init_grmhd_data(char *fname) {
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
 
-    int *nx;
     neqpar = (double *)malloc(neqparini * sizeof(double));
     nx = (int *)malloc(ndimini * sizeof(int));
 
@@ -659,7 +659,7 @@ void init_grmhd_data(char *fname) {
             }
         }
 
-        //#pragma omp parallel for shared(values,p) schedule(static,1)
+        #pragma omp parallel for shared(values,p) schedule(static,1)
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
@@ -759,13 +759,144 @@ void init_storage() {
     return;
 }
 
+void coefficients(double X[NDIM], struct block *block_info, int igrid, int c, double del[NDIM]) {
+    double phi;
+    /* Map X[3] into sim range, assume startx[3] = 0 */
+
+    double block_start[4];
+    double block_dx[4];
+    int i, j, k;
+
+   block_start[0] = block_info[igrid].lb[0];
+   block_dx[0] = block_info[igrid].dxc_block[0];
+
+   block_start[1] = block_info[igrid].lb[1];
+   block_dx[1] = block_info[igrid].dxc_block[1];
+
+   block_start[2] = block_info[igrid].lb[2];
+   block_dx[2] = block_info[igrid].dxc_block[2];
+
+    i = (int)((X[1] - block_start[0]) / block_dx[0] - 0.5 + 1000) - 1000;
+    j = (int)((X[2] - block_start[1]) / block_dx[1] - 0.5 + 1000) - 1000;
+    k = (int)((X[3] - block_start[2]) / block_dx[2] + 1000 - 0.5) - 1000;
+
+    if (i < 0) {
+        del[1] = 0.;
+    } else if (i > nx[0] - 2) {
+        del[1] = 1.;
+    } else {
+        del[1] =
+            (X[1] - ((i + 0.5) * block_dx[0] + block_start[0])) / block_dx[0];
+    }
+
+    if (j < 0) {
+        del[2] = 0.;
+    } else if (j > nx[1] - 2) {
+        del[2] = 1.;
+    } else {
+        del[2] =
+            (X[2] - ((j + 0.5) * block_dx[1] + block_start[1])) / block_dx[1];
+    }
+
+    if (k < 0) {
+        del[3] = 0.;
+    } else if (k > nx[2] - 2) {
+        del[3] = 1.;
+    } else {
+        del[3] =
+            (X[3] - ((k + 0.5) * block_dx[2] + block_start[2])) / block_dx[2];
+    }
+
+    return;
+}
+
+int compute_c(int i, int j, int k) {
+    // computes "c" index for p array given a set of i,j,k indices
+    return i + j * nx[0] + k * nx[0] * nx[1];
+}
+
+double interp_scalar(double **var, int c, double coeff[4]) {
+
+    double interp;
+    int c_ip, c_jp, c_kp;
+    int c_i, c_j, c_k;
+    double b1, b2, b3, del[NDIM];
+    int cindex[2][2][2];
+
+    del[1] = coeff[1];
+    del[2] = coeff[2];
+    del[3] = coeff[3];
+    if (del[1] > 1 || del[2] > 1 || del[3] > 1 || del[1] < 0 || del[2] < 0 ||
+        del[3] < 0)
+        fprintf(stderr, "del[1] %e \n del[2] %e\n del[3] %e\n", del[1], del[2],
+                del[3]);
+
+    c_i = (int)((c % nx[0]));
+    c_j = (int)(fmod((((double)c) / ((double)nx[0])), (double)nx[1]));
+    if (ndimini == 3) {
+        c_k = (int)(((double)c) / ((double)nx[0] * nx[1]));
+    }
+
+    c_ip = c_i + 1;
+    c_jp = c_j + 1;
+    c_kp = c_k + 1;
+
+    if(c_ip>=nx[0])
+	c_ip=nx[0]-1;
+
+    if(c_jp>=nx[1])
+	c_jp=nx[1]-1;
+
+    if(c_kp>=nx[2])
+	c_kp=nx[2]-1;
+
+    b1 = 1. - del[1];
+    b2 = 1. - del[2];
+    b3 = 1. - del[3];
+
+    cindex[0][0][0] = compute_c(c_i, c_j, c_k);
+    cindex[1][0][0] = compute_c(c_ip, c_j, c_k);
+    cindex[0][1][0] = compute_c(c_i, c_jp, c_k);
+    cindex[0][0][1] = compute_c(c_i, c_j, c_kp);
+    cindex[1][1][0] = compute_c(c_ip, c_jp, c_k);
+    cindex[1][0][1] = compute_c(c_ip, c_j, c_kp);
+    cindex[0][1][1] = compute_c(c_i, c_jp, c_kp);
+    cindex[1][1][1] = compute_c(c_ip, c_jp, c_kp);
+
+/*
+    fprintf(stderr,"c %d\n",c);
+    fprintf(stderr,"c_i %d c_j %d c_k %d\n",c_i,c_j,c_k);
+    fprintf(stderr,"c_ip %d c_jp %d c_kp %d\n",c_ip,c_jp,c_kp);
+
+    fprintf(stderr,"000 %d\n",cindex[0][0][0]);
+    fprintf(stderr,"100 %d\n",cindex[1][0][0]);
+    fprintf(stderr,"010 %d\n",cindex[0][1][0]);
+    fprintf(stderr,"001 %d\n",cindex[0][0][1]);
+    fprintf(stderr,"110 %d\n",cindex[1][1][0]);
+    fprintf(stderr,"101 %d\n",cindex[1][0][1]);
+    fprintf(stderr,"011 %d\n",cindex[0][1][1]);
+    fprintf(stderr,"111 %d\n",cindex[1][1][1]);
+*/
+    interp = var[cindex[0][0][0]][0] * b1 * b2 +
+             var[cindex[0][1][0]][0] * b1 * del[2] +
+             var[cindex[1][0][0]][0] * del[1] * b2 +
+             var[cindex[1][1][0]][0] * del[1] * del[2];
+
+    /* Now interpolate above in x3 */
+    interp = b3 * interp + del[3] * (var[cindex[0][0][1]][0] * b1 * b2 +
+                                     var[cindex[0][1][1]][0] * b1 * del[2] +
+                                     var[cindex[1][0][1]][0] * del[1] * b2 +
+                                     var[cindex[1][1][1]][0] * del[1] * del[2]);
+
+    return interp;
+}
 // Get the flud parameters in the local co-moving plasma frame.
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
     int i, c;
-
+    double del[NDIM];
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
 
@@ -813,33 +944,32 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         exit(1);
     }
 
-    if (igrid >= 7192) {
-        fprintf(stderr, "running out of grid!");
-        return 0;
-    }
 
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
-    //		      fprintf(stderr,"igrid %d dxc %e\n",igrid,*dx_local);
 
     c = find_cell(X, block_info, igrid, Xgrid);
+
+//    fprintf(stderr,"igrid %d c %d\n",igrid,c);
 
     metric_uu(X, g_uu); // cell centered, nearest neighbour so need metric
                         // at cell position
     metric_dd(X, g_dd);
 
+    coefficients(X, block_info, igrid, c, del);
+
     // inteprolatie van je primitieve variabelen
-    rho = p[KRHO][igrid][c][0];
-    uu = p[UU][igrid][c][0];
+    rho = interp_scalar(p[KRHO][igrid], c, del); // p[KRHO][igrid][c][0];
+    uu = interp_scalar(p[UU][igrid], c, del);
     // bepalen van de plasma number density en electron temperatuur
     (*modvar).n_e = rho * Ne_unit + smalll;
 
-    Bp[1] = p[B1][igrid][c][0]; // interp_scalar_3d(p[B1], i, j,k,del);
-    Bp[2] = p[B2][igrid][c][0]; // interp_scalar_3d(p[B2], i, j,k, del);
-    Bp[3] = p[B3][igrid][c][0]; // interp_scalar_3d(p[B3], i, j,k, del);
+    Bp[1] = interp_scalar(p[B1][igrid], c, del); // interp_scalar_3d(p[B1], i, j,k,del);
+    Bp[2] = interp_scalar(p[B2][igrid], c, del); // interp_scalar_3d(p[B2], i, j,k, del);
+    Bp[3] = interp_scalar(p[B3][igrid], c, del); // interp_scalar_3d(p[B3], i, j,k, del);
 
-    V_u[1] = p[U1][igrid][c][0];
-    V_u[2] = p[U2][igrid][c][0];
-    V_u[3] = p[U3][igrid][c][0];
+    V_u[1] = interp_scalar(p[U1][igrid], c, del);
+    V_u[2] = interp_scalar(p[U2][igrid], c, del);
+    V_u[3] = interp_scalar(p[U3][igrid], c, del);
 
     double gamma_dd[4][4];
     for (int i = 1; i < 4; i++) {
