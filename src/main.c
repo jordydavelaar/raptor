@@ -77,18 +77,19 @@ int main(int argc, char *argv[]) {
     init_camera(&intensityfield);
 
 
-    #if (FREQS == FREQLOG)
+    #if(FREQS==FREQLOG)
         for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
             frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
             energy_spectrum[f] = 0.;
             fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
         }
-    #elif (FREQS == FREQFILE)
+    #elif(FREQS==FREQFILE)
         FILE *input;
-        input = fopen("./frequencies.txt", "r");
-        if (input == NULL) 
+        input = fopen("frequencies.txt", "r");
+        if (input == NULL){ 
             fprintf(stderr, "Cannot read input file\n");
-            // return 1;
+	    exit(1);
+	}	            
         for (int f = 0; f < num_frequencies; f++) {
             fscanf(input, "%lf", &frequencies[f]);
         }
