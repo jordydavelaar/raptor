@@ -10,7 +10,7 @@ import sys
 prefix = sys.argv[1]
 
 # Load data
-MBH, M_UNIT, Rhigh, i, Chisquare_Radio, Chisquare_IR, Chisquare_Coreshift, Chisquare_Total = np.loadtxt('%s_Chisquared.txt'%(prefix)).transpose()
+MBH, M_UNIT, Rhigh, i, Chisquare_Radio = np.loadtxt('%s_Chisquared.txt'%(prefix)).transpose()
 
 # Make figure
 fig = plt.figure(num=None, figsize=(12,12))
@@ -111,12 +111,9 @@ fig.tight_layout()
 #fig = plt.figure()
 plt.subplot(313)
 
-Chisquare_Radio, Chisquare_IR, Chisquare_Coreshift, Chisquare_Total
+Chisquare_Radio
 
 plt.plot(Chisquare_Radio, color='b', label='Radio')
-plt.plot(Chisquare_IR, color='r', label='IR')
-plt.plot(Chisquare_Coreshift, color='g', label='Coreshift')
-plt.plot(Chisquare_Total, color='k', label='Total')
 plt.xlabel('$Iteration$ $number$', size = xlabelsize)
 plt.ylabel('$\chi^2$ ()', size = ylabelsize)
 #plt.xlim
