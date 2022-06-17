@@ -659,7 +659,7 @@ void init_grmhd_data(char *fname) {
             }
         }
 
-        #pragma omp parallel for shared(values,p) schedule(static,1)
+#pragma omp parallel for shared(values, p) schedule(static, 1)
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
@@ -759,7 +759,8 @@ void init_storage() {
     return;
 }
 
-void coefficients(double X[NDIM], struct block *block_info, int igrid, int c, double del[NDIM]) {
+void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
+                  double del[NDIM]) {
     double phi;
     /* Map X[3] into sim range, assume startx[3] = 0 */
 
@@ -767,14 +768,14 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c, do
     double block_dx[4];
     int i, j, k;
 
-   block_start[0] = block_info[igrid].lb[0];
-   block_dx[0] = block_info[igrid].dxc_block[0];
+    block_start[0] = block_info[igrid].lb[0];
+    block_dx[0] = block_info[igrid].dxc_block[0];
 
-   block_start[1] = block_info[igrid].lb[1];
-   block_dx[1] = block_info[igrid].dxc_block[1];
+    block_start[1] = block_info[igrid].lb[1];
+    block_dx[1] = block_info[igrid].dxc_block[1];
 
-   block_start[2] = block_info[igrid].lb[2];
-   block_dx[2] = block_info[igrid].dxc_block[2];
+    block_start[2] = block_info[igrid].lb[2];
+    block_dx[2] = block_info[igrid].dxc_block[2];
 
     i = (int)((X[1] - block_start[0]) / block_dx[0] - 0.5 + 1000) - 1000;
     j = (int)((X[2] - block_start[1]) / block_dx[1] - 0.5 + 1000) - 1000;
@@ -841,14 +842,14 @@ double interp_scalar(double **var, int c, double coeff[4]) {
     c_jp = c_j + 1;
     c_kp = c_k + 1;
 
-    if(c_ip>=nx[0])
-	c_ip=nx[0]-1;
+    if (c_ip >= nx[0])
+        c_ip = nx[0] - 1;
 
-    if(c_jp>=nx[1])
-	c_jp=nx[1]-1;
+    if (c_jp >= nx[1])
+        c_jp = nx[1] - 1;
 
-    if(c_kp>=nx[2])
-	c_kp=nx[2]-1;
+    if (c_kp >= nx[2])
+        c_kp = nx[2] - 1;
 
     b1 = 1. - del[1];
     b2 = 1. - del[2];
@@ -863,20 +864,20 @@ double interp_scalar(double **var, int c, double coeff[4]) {
     cindex[0][1][1] = compute_c(c_i, c_jp, c_kp);
     cindex[1][1][1] = compute_c(c_ip, c_jp, c_kp);
 
-/*
-    fprintf(stderr,"c %d\n",c);
-    fprintf(stderr,"c_i %d c_j %d c_k %d\n",c_i,c_j,c_k);
-    fprintf(stderr,"c_ip %d c_jp %d c_kp %d\n",c_ip,c_jp,c_kp);
+    /*
+        fprintf(stderr,"c %d\n",c);
+        fprintf(stderr,"c_i %d c_j %d c_k %d\n",c_i,c_j,c_k);
+        fprintf(stderr,"c_ip %d c_jp %d c_kp %d\n",c_ip,c_jp,c_kp);
 
-    fprintf(stderr,"000 %d\n",cindex[0][0][0]);
-    fprintf(stderr,"100 %d\n",cindex[1][0][0]);
-    fprintf(stderr,"010 %d\n",cindex[0][1][0]);
-    fprintf(stderr,"001 %d\n",cindex[0][0][1]);
-    fprintf(stderr,"110 %d\n",cindex[1][1][0]);
-    fprintf(stderr,"101 %d\n",cindex[1][0][1]);
-    fprintf(stderr,"011 %d\n",cindex[0][1][1]);
-    fprintf(stderr,"111 %d\n",cindex[1][1][1]);
-*/
+        fprintf(stderr,"000 %d\n",cindex[0][0][0]);
+        fprintf(stderr,"100 %d\n",cindex[1][0][0]);
+        fprintf(stderr,"010 %d\n",cindex[0][1][0]);
+        fprintf(stderr,"001 %d\n",cindex[0][0][1]);
+        fprintf(stderr,"110 %d\n",cindex[1][1][0]);
+        fprintf(stderr,"101 %d\n",cindex[1][0][1]);
+        fprintf(stderr,"011 %d\n",cindex[0][1][1]);
+        fprintf(stderr,"111 %d\n",cindex[1][1][1]);
+    */
     interp = var[cindex[0][0][0]][0] * b1 * b2 +
              var[cindex[0][1][0]][0] * b1 * del[2] +
              var[cindex[1][0][0]][0] * del[1] * b2 +
@@ -944,12 +945,11 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         exit(1);
     }
 
-
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
 
     c = find_cell(X, block_info, igrid, Xgrid);
 
-//    fprintf(stderr,"igrid %d c %d\n",igrid,c);
+    //    fprintf(stderr,"igrid %d c %d\n",igrid,c);
 
     metric_uu(X, g_uu); // cell centered, nearest neighbour so need metric
                         // at cell position
@@ -963,9 +963,12 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     // bepalen van de plasma number density en electron temperatuur
     (*modvar).n_e = rho * Ne_unit + smalll;
 
-    Bp[1] = interp_scalar(p[B1][igrid], c, del); // interp_scalar_3d(p[B1], i, j,k,del);
-    Bp[2] = interp_scalar(p[B2][igrid], c, del); // interp_scalar_3d(p[B2], i, j,k, del);
-    Bp[3] = interp_scalar(p[B3][igrid], c, del); // interp_scalar_3d(p[B3], i, j,k, del);
+    Bp[1] = interp_scalar(p[B1][igrid], c,
+                          del); // interp_scalar_3d(p[B1], i, j,k,del);
+    Bp[2] = interp_scalar(p[B2][igrid], c,
+                          del); // interp_scalar_3d(p[B2], i, j,k, del);
+    Bp[3] = interp_scalar(p[B3][igrid], c,
+                          del); // interp_scalar_3d(p[B3], i, j,k, del);
 
     V_u[1] = interp_scalar(p[U1][igrid], c, del);
     V_u[2] = interp_scalar(p[U2][igrid], c, del);
