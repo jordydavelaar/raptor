@@ -462,7 +462,7 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
         for (int j = 0; j < 4; j++) {
             X_u_temp[j] = X_u[j];
         }
-        X_u_temp[i] += delta_num;
+        X_u_temp[i] += delta_num ;
 
         metric_dd(X_u_temp, g_dd_p);
 
