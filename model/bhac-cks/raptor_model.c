@@ -663,8 +663,9 @@ void init_grmhd_data(char *fname) {
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
-            double r = get_r(Xgrid[i][c]);
-            if (r > 1) {
+	    double X_u[4] ={0,Xgrid[i][c][0],Xgrid[i][c][1],Xgrid[i][c][2]};
+            double r = get_r(X_u);
+            if (r > 1.) {
 
                 calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block,
                                Xbar[i][c]);
@@ -1080,8 +1081,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 5.) || r > 2000 ||
-        (*modvar).theta_e > 20) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 1000.) || r > 100 || (*modvar).theta_e > 100) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }

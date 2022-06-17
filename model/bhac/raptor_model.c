@@ -663,7 +663,8 @@ void init_grmhd_data(char *fname) {
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
-            double r = get_r(Xgrid[i][c]);
+            double X_u[4] ={0,Xgrid[i][c][0],Xgrid[i][c][1],Xgrid[i][c][2]};
+            double r = get_r(X_u);
             if (r > 1) {
 
                 calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block,
