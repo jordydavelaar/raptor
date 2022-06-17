@@ -98,6 +98,7 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         status = H5Sclose(dataspace_id);
     }
 
+#if(POL)
     for (int freq = 0; freq < num_frequencies; freq++) {
         char dataset[200];
 
@@ -175,6 +176,7 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
         status = H5Sclose(dataspace_id);
     }
+#endif
 
     char dataset[200];
 
