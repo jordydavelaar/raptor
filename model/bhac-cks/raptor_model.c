@@ -686,13 +686,15 @@ void init_grmhd_data(char *fname) {
                 p[KRHO][i][c][0] = prim[KRHO];
                 p[UU][i][c][0] = prim[UU];
 
-                p[U1][i][c][0] = prim[U1];
-                p[U2][i][c][0] = prim[U2];
-                p[U3][i][c][0] = prim[U3];
+                p[U1][i][c][0] = prim[U1] * values[LFAC][c];
+                p[U2][i][c][0] = prim[U2] * values[LFAC][c];
+                p[U3][i][c][0] = prim[U3] * values[LFAC][c];
 
                 p[B1][i][c][0] = prim[B1];
                 p[B2][i][c][0] = prim[B2];
                 p[B3][i][c][0] = prim[B3];
+
+                p[LF][i][c][0] = values[LFAC][c];
             }
             //                 count++;
         }
@@ -989,9 +991,11 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     Bp[3] = interp_scalar(p[B3][igrid], c,
                           del); // interp_scalar_3d(p[B3], i, j,k, del);
 
-    V_u[1] = interp_scalar(p[U1][igrid], c, del);
-    V_u[2] = interp_scalar(p[U2][igrid], c, del);
-    V_u[3] = interp_scalar(p[U3][igrid], c, del);
+    double Gfac = interp_scalar(p[LFAC][igrid], c, del);
+
+    V_u[1] = interp_scalar(p[U1][igrid], c, del) / Gfac;
+    V_u[2] = interp_scalar(p[U2][igrid], c, del) / Gfac;
+    V_u[3] = interp_scalar(p[U3][igrid], c, del) / Gfac;
 
     double gamma_dd[4][4];
     for (int i = 1; i < 4; i++) {
@@ -1014,10 +1018,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-        //        fprintf(stderr, "VdotV too large %e %d %d %e %e %e %e %e %e %e
-        //        %e %e %e\n", VdotV, igrid, c,
-        //              X[1], X[2], X[3],r,
-        //              V_u[1],V_u[2],V_u[3],p[U1][igrid][c][0],p[U2][igrid][c][0],p[U3][igrid][c][0]);
+        fprintf(stderr,
+                "VdotV too large %e %d %d %e %e %e %e %e %e %e
+                    % e % e %
+                    e\n ", VdotV, igrid, c,
+                    X[1],
+                X[2], X[3], r, V_u[1], V_u[2], V_u[3], p[U1][igrid][c][0],
+                p[U2][igrid][c][0], p[U3][igrid][c][0]);
         //	issue with normalization, either due to inaccurate
         // interpolation/extrapolation typically only occurs very close to the
         // horizon setting it to a high value lfac=10
