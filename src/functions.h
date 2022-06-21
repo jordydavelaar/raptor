@@ -217,11 +217,14 @@ double j_Q(double theta_e, double n_e, double nu, double B, double theta_B);
 
 double j_V(double theta_e, double n_e, double nu, double B, double theta_B);
 
-double a_I(double theta_e, double n_e, double nu, double B, double theta_B, double j_I_thermal);
+double a_I(double theta_e, double n_e, double nu, double B, double theta_B,
+           double j_I_thermal);
 
-double a_Q(double theta_e, double n_e, double nu, double B, double theta_B, double j_Q_thermal);
+double a_Q(double theta_e, double n_e, double nu, double B, double theta_B,
+           double j_Q_thermal);
 
-double a_V(double theta_e, double n_e, double nu, double B, double theta_B, double j_V_thermal);
+double a_V(double theta_e, double n_e, double nu, double B, double theta_B,
+           double j_V_thermal);
 
 double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B);
 

@@ -411,7 +411,8 @@ double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]) {
     if (isnan(result))
         fprintf(stderr, "position of nan is %e %e %e\n", exp(X_u[1]), X_u[2],
                 X_u[3]);
-    fprintf(stderr,"\nTetrad identities (should be close to zero): %+.15e", result);
+    fprintf(stderr, "\nTetrad identities (should be close to zero): %+.15e",
+            result);
     return result;
 }
 

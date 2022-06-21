@@ -462,7 +462,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // CGS UNITS USED FROM HERE ON OUT
     //////////////////////////////////
-	double kdotk = four_velocity_norm(X_u, k_u);
+    double kdotk = four_velocity_norm(X_u, k_u);
 
     // Scale the wave vector to correct energy
     LOOP_i k_u[i] *= PLANCK_CONSTANT * frequency /
@@ -522,10 +522,10 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     *Iinv = S_A[0];
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
 
-//        fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
-//        fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);
-//        check_tetrad_identities(X_u, tetrad_u);
-//        check_tetrad_compact(X_u, tetrad_u);
+    //        fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
+    //        fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);
+    //        check_tetrad_identities(X_u, tetrad_u);
+    //        check_tetrad_compact(X_u, tetrad_u);
 
     // We have now updated the Stokes vector using plasma at current
     // position. Only do stuff below this line IF S_A[0] > 1.e-40. If

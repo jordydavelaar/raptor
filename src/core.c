@@ -79,7 +79,7 @@ void calculate_image_block(struct Camera *intensityfield,
     }
 #pragma omp parallel for shared(energy_spectrum, frequencies, intensityfield,  \
                                 p) schedule(static, 1)
-    for (int pixel = 0; pixel < tot_pixels; pixel++) { //tot_pixels
+    for (int pixel = 0; pixel < tot_pixels; pixel++) { // tot_pixels
         int steps = 0;
         // For all pixel rows (distributed over threads)...
 
