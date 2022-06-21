@@ -21,7 +21,7 @@ void init_model() {
 }
 
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
-    double small = 1e-12;
+    double small = 1e-6;
 
     for (int igrid = 0; igrid < nleafs; igrid++) {
         if (x[1] + small >= block_info[igrid].lb[0] &&
@@ -282,7 +282,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     X_u[3] = X[2]; // - dxc[0];
 
     double r_current = get_r(X);
-    if (r_current < 1.)
+    if (r_current < 1.0)
         return;
 
     metric_dd(X_u, g_dd);
@@ -659,12 +659,13 @@ void init_grmhd_data(char *fname) {
             }
         }
 
-#pragma omp parallel for shared(values, p) schedule(static, 1)
+        //  #pragma omp parallel for shared(values,p) schedule(static,1)
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
-            double r = get_r(Xgrid[i][c]);
-            if (r > 1) {
+            double X_u[4] = {0, Xgrid[i][c][0], Xgrid[i][c][1], Xgrid[i][c][2]};
+            double r = get_r(X_u);
+            if (r > 1.0) {
 
                 calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block,
                                Xbar[i][c]);
@@ -695,6 +696,7 @@ void init_grmhd_data(char *fname) {
             }
             //                 count++;
         }
+        //#pragma omp barrier
         //	exit(1);
         offset = (nx[0] + 1) * (nx[1] + 1) * (nx[2] + 1) * nws * 8;
         fseek(file_id, offset, SEEK_CUR);
@@ -787,7 +789,10 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (i < 0) {
         del[1] = 0.;
     } else if (i > nx[0] - 2) {
-        del[1] = 1.;
+        //        del[1] = 1.;
+        del[1] =
+            (X[1] - ((i + 0.5) * block_dx[0] + block_start[0])) / block_dx[0];
+
     } else {
         del[1] =
             (X[1] - ((i + 0.5) * block_dx[0] + block_start[0])) / block_dx[0];
@@ -796,7 +801,10 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (j < 0) {
         del[2] = 0.;
     } else if (j > nx[1] - 2) {
-        del[2] = 1.;
+        //        del[2] = 1.;
+        del[2] =
+            (X[2] - ((j + 0.5) * block_dx[1] + block_start[1])) / block_dx[1];
+
     } else {
         del[2] =
             (X[2] - ((j + 0.5) * block_dx[1] + block_start[1])) / block_dx[1];
@@ -805,7 +813,9 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (k < 0) {
         del[3] = 0.;
     } else if (k > nx[2] - 2) {
-        del[3] = 1.;
+        //        del[3] = 1.;
+        del[3] =
+            (X[3] - ((k + 0.5) * block_dx[2] + block_start[2])) / block_dx[2];
     } else {
         del[3] =
             (X[3] - ((k + 0.5) * block_dx[2] + block_start[2])) / block_dx[2];
@@ -845,14 +855,20 @@ double interp_scalar(double **var, int c, double coeff[4]) {
     c_jp = c_j + 1;
     c_kp = c_k + 1;
 
-    if (c_ip >= nx[0])
-        c_ip = nx[0] - 1;
+    if (c_ip >= nx[0]) {
+        c_ip = c_i;
+        c_i--;
+    }
 
-    if (c_jp >= nx[1])
-        c_jp = nx[1] - 1;
+    if (c_jp >= nx[1]) {
+        c_jp = c_j;
+        c_j--;
+    }
 
-    if (c_kp >= nx[2])
-        c_kp = nx[2] - 1;
+    if (c_kp >= nx[2]) {
+        c_kp = c_k;
+        c_k--;
+    }
 
     b1 = 1. - del[1];
     b2 = 1. - del[2];
@@ -914,7 +930,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 #endif
 
     double r = get_r(X);
-    if (r < 1.)
+    if (r < 1.00)
         return 0;
 
     // X[3]=fmod(X[3],2*M_PI);
@@ -998,9 +1014,15 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-        fprintf(stderr, "VdotV too large %e %d %e %e %e\n", VdotV, igrid,
-                exp(X[1]), X[2], X[3]);
-        VdotV = 0;
+        //        fprintf(stderr, "VdotV too large %e %d %d %e %e %e %e %e %e %e
+        //        %e %e %e\n", VdotV, igrid, c,
+        //              X[1], X[2], X[3],r,
+        //              V_u[1],V_u[2],V_u[3],p[U1][igrid][c][0],p[U2][igrid][c][0],p[U3][igrid][c][0]);
+        //	issue with normalization, either due to inaccurate
+        // interpolation/extrapolation typically only occurs very close to the
+        // horizon setting it to a high value lfac=10
+        LOOP_i V_u[i] *= sqrt(0.99 / VdotV);
+        VdotV = 0.99;
     }
 
     double lfac = 1 / sqrt(1 - VdotV);
@@ -1086,8 +1108,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 5.) || r > 2000 ||
-        (*modvar).theta_e > 20) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 5.) || r > 100 ||
+        (*modvar).theta_e > 100) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
