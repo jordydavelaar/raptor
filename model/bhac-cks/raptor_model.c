@@ -1,4 +1,4 @@
-	
+
 /*
  * raptor_BHAC_AMR_model.c
  *
@@ -686,14 +686,13 @@ void init_grmhd_data(char *fname) {
                 p[KRHO][i][c][0] = prim[KRHO];
                 p[UU][i][c][0] = prim[UU];
 
-                p[U1][i][c][0] = prim[U1] ;
-                p[U2][i][c][0] = prim[U2] ;
-                p[U3][i][c][0] = prim[U3] ;
+                p[U1][i][c][0] = prim[U1];
+                p[U2][i][c][0] = prim[U2];
+                p[U3][i][c][0] = prim[U3];
 
                 p[B1][i][c][0] = prim[B1];
                 p[B2][i][c][0] = prim[B2];
                 p[B3][i][c][0] = prim[B3];
-
             }
             //                 count++;
         }
@@ -934,10 +933,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     if (r < 1.00)
         return 0;
 
-    // X[3]=fmod(X[3],2*M_PI);
     double smalll = 1.e-6;
     double small = 0;
-    // _uversie van coordinaat naar cel i,j
+
     if (X[1] > stopx[1] || X[1] < startx[1] || X[2] < startx[2] ||
         X[2] > stopx[2] || X[3] < startx[3] || X[3] > stopx[3]) {
         return 0;
@@ -969,27 +967,20 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     c = find_cell(X, block_info, igrid, Xgrid);
 
-    //    fprintf(stderr,"igrid %d c %d\n",igrid,c);
+    metric_uu(X, g_uu);
 
-    metric_uu(X, g_uu); // cell centered, nearest neighbour so need metric
-                        // at cell position
     metric_dd(X, g_dd);
 
     coefficients(X, block_info, igrid, c, del);
 
-    // inteprolatie van je primitieve variabelen
-    rho = interp_scalar(p[KRHO][igrid], c, del); // p[KRHO][igrid][c][0];
+    rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
-    // bepalen van de plasma number density en electron temperatuur
+
     (*modvar).n_e = rho * Ne_unit + smalll;
 
-    Bp[1] = interp_scalar(p[B1][igrid], c,
-                          del); // interp_scalar_3d(p[B1], i, j,k,del);
-    Bp[2] = interp_scalar(p[B2][igrid], c,
-                          del); // interp_scalar_3d(p[B2], i, j,k, del);
-    Bp[3] = interp_scalar(p[B3][igrid], c,
-                          del); // interp_scalar_3d(p[B3], i, j,k, del);
-
+    Bp[1] = interp_scalar(p[B1][igrid], c, del);
+    Bp[2] = interp_scalar(p[B2][igrid], c, del);
+    Bp[3] = interp_scalar(p[B3][igrid], c, del);
     V_u[1] = interp_scalar(p[U1][igrid], c, del);
     V_u[2] = interp_scalar(p[U2][igrid], c, del);
     V_u[3] = interp_scalar(p[U3][igrid], c, del);
@@ -997,8 +988,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double gamma_dd[4][4];
     for (int i = 1; i < 4; i++) {
         for (int j = 1; j < 4; j++) {
-            gamma_dd[i][j] =
-                g_dd[i][j]; // + g_uu[0][i]*g_uu[0][j]/(-g_uu[0][0]);
+            gamma_dd[i][j] = g_dd[i][j];
         }
     }
     double shift[4];
@@ -1016,9 +1006,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     if (VdotV > 1.) {
         fprintf(stderr,
-                "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n", VdotV, igrid, c, X[1],
-                X[2], X[3], r, V_u[1], V_u[2], V_u[3], p[U1][igrid][c][0],
-                p[U2][igrid][c][0], p[U3][igrid][c][0]);
+                "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
+                VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
+                p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
         //	issue with normalization, either due to inaccurate
         // interpolation/extrapolation typically only occurs very close to the
         // horizon setting it to a high value lfac=10
@@ -1030,7 +1020,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).U_u[0] = lfac / alpha;
 
-    // U_u[0] = gamma/alpha;
     for (int i = 1; i < NDIM; i++) {
         (*modvar).U_u[i] = 0;
         (*modvar).U_u[i] = V_u[i] * lfac - shift[i] * lfac / alpha;
@@ -1095,15 +1084,12 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double b2 = pow(uu * (gam - 1.) / (0.5 * (Bsq + smalll) * beta_trans), 2.);
 
-    (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
+    (*modvar).sigma = Bsq / (rho + smalll);
 
     double Rhigh = R_HIGH;
     double Rlow = R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
-
-    //    double two_temp_gam =
-    //      0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
 
     Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
 
