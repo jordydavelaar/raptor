@@ -201,6 +201,8 @@ void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4],
     LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
 }
 
+
+
 void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double *rQ,
                      double *rU, double *rV, double *aI, double *aQ, double *aU,
                      double *aV, double nu_p, struct GRMHD modvar,
@@ -209,6 +211,8 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
     double jI_thermal;
     double aI_kappa;
     double aI_thermal;
+    double eps, epsilon;
+    
     
     jI_kappa = J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     jI_thermal = j_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
@@ -219,6 +223,11 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
     jI_thermal /= (nu_p * nu_p);
     aI_kappa *= nu_p;
     aI_thermal *= nu_p;
+    epsilon = 1.;
+    eps = epsilon*(1.-exp(-pow(modvar.beta, -2.)))*(1-exp(-pow(modvar.sigma/modvar.sigma_min, 2)));
+    *jI = (1.-eps)*jI_thermal + eps*jI_kappa;
+    *aI = (1.-eps)*aI_thermal + eps*aI_kappa;
+  
 }
 
 void evaluate_coeffs_singel(double *jI, double *jQ, double *jU, double *jV, double *rQ,
