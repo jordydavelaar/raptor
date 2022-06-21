@@ -910,6 +910,7 @@ double interp_scalar(double **var, int c, double coeff[4]) {
 
     return interp;
 }
+
 // Get the flud parameters in the local co-moving plasma frame.
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_dd[NDIM][NDIM];

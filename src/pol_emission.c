@@ -222,7 +222,7 @@ double rho_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////J
-///for thermal and kappa
+/// for thermal and kappa
 double J_S_I_kappa(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
     double w = get_w(theta_e);
@@ -427,7 +427,7 @@ double j_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 #endif
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////A
-///for thermal and kappa
+/// for thermal and kappa
 double hyp2F1_f(double theta_e) {
     double w = get_w(theta_e);
     double a = kappa - 1. / 3.;

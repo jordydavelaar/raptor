@@ -203,21 +203,21 @@ void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4],
 
 void evaluate_coeffs(double *jI, double *jQ, double *jU, double *jV, double *rQ,
                      double *rU, double *rV, double *aI, double *aQ, double *aU,
-                     double *aV, double nu_p, double THETA_e, double n_e,
-                     double B, double pitch_ang) {
-    *jI = j_I(THETA_e, n_e, nu_p, B, pitch_ang);
-    *jQ = j_Q(THETA_e, n_e, nu_p, B, pitch_ang);
+                     double *aV, double nu_p, struct GRMHD modvar,
+                     double pitch_ang) {
+    *jI = j_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    *jQ = j_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *jU = 0.;
-    *jV = j_V(THETA_e, n_e, nu_p, B, pitch_ang);
+    *jV = j_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
-    *rQ = rho_Q(THETA_e, n_e, nu_p, B, pitch_ang);
+    *rQ = rho_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *rU = 0.;
-    *rV = rho_V(THETA_e, n_e, nu_p, B, pitch_ang);
+    *rV = rho_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
-    *aI = a_I(THETA_e, n_e, nu_p, B, pitch_ang, *jI);
-    *aQ = a_Q(THETA_e, n_e, nu_p, B, pitch_ang, *jQ);
+    *aI = a_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI);
+    *aQ = a_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jQ);
     *aU = 0;
-    *aV = a_V(THETA_e, n_e, nu_p, B, pitch_ang, *jV);
+    *aV = a_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jV);
 
     // Transform to invariant forms
     *jI /= (nu_p * nu_p);
@@ -480,9 +480,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
-
     evaluate_coeffs(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV, nu_p,
-                    modvar.theta_e, modvar.n_e, modvar.B, pitch_ang);
+                    modvar, pitch_ang);
 
     // Create tetrad, needed whether POLARIZATION_ACTIVE is true or
     // false.
