@@ -205,15 +205,20 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
                      double *rU, double *rV, double *aI, double *aQ, double *aU,
                      double *aV, double nu_p, struct GRMHD modvar,
                      double pitch_ang) {
-    *jI_kappa = J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    *jI_thermal = j_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    *aI_kappa = A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI_kappa);
-    *aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI_thermal);
+    double jI_kappa;
+    double jI_thermal;
+    double aI_kappa;
+    double aI_thermal;
+    
+    jI_kappa = J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jI_thermal = j_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aI_kappa = A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI_kappa);
+    aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI_thermal);
     // Transform to invariant forms
-    *jI_kappa /= (nu_p * nu_p);
-    *jI_thermal /= (nu_p * nu_p);
-    *aI_kappa *= nu_p;
-    *aI_thermal *= nu_p;
+    jI_kappa /= (nu_p * nu_p);
+    jI_thermal /= (nu_p * nu_p);
+    aI_kappa *= nu_p;
+    aI_thermal *= nu_p;
 }
 
 void evaluate_coeffs_singel(double *jI, double *jQ, double *jU, double *jV, double *rQ,
