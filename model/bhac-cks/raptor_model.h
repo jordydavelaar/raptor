@@ -32,7 +32,6 @@ struct GRMHD {
 #define B1 5
 #define B2 6
 #define B3 7
-#define LF 8
 
 double ****p;
 double R_HIGH, R_LOW;
