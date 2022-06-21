@@ -1006,10 +1006,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-        fprintf(stderr,
-                "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
-                VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
-                p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
+        // fprintf(stderr,
+        //         "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
+        //        VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
+        //       p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
         //	issue with normalization, either due to inaccurate
         // interpolation/extrapolation typically only occurs very close to the
         // horizon setting it to a high value lfac=10
