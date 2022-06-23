@@ -1083,12 +1083,14 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double beta_trans = 1.0;
 
-    double b2 = pow(uu * (gam - 1.) / (0.5 * (Bsq + smalll) * beta_trans), 2.);
+    (*modvar).beta = uu * (gam - 1.) / (0.5 * (Bsq + smalll));
+
+
+    double b2 = pow( (*modvar.beta) / beta_trans), 2.);
 
     (*modvar).sigma = Bsq / (rho + smalll);
-    (*modvar).sigma = 100.;
-    (*modvar).sigma_min = 0.;
-    (*modvar).beta = 100.;
+
+    (*modvar).sigma_min = 0.1;
     double Rhigh = R_HIGH;
     double Rlow = R_LOW;
 
