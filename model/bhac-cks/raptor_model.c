@@ -1086,7 +1086,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     (*modvar).beta = uu * (gam - 1.) / (0.5 * (Bsq + smalll));
 
 
-    double b2 = pow( (*modvar.beta) / beta_trans), 2.);
+    double b2 = pow(((*modvar).beta / beta_trans), 2.);
 
     (*modvar).sigma = Bsq / (rho + smalll);
 
@@ -1100,8 +1100,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 5.) || r > 100 ||
-        (*modvar).theta_e > 100) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 5.) || r > 100. ||
+        (*modvar).theta_e > 100.) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
