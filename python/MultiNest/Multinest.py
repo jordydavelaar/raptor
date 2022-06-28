@@ -71,14 +71,15 @@ def Initialize_imgrendererc():
 
 def Initialize_modelin(params_modelin):
 	# Set parameters in 'model.in'
-	MBH, M_UNIT, Rhigh, Rlow, i, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y, FREQS_PER_DEC, FREQ_MIN, STEPSIZE, MAX_LEVEL = params_modelin
+	MBH, M_UNIT, Rlow, Rhigh, i, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y, FREQS_PER_DEC, FREQ_MIN, STEPSIZE, MAX_LEVEL = params_modelin
 	f = open('model.in','r')
 	text = f.readlines()
 	f.close()
 	text[0] = 'MBH\t\t(g)\t\t%.15e\n'%(MBH)
 	text[1] = 'M_UNIT\t\t(g)\t\t%.15e\n'%(M_UNIT)
-	text[2] = 'Rhigh\t\t(-)\t\t%d\n'%(Rhigh)
-	text[3] = 'Rlow\t\t(-)\t\t%d\n'%(Rlow)
+	text[2] = 'Rlow\t\t(-)\t\t%d\n'%(Rlow)
+	text[3] = 'Rhigh\t\t(-)\t\t%d\n'%(Rhigh)
+
 	text[5] = 'INCLINATION\t(deg)\t%d\n'%(i)
 	text[6] = 'IMG_WIDTH\t(pixels)\t%d\n'%(IMG_WIDTH)
 	text[7] = 'IMG_HEIGHT\t(pixels)\t%d\n'%(IMG_HEIGHT)
