@@ -61,7 +61,7 @@ def Initialize_imgrendererc():
                 FREQ_Coreshift = np.loadtxt('Observational_Coreshift.txt').transpose()[0]
 #                FREQ_Coreshift = np.divide(29979245800,np.loadtxt('Observations_Coreshift.txt').transpose()[0])
 		num_Coreshift = len(FREQ_Coreshift)
- #       FREQ = np.concatenate([FREQ_Radio,FREQ_IR,FREQ_Coreshift])
+        FREQ = np.concatenate([FREQ_Spectrum,FREQ_Coreshift])
 	f = open('frequencies.txt', 'w')
 	for i in FREQ:
 		f.write(str(i + "\n")
@@ -112,13 +112,15 @@ def Initialize_parametersh(source_dist):
         f = open('parameters.h','r')
         text = f.readlines()
         f.close()
-	num_frequencies = num_Radio + num_Coreshift
+	num_frequencies = num_Spectrum + num_Coreshift
         text[37] = '#define num_indices %d\n'%(num_frequencies)
 	text[42] = '#define FREQS (FREQFILE) \n'
 	text[142] = '#define source_dist    (%.15e) // Distance to Centaurus A (cm)\n'%(source_dist)
         f = open('parameters.h','w')
         f.writelines(text)
         f.close()
+	os.system('make clean')
+	os.system('make all')
 			
 def Set_parameters():
     	# Load parameters from 'MultiNestRAPTORinput.txt'
