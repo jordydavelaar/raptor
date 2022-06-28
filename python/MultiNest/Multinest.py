@@ -48,8 +48,8 @@ from pymultinest.analyse import Analyzer
 import ehtim as eh
 
 # Define global variables
-MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, Coreshift, Image = [0,0,0,0,0,0,0]
-num_Radio, num_IR, num_Coreshift, num_indices = [0,0,0,0]
+MBH_var, M_UNIT_var, Rhigh_var, i_var, Spectrum, Coreshift, Image = [0,0,0,0,0,0,0]
+num_Spectrum, num_IR, num_Coreshift, num_indices = [0,0,0,0]
 MBH, M_UNIT, Rhigh, i, data_number = [0,0,0,0,0]
 loglike_evaluation = 0
 
@@ -68,7 +68,23 @@ def Initialize_imgrendererc():
 	for i in FREQ:
 		f.write(str(i + "\n")
 	f.close()
-
+			
+def Initialize_sizeflux_v4c(IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, source_dist):
+        if Coreshift: # Coreshift frequencies
+                FREQ_Coreshift = np.loadtxt('Observations_Coreshift.txt').transpose()[0]
+#                FREQ_Coreshift = np.divide(29979245800,np.loadtxt('Observations_Coreshift.txt').transpose()[0])
+		f = open('sizeflux_v4_5.c','r')
+        	text = f.readlines()
+        	f.close()
+		text[11] = '\tint dump1,dump2,img_size1=%d,img_size2=%d;\n'%(IMG_WIDTH, IMG_HEIGHT)
+		text[23] = '\tdouble freqlist[%d] = {%s};\n'%(len(FREQ_Coreshift),', '.join(map(str, FREQ_Coreshift)))
+		text[40] = '\tdouble d=%.15e;//5.061e25;\n'%(source_dist)
+        	text[43] = '\tdouble CAM_SIZE_X = %f;\n'%(CAM_SIZE_X)
+		f = open('sizeflux_v4_5.c','w')
+        	f.writelines(text)
+        	f.close()
+		os.system('gcc -o sizeflux_v4_5 sizeflux_v4_5.c -lm')
+			
 def Initialize_modelin(params_modelin):
 	# Set parameters in 'model.in'
 	MBH, M_UNIT, Rlow, Rhigh, i, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y, FREQS_PER_DEC, FREQ_MIN, STEPSIZE, MAX_LEVEL = params_modelin
@@ -93,6 +109,19 @@ def Initialize_modelin(params_modelin):
 	f.writelines(text)
 	f.close()
 
+def Initialize_parametersh(source_dist):
+    	# Set parameters in 'parameters.h'
+        f = open('parameters.h','r')
+        text = f.readlines()
+        f.close()
+	num_frequencies = num_Radio + num_Coreshift
+        text[37] = '#define num_indices %d\n'%(num_frequencies)
+	text[42] = '#define FREQS (FREQFILE) \n'
+	text[142] = '#define source_dist    (%.15e) // Distance to Centaurus A (cm)\n'%(source_dist)
+        f = open('parameters.h','w')
+        f.writelines(text)
+        f.close()
+			
 def Set_parameters():
     	# Load parameters from 'MultiNestRAPTORinput.txt'
 	_, params = np.loadtxt('MultiNestRAPTORinput.txt', dtype=str, delimiter='=', unpack=True)
