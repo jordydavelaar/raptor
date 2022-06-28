@@ -98,8 +98,8 @@ def Set_parameters():
 	_, params = np.loadtxt('MultiNestRAPTORinput.txt', dtype=str, delimiter='=', unpack=True)
 	params = params[0:27].astype(float)
        	# Set global variables
-	global MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, IR, Coreshift
-	MBH_var, M_UNIT_var, Rhigh_var, i_var, Radio, IR, Coreshift = params[0:7].astype(int)
+	global MBH_var, M_UNIT_var, Rhigh_var, i_var, Spectrum, Image, Coreshift
+	MBH_var, M_UNIT_var, Rhigh_var, i_var, Spectrum, Image, Coreshift = params[0:7].astype(int)
 	global MBH, M_UNIT, Rhigh, i, data_number
 	if not MBH_var:
 		MBH = params[7]
@@ -120,7 +120,7 @@ def Set_modelin(MBH, M_UNIT,Rhigh,i):
         f.close()
         text[0] = 'MBH\t\t(g)\t\t%.15e\n'%(MBH)
         text[1] = 'M_UNIT\t\t(g)\t\t%.15e\n'%(M_UNIT)
-        text[2] = 'Rhigh\t\t(-)\t\t%d\n'%(Rhigh)
+        text[3] = 'Rhigh\t\t(-)\t\t%d\n'%(Rhigh)
         text[5] = 'INCLINATION\t(deg)\t%d\n'%(i)
         f = open('model.in','w')
         f.writelines(text)
@@ -128,10 +128,9 @@ def Set_modelin(MBH, M_UNIT,Rhigh,i):
 
 def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
         # Set parameter values for RAPTOR:
-        print("running raptor")
         Set_modelin(MBH, M_UNIT, Rhigh,i)
     	# Run RAPTOR
-        os.system('./RAPTOR model.in ./harm3d.txt %d'%(data_number))
+        os.system('sbatch Multinest.sh %d'%(data_number))
     	# Load flux values
         Freq, Flux = np.loadtxt('output/spectrum_%d_%d.00.dat'%(data_number,np.floor(i)), dtype=str, unpack=True)
         Freq = Freq.astype(float)
@@ -172,15 +171,28 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
         #Calculate Chi^2
         if Spectrum:
                 Flux = RAPTOR(MBH, M_UNIT, Rhigh, i, data_number)
-                _, Measurements_Radio, Sigma_Radio = np.loadtxt('spectrum.txt', delimiter = " ", unpack = True)
-        	global num_Radio
-        	for freqnum in range(num_Radio):
+                _, Measurements_Spectrum, Sigma_Spectrum = np.loadtxt('Observational_Spectrum.txt', delimiter = " ", unpack = True)
+        	global num_Spectrum
+        	for freqnum in range(num_Spectrum):
 #            		Chisquare_Radio += (Measurements_Radio[freqnum] - np.log10(Flux[freqnum]))**2  /(2*Sigma_Radio[freqnum]**2)
-        		Chisquare_Radio += (Measurements_Radio[freqnum] - Flux[freqnum])**2  /(num_Radio*2*Sigma_Radio[freqnum]**2)
+        		Chisquare_Spectrum += (Measurements_Spetrum[freqnum] - Flux[freqnum])**2  /(num_Spectrum*2*Sigma_Spectrum[freqnum]**2)
 #			Chisquare_Radio += (np.log10(Measurements_Radio[freqnum]) - np.log10(Flux[freqnum]))**2 /(2*(np.log10(Measurements_Radio[freqnum])-np.log10(Measurements_Radio[freqnum] - Sigma_Radio[freqnum]))**2) #       	
 #			Chisquare_Radio +=(Measurements_Radio[freqnum] - Flux[freqnum])**2
         # Calculate total chisquared value
-    	Chisquare_Total = Chisquare_Radio + Chisquare_Image + Chisquare_Coreshift
+#	If Image:
+#		Chisquare = 
+    	if Coreshift:
+#		_, Measurements_Major, Sigma_Major, Measurements_Minor, Sigma_Minor = np.loadtxt('Observations_Coreshift.txt').transpose()
+		_, Measurements_Major, Err_up_Major, Err_down_Major = np.loadtxt('Observations_Coreshift.txt').transpose()
+        	os.system('./sizeflux_v4_5 1 %d %.2f %f %d'%(num_Coreshift, i, MBH, data_number))
+            	Wavelength, Major, Minor, _, _, _, _ = np.loadtxt('output/lambda_th_%d_%.2f.dat'%(data_number,i), dtype=float, delimiter=' ', unpack=True)
+		for Wavelengthnum in range(len(Wavelength)):
+                	Chisquare_Coreshift += (Measurements_Major[Wavelengthnum] - Major[Wavelengthnum])**2  /(num_Coreshift*2*Err_up_Major[Wavelengthnum]**2)
+#			Chisquare_Coreshift += (Measurements_Minor[Wavelengthnum] - Minor[Wavelengthnum])**2  /(2*Sigma_Minor[Wavelengthnum]**2)
+#			Chisquare_Coreshift += (np.log10(Measurements_Major[Wavelengthnum]) - np.log10(Major[Wavelengthnum]))**2 /(2*(np.log10(Measurements_Coreshift[Wavelenghtnum])-np.log10(Measurements_Coreshift[Wavelengthnum] - Err_down_Major[Wavelengthnum]))**2)
+		# Write output to 'Run-name_Major.txt'
+		
+	Chisquare_Total = Chisquare_Radio + Chisquare_Image + Chisquare_Coreshift
     	# Write Chisquared values to 'Run-name_Chisquared.txt'
         f = open("%s_Chisquared.txt"%(sys.argv[1]),'a+')
         f.write("%.15e\t%.15e\t%.15e\t%.15e\t%.15e\n"%(MBH, M_UNIT, Rhigh, i, Chisquare_Total))
