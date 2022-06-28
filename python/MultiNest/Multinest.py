@@ -169,8 +169,8 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
         if i_var:
                 i = cube[MBH_var+M_UNIT_var+Rhigh_var+i_var-1]
         #Calculate Chi^2
+        Flux = RAPTOR(MBH, M_UNIT, Rhigh, i, data_number)
         if Spectrum:
-                Flux = RAPTOR(MBH, M_UNIT, Rhigh, i, data_number)
                 _, Measurements_Spectrum, Sigma_Spectrum = np.loadtxt('Observational_Spectrum.txt', delimiter = " ", unpack = True)
         	global num_Spectrum
         	for freqnum in range(num_Spectrum):
@@ -179,8 +179,8 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
 #			Chisquare_Radio += (np.log10(Measurements_Radio[freqnum]) - np.log10(Flux[freqnum]))**2 /(2*(np.log10(Measurements_Radio[freqnum])-np.log10(Measurements_Radio[freqnum] - Sigma_Radio[freqnum]))**2) #       	
 #			Chisquare_Radio +=(Measurements_Radio[freqnum] - Flux[freqnum])**2
         # Calculate total chisquared value
-#	If Image:
-#		Chisquare = 
+#	if Image:
+#		Chisquare_Image = 
     	if Coreshift:
 #		_, Measurements_Major, Sigma_Major, Measurements_Minor, Sigma_Minor = np.loadtxt('Observations_Coreshift.txt').transpose()
 		_, Measurements_Major, Err_up_Major, Err_down_Major = np.loadtxt('Observations_Coreshift.txt').transpose()
