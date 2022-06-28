@@ -222,7 +222,7 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
 #			Chisquare_Coreshift += (np.log10(Measurements_Major[Wavelengthnum]) - np.log10(Major[Wavelengthnum]))**2 /(2*(np.log10(Measurements_Coreshift[Wavelenghtnum])-np.log10(Measurements_Coreshift[Wavelengthnum] - Err_down_Major[Wavelengthnum]))**2)
 		# Write output to 'Run-name_Major.txt'
 		
-	Chisquare_Total = Chisquare_Radio + Chisquare_Image + Chisquare_Coreshift
+	Chisquare_Total = Chisquare_Spectrum + Chisquare_Image + Chisquare_Coreshift
     	# Write Chisquared values to 'Run-name_Chisquared.txt'
         f = open("%s_Chisquared.txt"%(sys.argv[1]),'a+')
         f.write("%.15e\t%.15e\t%.15e\t%.15e\t%.15e\n"%(MBH, M_UNIT, Rhigh, i, Chisquare_Total))
