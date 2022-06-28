@@ -23,7 +23,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 #define NDIM 4
 #define NPRIM 8
@@ -32,10 +32,9 @@ char inputfile[100];
 #define IMGFILE (1)
 #define SPECFILE (1)
 #define RAD_TRANS (1)
-#define POL (0)
+#define POL (1)
 
-
-#define num_frequencies 5
+#define num_frequencies 1
 
 #define FREQFILE (0)
 #define FREQLOG (1)
@@ -69,12 +68,12 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
-// DISTRIBUTION CHOISES 
+// DISTRIBUTION CHOISES
 //////////////////
 #define KAPPA (0) // kappa distribution
-#define TH (1) // thermal distribution
+#define TH (1)    // thermal distribution
 #define POWER (2) // Power-law distribution
-#define DF (TH)  // Distribution function
+#define DF (TH)   // Distribution function
 #define kappa 5.0
 #define power 2.5
 #define gamma_min 1.
@@ -155,7 +154,7 @@ double CAM_SIZE_Y;
 
 #define OUTER_BOUND_POL (1000.) // Stop polarized integration beyond this radius
 
-#define delta_num (1.e-9) // Used for numerical derivatives
+#define delta_num (1.e-4) // Used for numerical derivatives
 #define max_steps (1e5)   // Maximum number of integration steps
 
 double STEPSIZE;

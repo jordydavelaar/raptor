@@ -76,7 +76,6 @@ int main(int argc, char *argv[]) {
 
     init_camera(&intensityfield);
 
-
     #if (FREQS == FREQLOG)
         for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
             frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
@@ -98,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     int block = 0;
 
-    while (block < tot_blocks) {
+    while (block < tot_blocks) { // block_total
         if (block % (10) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 

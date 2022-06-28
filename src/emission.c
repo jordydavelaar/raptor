@@ -6,12 +6,11 @@
  */
 
 #include "functions.h"
-#include <gsl/gsl_sf_hyperg.h>
 #include "parameters.h"
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_hyperg.h>
 #include <math.h>
 #include <stdio.h>
-
 
 // non thermal emission
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
@@ -21,7 +20,7 @@ double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
     double J_low, J_high, J_s;
 
     // printf("%g\n", b2);
-    
+
     w = Thetae; // sqrt(  2./9./kappa *Thetae * Thetae);
     nuc = ELECTRON_CHARGE * B / (2. * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
     sth = sin(theta);
@@ -97,7 +96,6 @@ double absorption_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
     //      fprintf(stderr, "A_s %g\n", A_s*factor);
     return (factor * A_s);
 }
-
 
 // Return emissivity j_nu which depends on local plasma parameters
 // Ref. Dolence & Moscibrodzka 2009
