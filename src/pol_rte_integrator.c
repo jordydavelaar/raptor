@@ -230,6 +230,39 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
   
 }
 
+void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV, double *rQ,
+                     double *rU, double *rV, double *aI, double *aQ, double *aU,
+                     double *aV, double nu_p, struct GRMHD modvar,
+                     double pitch_ang) {
+    *jI = j_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    *jQ = j_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    *jU = 0.;
+    *jV = j_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+
+    *rQ = rho_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    *rU = 0.;
+    *rV = rho_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+
+    *aI = a_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI);
+    *aQ = a_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jQ);
+    *aU = 0;
+    *aV = a_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jV);
+
+    // Transform to invariant forms
+    *jI /= (nu_p * nu_p);
+    *jQ /= (nu_p * nu_p);
+    *jU /= (nu_p * nu_p);
+    *jV /= (nu_p * nu_p);
+
+    *aI *= nu_p;
+    *aQ *= nu_p;
+    *aU *= nu_p;
+    *aV *= nu_p;
+
+    *rQ *= nu_p;
+    *rU *= nu_p;
+    *rV *= nu_p;
+}
 int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
                     double rU, double rV, double aI, double aQ, double aU,
                     double aV, double dl_current) {
