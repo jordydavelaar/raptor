@@ -1,9 +1,8 @@
 '''
 Set parameters in 'MultiNestRAPTORinput.txt'
-Check if there are enough lines for the frequencies in file 'img_renderer.c'
-Run this file with command: python MultiNestRAPTOR_SgrA.py Run-name
+Run this file with command: python3 Multinest.py Run-name
 
-To run this code, one has to have downloaded PyMultiNest, ehtim
+To run this code, one has to have downloaded PyMultiNest, eht-imaging
 
 Needed files:
 	Multinest.py
@@ -11,7 +10,6 @@ Needed files:
 	Convergenceplotter.py
 
 Maybe needed files:
-	frequencies.txt
 	Observational_Spectrum.txt
 	Observational_Coreshift.txt
         Observational_Image.txt
@@ -129,7 +127,7 @@ def Set_parameters():
        	# Set global variables
 	global MBH_var, M_UNIT_var, Rhigh_var, i_var, Spectrum, Image, Coreshift
 	MBH_var, M_UNIT_var, Rhigh_var, i_var, Spectrum, Image, Coreshift = params[0:7].astype(int)
-	global MBH, M_UNIT, Rhigh, i, data_number
+	global MBH, M_UNIT, Rhigh, i, data_number, source_dist
 	if not MBH_var:
 		MBH = params[7]
 	if not M_UNIT_var:
@@ -138,6 +136,7 @@ def Set_parameters():
 		Rhigh = params[9]
 	if not i_var:
 		i = params[11]
+	source_dist = params[20]
 	data_number = params[22]
     	# Initialize input files RAPTOR
 	Initialize_modelin(params[7:20])
