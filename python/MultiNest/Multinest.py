@@ -57,10 +57,10 @@ loglike_evaluation = 0
 def Initialize_imgrendererc():
 	global num_Spectrum, num_Coreshift
         if Spectrum: # Radio frequencies
-                FREQ_Spectrum = np.loadtxt('Observations_Spectrum.txt').transpose()[0]
+                FREQ_Spectrum = np.loadtxt('Observational_Spectrum.txt').transpose()[0]
         	num_Spectrum = len(FREQ_Spectrum)
         if Coreshift: # Coreshift frequencies
-                FREQ_Coreshift = np.loadtxt('Observations_Coreshift.txt').transpose()[0]
+                FREQ_Coreshift = np.loadtxt('Observational_Coreshift.txt').transpose()[0]
 #                FREQ_Coreshift = np.divide(29979245800,np.loadtxt('Observations_Coreshift.txt').transpose()[0])
 		num_Coreshift = len(FREQ_Coreshift)
  #       FREQ = np.concatenate([FREQ_Radio,FREQ_IR,FREQ_Coreshift])
