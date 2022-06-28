@@ -26,4 +26,4 @@ $(OBJECTS): $(OBJDIR)/%.o: %.c
 
 
 clean:
-	rm -rf $(OBJDIR)/$(OBJECTS) $(TARGET)
+	rm -rf $(OBJECTS) $(TARGET)
