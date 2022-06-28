@@ -6,13 +6,11 @@
  */
 
 #include "functions.h"
-#include <gsl/gsl_sf_hyperg.h>
 #include "parameters.h"
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_hyperg.h>
 #include <math.h>
 #include <stdio.h>
-
-double kappa;
 
 // non thermal emission
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
@@ -21,11 +19,7 @@ double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
     double nuc, sth, nus, x, w, X_kappa, factor;
     double J_low, J_high, J_s;
 
-    double Rhigh = 4.5;
-    double Rlow = 4.5;
-    double b2 = pow((B / B_unit) / (Ne / Ne_unit), 2.);
     // printf("%g\n", b2);
-    kappa = Rhigh * b2 / (1 + b2) + Rlow / (1 + b2);
 
     w = Thetae; // sqrt(  2./9./kappa *Thetae * Thetae);
     nuc = ELECTRON_CHARGE * B / (2. * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -58,11 +52,7 @@ double absorption_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
     // absortion for the kappa distribution function, see Pandya et al. 2016
     double nuc, sth, nus, x, w, X_kappa, factor;
     double A_low, A_high, A_s;
-    double Rhigh = 4.5;
-    double Rlow = 4.5;
-    double b2 =
-        pow((B / B_unit) / (Ne / Ne_unit), 2.); //(B/B_unit)/(Ne/Ne_unit);
-    kappa = Rhigh * b2 / (1 + b2) + Rlow / (1 + b2);
+
     w = Thetae; // sqrt(2./9./kappa *Thetae * Thetae);
     nuc = ELECTRON_CHARGE * B / (2. * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
     sth = sin(theta);
@@ -106,7 +96,6 @@ double absorption_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
     //      fprintf(stderr, "A_s %g\n", A_s*factor);
     return (factor * A_s);
 }
-
 
 // Return emissivity j_nu which depends on local plasma parameters
 // Ref. Dolence & Moscibrodzka 2009

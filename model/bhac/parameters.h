@@ -62,6 +62,17 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
+// DISTRIBUTION CHOISES 
+//////////////////
+#define KAPPA (0) // kappa distribution
+#define TH (1) // thermal distribution
+#define POWER (2) // Power-law distribution
+#define DF (TH)  // Distribution function
+#define kappa 5.0
+#define power 2.5
+#define gamma_min 1.
+#define gamma_max 1000.
+
 // METRIC PARAMETERS
 ////////////////////
 
@@ -137,7 +148,7 @@ double CAM_SIZE_Y;
 
 #define OUTER_BOUND_POL (1000.) // Stop polarized integration beyond this radius
 
-#define delta_num (1.e-9) // Used for numerical derivatives
+#define delta_num (1.e-4) // Used for numerical derivatives
 #define max_steps (1e5)   // Maximum number of integration steps
 
 double STEPSIZE;
