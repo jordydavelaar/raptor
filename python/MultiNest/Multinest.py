@@ -88,7 +88,7 @@ def Initialize_modelin(params_modelin):
 	text[10] = 'FREQS_PER_DEC\t(-)\t\t%d\n'%(FREQS_PER_DEC)
 	text[11] = 'FREQ_MIN\t(Hz)\t\t%.15e\n'%(FREQ_MIN)
 	text[12] = 'STEPSIZE\t(-)\t\t%.15e\n'%(STEPSIZE)
-	text[10] = 'MAX_LEVEL\t(-)\t\t%d\n'%(MAX_LEVEL)
+	text[13] = 'MAX_LEVEL\t(-)\t\t%d\n'%(MAX_LEVEL)
 	f = open('model.in','w')
 	f.writelines(text)
 	f.close()
