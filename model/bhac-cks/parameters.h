@@ -40,7 +40,7 @@ char inputfile[100];
 #define FREQFILE (0)
 #define FREQLOG (1)
 
-#define FREQS (FREQFILE)
+#define FREQS (FREQLOG)
 
 #define num_pixels_1d 10
 #define tot_pixels 100

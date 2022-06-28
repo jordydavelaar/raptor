@@ -86,11 +86,13 @@ int main(int argc, char *argv[]) {
     #elif (FREQS == FREQFILE)
         FILE *input;
         input = fopen("./frequencies.txt", "r");
+
         if (input == NULL) 
             fprintf(stderr, "Cannot read input file\n");
             // return 1;
         for (int f = 0; f < num_frequencies; f++) {
             fscanf(input, "%lf", &frequencies[f]);
+            fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
         }
     #endif 
 
