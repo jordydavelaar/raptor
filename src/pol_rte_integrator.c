@@ -227,6 +227,9 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
     eps = epsilon*(1.-exp(-pow(modvar.beta, -2.)))*(1-exp(-pow(modvar.sigma/modvar.sigma_min, 2)));
     *jI = (1.-eps)*jI_thermal + eps*jI_kappa;
     *aI = (1.-eps)*aI_thermal + eps*aI_kappa;
+    
+    *jI /= (nu_p * nu_p);
+    *aI *= nu_p;
   
 }
 
