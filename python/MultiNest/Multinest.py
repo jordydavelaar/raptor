@@ -54,6 +54,21 @@ MBH, M_UNIT, Rhigh, i, data_number = [0,0,0,0,0]
 loglike_evaluation = 0
 
 # Define functions
+def Initialize_imgrendererc():
+	global num_Spectrum, num_Coreshift
+        if Spectrum: # Radio frequencies
+                FREQ_Spectrum = np.loadtxt('Observations_Spectrum.txt').transpose()[0]
+        	num_Spectrum = len(FREQ_Spectrum)
+        if Coreshift: # Coreshift frequencies
+                FREQ_Coreshift = np.loadtxt('Observations_Coreshift.txt').transpose()[0]
+#                FREQ_Coreshift = np.divide(29979245800,np.loadtxt('Observations_Coreshift.txt').transpose()[0])
+		num_Coreshift = len(FREQ_Coreshift)
+ #       FREQ = np.concatenate([FREQ_Radio,FREQ_IR,FREQ_Coreshift])
+	f = open('frequencies.txt', 'w')
+	for i in FREQ:
+		f.write(str(i + "\n")
+	f.close()
+
 def Initialize_modelin(params_modelin):
 	# Set parameters in 'model.in'
 	MBH, M_UNIT, Rhigh, Rlow, i, IMG_WIDTH, IMG_HEIGHT, CAM_SIZE_X, CAM_SIZE_Y, FREQS_PER_DEC, FREQ_MIN, STEPSIZE, MAX_LEVEL = params_modelin
