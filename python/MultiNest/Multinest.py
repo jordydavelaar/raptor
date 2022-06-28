@@ -160,7 +160,7 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
         # Set parameter values for RAPTOR:
         Set_modelin(MBH, M_UNIT, Rhigh,i)
     	# Run RAPTOR
-        os.system('sbatch Multinest.sh %d'%(data_number))
+        os.system('sbatch MultiNestRAPTOR.sh %d'%(data_number))
     	# Load flux values
         Freq, Flux = np.loadtxt('output/spectrum_%d_%d.00.dat'%(data_number,np.floor(i)), dtype=str, unpack=True)
         Freq = Freq.astype(float)
