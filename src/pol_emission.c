@@ -445,7 +445,7 @@ double hyp2F1_f(double theta_e) {
                gsl_sf_hyperg_2F1(b, c - a, b - a + 1., 1. / (1. - z));
     }
     if(X<1.0){
-        return gsl_sf_hyperg_2F1(a, b, c, -X));
+        return gsl_sf_hyperg_2F1(a, b, c, -X);
     }
     
     return 0;
