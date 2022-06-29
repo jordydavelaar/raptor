@@ -126,7 +126,7 @@ int refine_block(struct Camera intensity) {
             }
         }
     }
-    if (gradImax > 0.25 && intensity.level < max_level)struct block *block_info
+    if (gradImax > 0.25 && intensity.level < max_level)
         return 1;
     else
         return 0;
@@ -150,10 +150,10 @@ bronzwaer
 int find_block(double x[2], struct Camera *intensityfield) {
     double small = 1e-6;
     double dx[2];
-    dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
-    dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
 
     for (int block = 0; block < tot_blocks; block++) {
+        dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
+        dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
         if (x[0] + small >= intensityfield[block].lcorner[0]  &&
             x[0] + small <  num_pixels_1d* dx[0] &&            
             x[1] + small >= intensityfield[block].lcorner[0]  &&
