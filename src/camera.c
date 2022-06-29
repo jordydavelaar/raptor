@@ -28,7 +28,7 @@ void init_camera(struct Camera **intensityfield) {
         (*intensityfield)[block].ind[0] = x;
         (*intensityfield)[block].ind[1] = y;
 
-        get_impact_params(intensityfield, block);
+        get_impact_params(intensityfield, block);struct block *block_info
     }
 }
 
@@ -78,7 +78,7 @@ void new_cindex(int child, int *new_i, int *new_j, int ip, int jp) {
 void shift_camera_array(struct Camera **intensityfield, int current_block) {
     for (int block = tot_blocks - 1; block > current_block + 3; block--) {
         (*intensityfield)[block] = (*intensityfield)[block - 3];
-    }
+    }struct block *block_info
 }
 
 void add_block(struct Camera **intensityfield, int current_block) {
@@ -118,7 +118,7 @@ int refine_block(struct Camera intensity) {
                                intensity.IQUV[pixel1][freq][0]) /
                           (intensity.IQUV[pixel1][freq][0] + 1e-40);
                 gradI_x = fabs(intensity.IQUV[pixel3][freq][0] -
-                               intensity.IQUV[pixel1][freq][0]) /
+                               intensity.IQUV[pixel1][freq][0]) /struct block *block_info
                           (intensity.IQUV[pixel1][freq][0] + 1e-40);
 
                 if (gradI_x > gradImax)
@@ -128,7 +128,7 @@ int refine_block(struct Camera intensity) {
             }
         }
     }
-    if (gradImax > 0.25 && intensity.level < max_level)
+    if (gradImax > 0.25 && intensity.level < max_level)struct block *block_info
         return 1;
     else
         return 0;
@@ -147,4 +147,17 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
 #if (LOG_TETRADS_CAM || LINEAR_TETRADS_CAM)
     initialize_photon_tetrads(alpha, beta, photon_u, t, Xcam, Ucam);
 #endif
+}
+struct block *block_infostruct block *block_info
+int find_block(double x[2], struct Camera *intensityfield) {
+    double small = 1e-6
+    for (int block = 0; block < tot_blocks; block++) {
+        if (x[0] + small >= intensityfield[block].lcorner[0]  &&
+            x[0] + small <  num_pixels_1d*intensityfield[block].dx[0]  &&            
+            x[1] + small >= intensityfield[block].lcorner[0]  &&
+            x[1] + small <  num_pixels_1d*intensityfield[block].dx[0]  &&) {
+            return block;
+        }
+    }
+    return -1;
 }
