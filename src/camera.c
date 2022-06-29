@@ -78,7 +78,7 @@ void new_cindex(int child, int *new_i, int *new_j, int ip, int jp) {
 void shift_camera_array(struct Camera **intensityfield, int current_block) {
     for (int block = tot_blocks - 1; block > current_block + 3; block--) {
         (*intensityfield)[block] = (*intensityfield)[block - 3];
-    }struct block *block_info
+    }
 }
 
 void add_block(struct Camera **intensityfield, int current_block) {
