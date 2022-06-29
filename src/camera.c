@@ -115,11 +115,11 @@ int refine_block(struct Camera intensity) {
                 pixel3 = ypixel + (xpixel + 1) * num_pixels_1d;
 
                 gradI_y = fabs(intensity.IQUV[pixel2][freq][0] -
-                               intensity.IQUV[pixel1][freq][0]) /bronzwaer
+                               intensity.IQUV[pixel1][freq][0]) /
                           (intensity.IQUV[pixel1][freq][0] + 1e-40);
                 gradI_x = fabs(intensity.IQUV[pixel3][freq][0] -
                                intensity.IQUV[pixel1][freq][0]) /
-                    (intensity.IQUV[pixel1][freq][0] + 1e-40);
+                          (intensity.IQUV[pixel1][freq][0] + 1e-40);
 
                 if (gradI_x > gradImax)
                     gradImax = gradI_x;
