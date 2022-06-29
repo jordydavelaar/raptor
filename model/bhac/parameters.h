@@ -46,7 +46,7 @@ struct Camera {
     double tau[tot_pixels][num_frequencies];     // intensity
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
-    double lcorner[2];                           // upper left corner of a block
+    double lcorner[2];                           // lower left corner of a block
     double dx[2];                                // pixel spacing of block
     int level;
     int ind[2];
