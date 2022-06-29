@@ -161,11 +161,11 @@ int find_block(double x[2], struct Camera *intensityfield) {
             x[0] + small <  num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]&&            
             x[1] + small >= intensityfield[block].lcorner[1]  &&
             x[1] + small <  num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]  ) {
-           fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
-           fprintf(stderr,"x0  = %lf, %lf \n", intensityfield[block].lcorner[0],num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]);
-           fprintf(stderr,"y0  = %lf, %lf \n", intensityfield[block].lcorner[1],num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]);
-           fprintf(stderr,"alpha min max  = %lf, %lf \n", intensityfield[block].alpha[0],intensityfield[block].alpha[99]);
-           fprintf(stderr,"beta min max  = %lf, %lf \n", intensityfield[block].beta[0],intensityfield[block].beta[99]);
+           #fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
+           #fprintf(stderr,"x0  = %lf, %lf \n", intensityfield[block].lcorner[0],num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]);
+           #fprintf(stderr,"y0  = %lf, %lf \n", intensityfield[block].lcorner[1],num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]);
+           #fprintf(stderr,"alpha min max  = %lf, %lf \n", intensityfield[block].alpha[0],intensityfield[block].alpha[99]);
+           #fprintf(stderr,"beta min max  = %lf, %lf \n", intensityfield[block].beta[0],intensityfield[block].beta[99]);
 
             return block;
         }
