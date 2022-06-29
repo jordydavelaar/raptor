@@ -154,12 +154,12 @@ int find_block(double x[2], struct Camera *intensityfield) {
     for (int block = 0; block < tot_blocks; block++) {
         dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
         dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
-        fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
-        fprintf(stderr,"dx = %lf, %lf \n", dx[0], dx[1]);
-        fprintf(stderr,"nulpunt2 = %lf \n", intensityfield[block].lcorner[0]);
+        //fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
+        //fprintf(stderr,"dx = %lf, %lf \n", dx[0], dx[1]);
+        //fprintf(stderr,"nulpunt2 = %lf \n", intensityfield[block].lcorner[0]);
         if (x[0] + small >= intensityfield[block].lcorner[0]  &&
             x[0] + small <  num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]&&            
-            x[1] + small >= intensityfield[block].lcorner[0]  &&
+            x[1] + small >= intensityfield[block].lcorner[1]  &&
             x[1] + small <  num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]  ) {
             return block;
         }
