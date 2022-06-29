@@ -183,7 +183,7 @@ int find_pixel(double x[2], struct Camera *intensityfield, int block) {
     int i = (int)((x[0] - intensityfield[block].lcorner[0]) / dx[0] - 0.5);
     int j = (int)((x[1] - intensityfield[block].lcorner[1]) / dx[1] - 0.5);
 
-    int pixel = i + j * num_pixels_1d;
+    int pixel = j + i * num_pixels_1d;
 
     return pixel;
 }
