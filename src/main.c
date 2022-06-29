@@ -117,6 +117,8 @@ int main(int argc, char *argv[]) {
     /////////////////////
 
     output_files(intensityfield, energy_spectrum, frequencies);
+    
+    write_uniform_camera(intensityfield, frequencies[0],0);
 
     fprintf(stderr, "\nFinished writing files.\n");
 

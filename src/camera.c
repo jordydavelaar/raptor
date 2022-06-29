@@ -8,7 +8,6 @@
 #include "parameters.h"
 #include <math.h>
 #include <stdio.h>
-
 void init_camera(struct Camera **intensityfield) {
     int x, y;
 
@@ -31,7 +30,6 @@ void init_camera(struct Camera **intensityfield) {
         get_impact_params(intensityfield, block);
     }
 }
-
 void get_impact_params(struct Camera **intensityfield, int block) {
     int xpixel, ypixel;
     double stepx, stepy, d_x, d_y;
@@ -140,11 +138,82 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
     double stepy = CAM_SIZE_Y / (double)IMG_HEIGHT;
     alpha = -CAM_SIZE_X * 0.5 + (x + 0.5) * stepx;
     beta = -CAM_SIZE_Y * 0.5 + (y + 0.5) * stepy;
-
+    
     initialize_photon(alpha, beta, photon_u, t_init);
 #endif
 
 #if (LOG_TETRADS_CAM || LINEAR_TETRADS_CAM)
     initialize_photon_tetrads(alpha, beta, photon_u, t, Xcam, Ucam);
 #endif
+}
+
+int find_block(double x[2], struct Camera *intensityfield) {
+    double small = 1e-6;
+    double dx[2];
+
+    for (int block = 0; block < tot_blocks; block++) {
+        dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
+        dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
+        //fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
+        //fprintf(stderr,"dx = %lf, %lf \n", dx[0], dx[1]);
+        //fprintf(stderr,"nulpunt2 = %lf \n", intensityfield[block].lcorner[0]);
+        if (x[0] + small >= intensityfield[block].lcorner[0]  &&
+            x[0] + small <  num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]&&            
+            x[1] + small >= intensityfield[block].lcorner[1]  &&
+            x[1] + small <  num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]  ) {
+           \\fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
+           \\fprintf(stderr,"x0  = %lf, %lf \n", intensityfield[block].lcorner[0],num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]);
+           \\fprintf(stderr,"y0  = %lf, %lf \n", intensityfield[block].lcorner[1],num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]);
+           \\fprintf(stderr,"alpha min max  = %lf, %lf \n", intensityfield[block].alpha[0],intensityfield[block].alpha[99]);
+           \\fprintf(stderr,"beta min max  = %lf, %lf \n", intensityfield[block].beta[0],intensityfield[block].beta[99]);
+
+            return block;
+        }
+    }
+    
+    
+    return -1;
+}
+
+int find_pixel(double x[2], struct Camera *intensityfield, int block) {
+    double dx[2];
+    dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
+    dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
+    
+    int i = (int)((x[0] - intensityfield[block].lcorner[0]) / dx[0] - 0.5);
+    int j = (int)((x[1] - intensityfield[block].lcorner[1]) / dx[1] - 0.5);
+
+    int pixel = j + i * num_pixels_1d;
+
+    return pixel;
+}
+
+double write_uniform_camera(struct Camera *intensityfield,double frequency,int freq){
+  int uniform_size = IMG_WIDTH * pow(2,max_level-1);
+  double uniform_dx = CAM_SIZE_X / (double)uniform_size;
+  double x[2];
+  char spec_folder[64] = "output";  
+  char uniform_filename[256] = "";
+  sprintf(uniform_filename, "%s/uniform_img_%.02e_%d.dat", spec_folder, frequency,
+            (int)TIME_INIT);
+       
+  FILE *uniformfile = fopen(uniform_filename, "w"); 
+    
+  double UNIT_FACTOR = JANSKY_FACTOR * uniform_dx * uniform_dx *R_GRAV * R_GRAV /source_dist/source_dist;
+  double arcsec_factor = 206265.0*R_GRAV/source_dist; 
+      
+  for(int i=0; i<uniform_size;i++){
+    for(int j=0;j<uniform_size; j++){
+        x[0] = -CAM_SIZE_X/2. + (i + 0.5) * uniform_dx; 
+        x[1] = -CAM_SIZE_X/2. + (j + 0.5) * uniform_dx;
+        int block = find_block(x,intensityfield);
+        if(block==-1){
+            fprintf(stderr,"camera block not found!\n");
+            exit(1);
+        }
+        int pixel = find_pixel(x,intensityfield, block);
+        fprintf(uniformfile, "%+.15e\t%+.15e\t%+.15e \n", x[0]*arcsec_factor,x[1]*arcsec_factor, intensityfield[block].IQUV[pixel][freq][0]*UNIT_FACTOR);
+      }
+    }
+    fclose(uniformfile);
 }
