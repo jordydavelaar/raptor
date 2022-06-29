@@ -8,7 +8,6 @@
 #include "parameters.h"
 #include <math.h>
 #include <stdio.h>
-
 void init_camera(struct Camera **intensityfield) {
     int x, y;
 
@@ -28,10 +27,9 @@ void init_camera(struct Camera **intensityfield) {
         (*intensityfield)[block].ind[0] = x;
         (*intensityfield)[block].ind[1] = y;
 
-        get_impact_params(intensityfield, block);struct block *block_info
+        get_impact_params(intensityfield, block);
     }
 }
-
 void get_impact_params(struct Camera **intensityfield, int block) {
     int xpixel, ypixel;
     double stepx, stepy, d_x, d_y;
