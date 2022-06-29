@@ -115,11 +115,11 @@ int refine_block(struct Camera intensity) {
                 pixel3 = ypixel + (xpixel + 1) * num_pixels_1d;
 
                 gradI_y = fabs(intensity.IQUV[pixel2][freq][0] -
-                               intensity.IQUV[pixel1][freq][0]) /
+                               intensity.IQUV[pixel1][freq][0]) /bronzwaer
                           (intensity.IQUV[pixel1][freq][0] + 1e-40);
                 gradI_x = fabs(intensity.IQUV[pixel3][freq][0] -
-                               intensity.IQUV[pixel1][freq][0]) /struct block *block_info
-                          (intensity.IQUV[pixel1][freq][0] + 1e-40);
+                               intensity.IQUV[pixel1][freq][0]) /
+                    (intensity.IQUV[pixel1][freq][0] + 1e-40);
 
                 if (gradI_x > gradImax)
                     gradImax = gradI_x;
@@ -140,7 +140,7 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
     double stepy = CAM_SIZE_Y / (double)IMG_HEIGHT;
     alpha = -CAM_SIZE_X * 0.5 + (x + 0.5) * stepx;
     beta = -CAM_SIZE_Y * 0.5 + (y + 0.5) * stepy;
-
+bronzwaer
     initialize_photon(alpha, beta, photon_u, t_init);
 #endif
 
@@ -148,16 +148,63 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
     initialize_photon_tetrads(alpha, beta, photon_u, t, Xcam, Ucam);
 #endif
 }
-struct block *block_infostruct block *block_info
+
 int find_block(double x[2], struct Camera *intensityfield) {
-    double small = 1e-6
+    double small = 1e-6;
+    double dx[2];
+    dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
+    dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
+
     for (int block = 0; block < tot_blocks; block++) {
         if (x[0] + small >= intensityfield[block].lcorner[0]  &&
-            x[0] + small <  num_pixels_1d*intensityfield[block].dx[0]  &&            
+            x[0] + small <  num_pixels_1d* dx[0] &&            
             x[1] + small >= intensityfield[block].lcorner[0]  &&
-            x[1] + small <  num_pixels_1d*intensityfield[block].dx[0]  &&) {
+            x[1] + small <  num_pixels_1d* dx[1]  ) {
             return block;
         }
     }
     return -1;
+}
+
+int find_pixel(double x[2], struct Camera *intensityfield, int block) {
+    double dx[2];
+    dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
+    dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
+    
+    int i = (int)((x[0] - intensityfield[block].lcorner[0]) / dx[0]);
+    int j = (int)((x[1] - intensityfield[block].lcorner[1]) / dx[1]);
+
+    int pixel = i + j * num_pixels_1d;
+
+    return pixel;
+}
+
+double write_uniform_camera(struct Camera *intensityfield,double frequency,int freq){
+  int uniform_size = IMG_WIDTH * pow(2,max_level-1);
+  double uniform_dx = CAM_SIZE_X / (double)uniform_size;
+  double x[2];
+  char spec_folder[64] = "output";  
+  char uniform_filename[256] = "";
+  sprintf(uniform_filename, "%s/uniform_img_%.02e_%d.dat", spec_folder, frequency,
+            (int)TIME_INIT);
+       
+  FILE *uniformfile = fopen(uniform_filename, "w"); 
+    
+  double UNIT_FACTOR = JANSKY_FACTOR * uniform_dx * uniform_dx *R_GRAV * R_GRAV /source_dist/source_dist;
+  double arcsec_factor = 206265.0*R_GRAV/source_dist; 
+      
+  for(int i=0; i<uniform_size;i++){
+    for(int j=0;j<uniform_size; j++){
+        x[0] = -CAM_SIZE_X/2. + (i + 0.5) * uniform_dx; 
+        x[1] = -CAM_SIZE_X/2. + (j + 0.5) * uniform_dx;
+        block = find_block(x,intenistyfield);
+        if(block==-1){
+            fprintf(stderr,"camera block not found!\n");
+            exit(1);
+        }
+        pixel = find_pixel(x,intensityfield, block);
+        fprintf(uniformfile, "%+.15e\t%+.15e\t%+.15e \n", x[0]*arcsec_factor,x[1]*arcsec_factor, intensityfield[block].IQUV[pixel][freq][0]*UNIT_FACTOR);
+      }
+    }
+    fclose(uniformfile);
 }
