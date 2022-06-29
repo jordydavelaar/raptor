@@ -152,7 +152,7 @@ int find_block(double x[2], struct Camera *intensityfield) {
     double dx[2];
     fprintf(stderr,"x  = %d \n", x);
     fprintf(stderr,"nulpunt = %d \n", intensityfield[block].dx[0]*source_dist/R_GRAV);
-    fprintf(stderr,"nulpunt2 = %d \n", str(intensityfield[block].lcorner[0]);
+    fprintf(stderr,"nulpunt2 = %d \n", intensityfield[block].lcorner[0]);
     for (int block = 0; block < tot_blocks; block++) {
         dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
         dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
