@@ -155,9 +155,9 @@ int find_block(double x[2], struct Camera *intensityfield) {
         dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
         dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
         if (x[0] + small >= intensityfield[block].lcorner[0]  &&
-            x[0] + small <  num_pixels_1d* dx[0] &&            
+            x[0] + small <  num_pixels_1d* dx[0] + intensityfield[block].lcorner[0]&&            
             x[1] + small >= intensityfield[block].lcorner[0]  &&
-            x[1] + small <  num_pixels_1d* dx[1]  ) {
+            x[1] + small <  num_pixels_1d* dx[1] + intensityfield[block].lcorner[1]  ) {
             return block;
         }
     }
