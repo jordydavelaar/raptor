@@ -150,9 +150,9 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
 int find_block(double x[2], struct Camera *intensityfield) {
     double small = 1e-6;
     double dx[2];
-    fprintf(stderr,"x  = %f \n", x);
-    fprintf(stderr,"nulpunt = %f \n", intensityfield[block].dx[0]*source_dist/R_GRAV);
-    fprintf(stderr,"nulpunt2 = %f \n", intensityfield[block].lcorner[0]);
+    fprintf(stderr,"x  = %lf \n", x);
+    fprintf(stderr,"nulpunt = %lf \n", intensityfield[0].dx[0]*source_dist/R_GRAV);
+    fprintf(stderr,"nulpunt2 = %lf \n", intensityfield[0].lcorner[0]);
     for (int block = 0; block < tot_blocks; block++) {
         dx[0] = intensityfield[block].dx[0]*source_dist/R_GRAV;
         dx[1] = intensityfield[block].dx[1]*source_dist/R_GRAV;
