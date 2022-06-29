@@ -195,7 +195,7 @@ double write_uniform_camera(struct Camera *intensityfield,double frequency,int f
     for(int j=0;j<uniform_size; j++){
         x[0] = -CAM_SIZE_X/2. + (i + 0.5) * uniform_dx; 
         x[1] = -CAM_SIZE_X/2. + (j + 0.5) * uniform_dx;
-        double block = find_block(x,intenistyfield);
+        double block = find_block(x,intensityfield);
         if(block==-1){
             fprintf(stderr,"camera block not found!\n");
             exit(1);
