@@ -200,7 +200,7 @@ double write_uniform_camera(struct Camera *intensityfield,double frequency,int f
             fprintf(stderr,"camera block not found!\n");
             exit(1);
         }
-        pixel = find_pixel(x,intensityfield, block);
+        double pixel = find_pixel(x,intensityfield, block);
         fprintf(uniformfile, "%+.15e\t%+.15e\t%+.15e \n", x[0]*arcsec_factor,x[1]*arcsec_factor, intensityfield[block].IQUV[pixel][freq][0]*UNIT_FACTOR);
       }
     }
