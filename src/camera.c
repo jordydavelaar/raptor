@@ -138,7 +138,7 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
     double stepy = CAM_SIZE_Y / (double)IMG_HEIGHT;
     alpha = -CAM_SIZE_X * 0.5 + (x + 0.5) * stepx;
     beta = -CAM_SIZE_Y * 0.5 + (y + 0.5) * stepy;
-bronzwaer
+    
     initialize_photon(alpha, beta, photon_u, t_init);
 #endif
 
