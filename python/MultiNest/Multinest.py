@@ -162,6 +162,17 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
     	# Run RAPTOR
         os.system('sbatch MultiNestRAPTOR.sh %d'%(data_number))
     	# Load flux values
+	Chisquare_Im = 0
+        if Image:
+		obs = eh.obsdata.load_uvfits(‘obsname.uvfits’)
+		im = eh.image.load_txt(‘output/uniform.’)
+		im.rf = obs.rf
+		im.ra = obs.ra
+		im.dec = obs.dec
+		#get reduced chi squares
+		chi_cphase  = obs.chisq(im, dtype= ‘cphase’’)
+		chi_logcamp = obs.chisq(im, dtype= ‘logcamp’)
+		Chisquare_Im = chi_cphase + chi_logcamp
         Freq, Flux = np.loadtxt('output/spectrum_%d_%d.00.dat'%(data_number,np.floor(i)), dtype=str, unpack=True)
         Freq = Freq.astype(float)
         Flux = Flux.astype(float)
@@ -172,7 +183,7 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
         f.close()
     	# Return flux values
         # 
-        return Flux
+        return Flux, Chisquare_Im
 
 def myprior(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_UNIT_var+Rhigh_var+i_var):
     	if MBH_var: # MBH has a log uniform distribution between 1.0e40 and 1.0e42 g
@@ -199,7 +210,7 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
         if i_var:
                 i = cube[MBH_var+M_UNIT_var+Rhigh_var+i_var-1]
         #Calculate Chi^2
-        Flux = RAPTOR(MBH, M_UNIT, Rhigh, i, data_number)
+        Flux, Chisquare_Image = RAPTOR(MBH, M_UNIT, Rhigh, i, data_number)
         if Spectrum:
                 _, Measurements_Spectrum, Sigma_Spectrum = np.loadtxt('Observational_Spectrum.txt', delimiter = " ", unpack = True)
         	global num_Spectrum
@@ -209,8 +220,6 @@ def myloglike(cube, ndim=MBH_var+M_UNIT_var+Rhigh_var+i_var, nparams=MBH_var+M_U
 #			Chisquare_Radio += (np.log10(Measurements_Radio[freqnum]) - np.log10(Flux[freqnum]))**2 /(2*(np.log10(Measurements_Radio[freqnum])-np.log10(Measurements_Radio[freqnum] - Sigma_Radio[freqnum]))**2) #       	
 #			Chisquare_Radio +=(Measurements_Radio[freqnum] - Flux[freqnum])**2
         # Calculate total chisquared value
-#	if Image:
-#		Chisquare_Image = 
     	if Coreshift:
 #		_, Measurements_Major, Sigma_Major, Measurements_Minor, Sigma_Minor = np.loadtxt('Observations_Coreshift.txt').transpose()
 		_, Measurements_Major, Err_up_Major, Err_down_Major = np.loadtxt('Observations_Coreshift.txt').transpose()
