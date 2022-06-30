@@ -62,6 +62,7 @@ def Initialize_imgrendererc():
 #                FREQ_Coreshift = np.divide(29979245800,np.loadtxt('Observations_Coreshift.txt').transpose()[0])
 		num_Coreshift = len(FREQ_Coreshift)
         FREQ = np.concatenate([FREQ_Spectrum,FREQ_Coreshift])
+	global FREQ
 	f = open('frequencies.txt', 'w')
 	for i in FREQ:
 		f.write(str(i + "\n")
@@ -165,7 +166,7 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
 	Chisquare_Im = 0
         if Image:
 		obs = eh.obsdata.load_uvfits(‘obsname.uvfits’)
-		im = eh.image.load_txt(‘output/uniform.’)
+		im = eh.image.load_txt(‘output/uniform_img_%d_%d’%(FREQ[0],data_number))
 		im.rf = obs.rf
 		im.ra = obs.ra
 		im.dec = obs.dec
