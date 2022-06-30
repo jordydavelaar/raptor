@@ -161,7 +161,7 @@ def RAPTOR(MBH, M_UNIT, Rhigh, i, data_number):
         # Set parameter values for RAPTOR:
         Set_modelin(MBH, M_UNIT, Rhigh,i)
     	# Run RAPTOR
-        os.system('sbatch MultiNestRAPTOR.sh %d'%(data_number))
+        os.system('./RAPTOR model.in ../data1000.dat %d'%(data_number))
     	# Load flux values
 	Chisquare_Im = 0
         if Image:
