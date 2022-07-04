@@ -435,7 +435,12 @@ double hyp2F1_f(double theta_e) {
     double c = kappa + 2. / 3.;
     double X = kappa * w;
     double z;
-    if(X>1.0){
+
+    if(X<1e-4){
+        return 0;
+    }
+
+    else{
         z=-X;
         return pow(1. - z, -a) * tgamma(c) * tgamma(b - a) /
                (tgamma(b) * tgamma(c - a)) *
@@ -444,10 +449,7 @@ double hyp2F1_f(double theta_e) {
                (tgamma(a) * tgamma(c - b)) *
                gsl_sf_hyperg_2F1(b, c - a, b - a + 1., 1. / (1. - z));
     }
-    if(X<1.0){
-        return gsl_sf_hyperg_2F1(a, b, c, -X);
-    }
-    
+
     return 0;
 }
 double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
