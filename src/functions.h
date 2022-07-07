@@ -170,6 +170,16 @@ void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
 // EMISSION.C
 /////////////
 
+void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double *rQ,
+                     double *rU, double *rV, double *aI, double *aQ, double *aU,
+                     double *aV, double nu_p, struct GRMHD modvar,
+                     double pitch_ang);
+
+void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV, double *rQ,
+                     double *rU, double *rV, double *aI, double *aQ, double *aU,
+                     double *aV, double nu_p, struct GRMHD modvar,
+                     double pitch_ang);
+
 // Return emission coefficient j_nu for kappa distribution function
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
                                 double theta);
@@ -210,6 +220,23 @@ double backward_transfer(double alpha, double beta, double *photon_u,
 
 // POL_EMISSION.C
 /////////////////
+
+double j_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
+double A_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B,
+           double j_I_thermal);
+double J_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+double A_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+double j_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
+double A_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B,
+           double j_V_thermal);
+double J_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+double A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+double j_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
+double A_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B,
+           double j_Q_thermal);
+double J_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+double A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
+
 
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B);
 

@@ -20,7 +20,9 @@ struct GRMHD {
     double B;
     double theta_e;
     double sigma;
+    double sigma_min;
     double dx_local;
+    double beta;
     int igrid_c;
 };
 

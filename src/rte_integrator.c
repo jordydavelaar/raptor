@@ -73,9 +73,8 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             // Compute the photon frequency in the plasma frame:
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
             // Obtain emission coefficient in current plasma conditions
-            evaluate_coeffs(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
-                            &aV, nu_p, modvar.theta_e, modvar.n_e, modvar.B,
-                            pitch_ang);
+            evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
+                            &aV, nu_p, modvar, pitch_ang);
 
             double C = Rg * PLANCK_CONSTANT /
                        (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
