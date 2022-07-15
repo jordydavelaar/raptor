@@ -23,18 +23,24 @@ double f_m(double X) {
 
 // Bessel function approximations:
 double bessel_appr(int n, double x) {
+
+//use taylor expanded version
+if(x < 0.1){
     if (n == 0)
-        return gsl_sf_bessel_Kn(0, x);
-    //        return -log(x / 2.) - 0.5772;
+       return -log(x / 2.) - 0.5772;
 
     if (n == 1)
-        return gsl_sf_bessel_Kn(1, x);
-
-    //        return 1. / x;
+       return 1. / x;
 
     if (n == 2)
-        return gsl_sf_bessel_Kn(2, x);
-    //        return 2. / x / x;
+       return 2. / x / x;
+}
+//in this case all bessel functions are really small... Theta_e is small, so no emission anyway.?
+else if(x>(1/0.004)){
+       return 1e-100;
+}
+else //use full versions in between.
+        return gsl_sf_bessel_Kn(n, x);
 
     exit(0);
 }
