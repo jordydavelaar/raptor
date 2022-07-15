@@ -10,7 +10,7 @@ import sys
 prefix = sys.argv[1]
 
 # Load data
-MBH, M_UNIT, Rhigh, i, Chisquare_Radio = np.loadtxt('%s_Chisquared.txt'%(prefix)).transpose()
+MBH, M_UNIT, Rhigh, i, Chisquare_Total = np.loadtxt('%s_Chisquared.txt'%(prefix)).transpose()
 
 # Make figure
 fig = plt.figure(num=None, figsize=(12,12))
@@ -26,7 +26,7 @@ plt.plot(MBH, '.')
 plt.xlabel('$Iteration$ $number$', size = xlabelsize)
 plt.ylabel('$MBH$ (g)', size = ylabelsize)
 #plt.xlim
-plt.ylim(1e39, 1e41)
+plt.ylim(1e40, 1e42)
 #plt.xscale
 plt.yscale('log')
 plt.title('$MBH$ vs $Iteration$ $number$', size = titlesize)
@@ -36,7 +36,7 @@ plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 
 fig.tight_layout()
-#fig.savefig('M_UNITevolution.png')
+fig.savefig('M_evolution.png')
 
 # M_UNIT plot
 plt.subplot(322)
@@ -49,7 +49,7 @@ plt.plot(M_UNIT, '.')
 plt.xlabel('$Iteration$ $number$', size = xlabelsize)
 plt.ylabel('$\mathcal{M}$ (g)', size = ylabelsize)
 #plt.xlim
-plt.ylim(1e19, 1e24)
+plt.ylim(1e20, 1e25)
 #plt.xscale
 plt.yscale('log')
 plt.title('$\mathcal{M}$ vs $Iteration$ $number$', size = titlesize)
@@ -59,7 +59,7 @@ plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 
 fig.tight_layout()
-#fig.savefig('M_UNITevolution.png')
+fig.savefig('M_UNITevolution.png')
 
 
 
@@ -71,7 +71,7 @@ plt.plot(Rhigh, '.')
 plt.xlabel('$Iteration$ $number$', size = xlabelsize)
 plt.ylabel('$Rhigh$ ()', size = ylabelsize)
 #plt.xlim
-plt.ylim(1, 160)
+plt.ylim(1, 100)
 #plt.xscale
 #plt.yscale('lin')
 plt.title('$Rhigh$ vs $Iteration$ $number$', size = titlesize)
@@ -81,7 +81,7 @@ plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 
 fig.tight_layout()
-#fig.savefig('Rhighevolution.png')
+fig.savefig('Rhighevolution.png')
 
 
 
@@ -103,7 +103,7 @@ plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 
 fig.tight_layout()
-#fig.savefig('ievolution.png')
+fig.savefig('ievolution.png')
 
 
 
@@ -111,9 +111,9 @@ fig.tight_layout()
 #fig = plt.figure()
 plt.subplot(313)
 
-Chisquare_Radio
+Chisquare_Total
 
-plt.plot(Chisquare_Radio, color='b', label='Radio')
+plt.plot(Chisquare_Total, color='k', label='Total')
 plt.xlabel('$Iteration$ $number$', size = xlabelsize)
 plt.ylabel('$\chi^2$ ()', size = ylabelsize)
 #plt.xlim

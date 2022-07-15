@@ -439,14 +439,27 @@ double hyp2F1_f(double theta_e) {
     double a = kappa - 1. / 3.;
     double b = kappa + 1.;
     double c = kappa + 2. / 3.;
-    double z = -kappa * w;
-    return pow(1. - z, -a) * tgamma(c) * tgamma(b - a) /
+    double X = kappa * w;
+    double z;
+
+    if(X<1e-4){
+        return 0;
+    }
+
+    else{
+        z=-X;
+        return pow(1. - z, -a) * tgamma(c) * tgamma(b - a) /
                (tgamma(b) * tgamma(c - a)) *
                gsl_sf_hyperg_2F1(a, c - b, a - b + 1., 1. / (1. - z)) +
            pow(1. - z, -b) * tgamma(c) * tgamma(a - b) /
                (tgamma(a) * tgamma(c - b)) *
                gsl_sf_hyperg_2F1(b, c - a, b - a + 1., 1. / (1. - z));
+    }
+
+    return 0;
 }
+
+
 double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
     double w = get_w(theta_e);

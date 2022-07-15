@@ -911,7 +911,7 @@ double interp_scalar(double **var, int c, double coeff[4]) {
     return interp;
 }
 
-// Get the flud parameters in the local co-moving plasma frame.
+// Get the fluid parameters in the local co-moving plasma frame.
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
@@ -1083,10 +1083,14 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double beta_trans = 1.0;
 
-    double b2 = pow(uu * (gam - 1.) / (0.5 * (Bsq + smalll) * beta_trans), 2.);
+    (*modvar).beta = uu * (gam - 1.) / (0.5 * (Bsq + smalll));
+
+
+    double b2 = pow(((*modvar).beta / beta_trans), 2.);
 
     (*modvar).sigma = Bsq / (rho + smalll);
 
+    (*modvar).sigma_min = 1.0;
     double Rhigh = R_HIGH;
     double Rlow = R_LOW;
 
@@ -1096,8 +1100,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 5.) || r > 100 ||
-        (*modvar).theta_e > 100) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 5.) || r > 2000. ||
+        (*modvar).theta_e > 100.) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
