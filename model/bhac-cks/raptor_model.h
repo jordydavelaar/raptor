@@ -111,6 +111,8 @@ void init_storage();
 double interp_scalar_2D(double ***var, int i, int j, int k, double coeff[4]);
 void Xtoij(double *X, int *i, int *j, double *del);
 
+double interp_scalar(double **var, int c, double coeff[4]);
+
 void lower(double *ucon, double Gcov[NDIM][NDIM], double *ucov);
 
 double get_detgamma(double x, double y, double z);

@@ -13,7 +13,7 @@
 void read_model(char *argv[]) {
     // model to read
     sscanf(argv[1], "%s", inputfile);
-
+    fprintf(stderr,"\nUsing model parameter file %s\n",inputfile);
     FILE *input;
     input = fopen(inputfile, "r");
     if (input == NULL) {
@@ -47,22 +47,22 @@ void read_model(char *argv[]) {
     sscanf(argv[2], "%s", GRMHD_FILE);
     sscanf(argv[3], "%lf", &TIME_INIT);
 
-    printf("Model parameters:\n");
-    printf("MBH \t\t= %g \n", MBH);
-    printf("M_UNIT \t\t= %g \n", M_UNIT);
-    printf("R_LOW \t= %g \n", R_LOW);
-    printf("R_HIGH \t= %g \n", R_HIGH);
-    printf("INCLINATION \t= %g \n", INCLINATION);
+    printf("\nModel parameters:\n\n");
+    printf("MBH \t\t= %g grams\n", MBH);
+    printf("M_UNIT \t\t= %g grams\n", M_UNIT);
+    printf("R_LOW \t\t= %g \n", R_LOW);
+    printf("R_HIGH \t\t= %g \n", R_HIGH);
+    printf("INCLINATION \t= %g deg\n", INCLINATION);
 
-    printf("Observer parameters:\n");
+    printf("\nObserver parameters:\n\n");
     printf("IMG_WIDTH \t= %d \n", IMG_WIDTH);
     printf("IMG_HEIGHT \t= %d \n", IMG_HEIGHT);
-    printf("CAM_SIZE_X \t= %g \n", CAM_SIZE_X);
-    printf("CAM_SIZE_Y \t= %g \n", CAM_SIZE_Y);
+    printf("CAM_SIZE_X \t= %g GM/c2\n", CAM_SIZE_X);
+    printf("CAM_SIZE_Y \t= %g GM/c2\n", CAM_SIZE_Y);
     printf("FREQS_PER_DEC \t= %d \n", FREQS_PER_DEC);
-    printf("FREQ_MIN \t= %g \n", FREQ_MIN);
-
+    printf("FREQ_MIN \t= %g Hz\n", FREQ_MIN);
     printf("STEPSIZE \t= %g \n", STEPSIZE);
+
     fclose(input);
 }
 

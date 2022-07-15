@@ -34,12 +34,12 @@ char inputfile[100];
 #define RAD_TRANS (1)
 #define POL (1)
 
-#define num_frequencies 8
+#define num_frequencies 1
 
 #define FREQFILE (0)
 #define FREQLOG (1)
 
-#define FREQS (FREQFILE)
+#define FREQS (FREQLOG)
 
 #define num_pixels_1d 10
 #define tot_pixels 100

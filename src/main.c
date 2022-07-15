@@ -47,6 +47,23 @@ int main(int argc, char *argv[]) {
     // INPUT FILE
     /////////////
 
+
+   fprintf(stderr,"__________    _____ _____________________________ __________\n");
+   fprintf(stderr,"\\______   \\  /  _  \\\\______   \\__    ___/\\_____  \\\\______   \\\n");
+   fprintf(stderr," |       _/ /  /_\\  \\|     ___/ |    |    /   |   \\|       _/\n");
+   fprintf(stderr," |    |   \\/    |    \\    |     |    |   /    |    \\    |   \\\n");
+   fprintf(stderr," |____|_  /\\____|__  /____|     |____|   \\_______  /____|_  /\n");
+   fprintf(stderr,"        \\/         \\/                            \\/       \\/  \n");
+
+   fprintf(stderr, "\nRunning RAPTOR v1.0 in");
+
+   if(POL)
+       fprintf(stderr," polarized mode!\n");
+   else
+       fprintf(stderr," unpolarized mode!\n");
+
+
+    fprintf(stderr,"\nInitializing...\n");
     read_model(argv);
 
     // INITIALIZE MODEL
@@ -95,6 +112,8 @@ int main(int argc, char *argv[]) {
         }
     #endif 
 
+    fprintf(stderr, "\nStarting ray tracing\n\n");
+
     int block = 0;
 
     while (block < tot_blocks) { // block_total
@@ -111,6 +130,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    fprintf(stderr,"\nRay tracing done!\n\n");
+
     compute_spec(intensityfield, energy_spectrum);
 
     // WRITE OUTPUT FILES
@@ -120,12 +141,12 @@ int main(int argc, char *argv[]) {
     
     write_uniform_camera(intensityfield, frequencies[0],0);
 
-    fprintf(stderr, "\nFinished writing files.\n");
-
     // FREE ALLOCATED POINTERS
     //////////////////////////
 
     free(intensityfield);
+
+    fprintf(stderr,"\nThat's all folks!\n");
 
     // END OF PROGRAM
     /////////////////

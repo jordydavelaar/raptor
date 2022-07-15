@@ -24,8 +24,10 @@ struct GRMHD {
     double B_d[4];
     double n_e;
     double B;
-    double theta_e;
     double sigma;
+    double sigma_min;
+    double beta;
+    double theta_e;
     double dx_local;
     int igrid_c;
 };
@@ -76,5 +78,7 @@ double U_unit;
 double B_unit;
 double Ne_unit;
 double Thetae_unit;
+
+double interp_scalar(double ***var, int i, int j, int k, double coeff[4]);
 
 #endif // RAPTOR_HARM_MODEL_H

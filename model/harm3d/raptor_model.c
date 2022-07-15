@@ -24,7 +24,7 @@ void init_model() {
      mass and its accretion rate */
     set_units(M_UNIT);
 
-    fprintf(stderr, "getting simulation data...\n");
+    fprintf(stderr, "\nStarting read in of HARM3D GRMHD data...\n");
 
     init_grmhd_data(GRMHD_FILE);
 }
@@ -32,14 +32,13 @@ void init_model() {
 void init_grmhd_data(char *fname) {
     FILE *fp;
 
-    fprintf(stderr, "%s\n", fname);
     fp = fopen(fname, "r");
 
     if (fp == NULL) {
-        fprintf(stderr, "can't open sim data file\n");
+        fprintf(stderr, "\nCan't open sim data file... Abort!\n");
         exit(1);
     } else {
-        fprintf(stderr, "successfully opened %s\n", fname);
+        fprintf(stderr, "\nSuccessfully opened %s. \n\nReading", fname);
     }
 
     /* get standard HARM header */
@@ -62,7 +61,6 @@ void init_grmhd_data(char *fname) {
     stopx[1] = startx[1] + N1 * dx[1];
     stopx[2] = startx[2] + N2 * dx[2];
     stopx[3] = startx[3] + N3 * dx[3];
-    fprintf(stderr, "phi limits is %e %e\n", startx[3], stopx[3]);
 
     init_storage();
 
@@ -75,13 +73,13 @@ void init_grmhd_data(char *fname) {
                        &p[B3][i][j][k]);
             }
         }
+	if(i%(N1/3)==0)
+		fprintf(stderr, ".");
     }
 
-    fprintf(stderr, "%e\n", p[KRHO][N1 - 1][N2 - 1][N3 - 1]);
 
-    fprintf(stderr, "done reading!\n");
+    fprintf(stderr, "Done!\n");
 
-    //	exit(1);
 }
 
 // Current metric: modified Kerr-Schild, squashed in theta
@@ -213,14 +211,9 @@ void set_units(double M_unit_) {
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
 
-    fprintf(stderr, "\nUNITS\n");
-    fprintf(stderr, "L,T,M: %g %g %g\n", L_unit, T_unit, M_unit_);
-
     RHO_unit = M_unit_ / pow(L_unit, 3);
     U_unit = RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
     B_unit = SPEED_OF_LIGHT * sqrt(4. * M_PI * RHO_unit);
-
-    fprintf(stderr, "rho,u,B: %g %g %g\n", RHO_unit, U_unit, B_unit);
 
     Ne_unit = RHO_unit / (PROTON_MASS + ELECTRON_MASS);
 }
@@ -352,6 +345,5 @@ void init_storage(void) {
         }
     }
 
-    fprintf(stderr, "done here with memory, %d %d %d %d\n", N1, N2, N3, NPRIM);
     return;
 }
