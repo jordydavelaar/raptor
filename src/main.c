@@ -47,23 +47,31 @@ int main(int argc, char *argv[]) {
     // INPUT FILE
     /////////////
 
+    fprintf(stderr,
+            "__________    _____ _____________________________ __________\n");
+    fprintf(stderr, "\\______   \\  /  _  \\\\______   \\__    ___/\\_____  "
+                    "\\\\______   \\\n");
+    fprintf(
+        stderr,
+        " |       _/ /  /_\\  \\|     ___/ |    |    /   |   \\|       _/\n");
+    fprintf(
+        stderr,
+        " |    |   \\/    |    \\    |     |    |   /    |    \\    |   \\\n");
+    fprintf(
+        stderr,
+        " |____|_  /\\____|__  /____|     |____|   \\_______  /____|_  /\n");
+    fprintf(
+        stderr,
+        "        \\/         \\/                            \\/       \\/  \n");
 
-   fprintf(stderr,"__________    _____ _____________________________ __________\n");
-   fprintf(stderr,"\\______   \\  /  _  \\\\______   \\__    ___/\\_____  \\\\______   \\\n");
-   fprintf(stderr," |       _/ /  /_\\  \\|     ___/ |    |    /   |   \\|       _/\n");
-   fprintf(stderr," |    |   \\/    |    \\    |     |    |   /    |    \\    |   \\\n");
-   fprintf(stderr," |____|_  /\\____|__  /____|     |____|   \\_______  /____|_  /\n");
-   fprintf(stderr,"        \\/         \\/                            \\/       \\/  \n");
+    fprintf(stderr, "\nRunning RAPTOR v1.0 in");
 
-   fprintf(stderr, "\nRunning RAPTOR v1.0 in");
+    if (POL)
+        fprintf(stderr, " polarized mode!\n");
+    else
+        fprintf(stderr, " unpolarized mode!\n");
 
-   if(POL)
-       fprintf(stderr," polarized mode!\n");
-   else
-       fprintf(stderr," unpolarized mode!\n");
-
-
-    fprintf(stderr,"\nInitializing...\n");
+    fprintf(stderr, "\nInitializing...\n");
     read_model(argv);
 
     // INITIALIZE MODEL
@@ -93,26 +101,28 @@ int main(int argc, char *argv[]) {
 
     init_camera(&intensityfield);
 
-    #if (FREQS == FREQLOG)
-        for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-            frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
-            energy_spectrum[f] = 0.;
-            fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
-        }
-    #elif (FREQS == FREQFILE)
-        FILE *input;
-        input = fopen("./frequencies.txt", "r");
+#if (FREQS == FREQLOG)
+    for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+        frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
+        energy_spectrum[f] = 0.;
+        fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+    }
+#elif (FREQS == FREQFILE)
+    FILE *input;
+    input = fopen("./frequencies.txt", "r");
 
-        if (input == NULL) 
-            fprintf(stderr, "Cannot read input file\n");
-            // return 1;
-        for (int f = 0; f < num_frequencies; f++) {
-            fscanf(input, "%lf", &frequencies[f]);
-            fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
-        }
-    #endif 
+    if (input == NULL)
+        fprintf(stderr, "Cannot read input file\n");
+    // return 1;
+    for (int f = 0; f < num_frequencies; f++) {
+        fscanf(input, "%lf", &frequencies[f]);
+        fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+    }
+#endif
 
     fprintf(stderr, "\nStarting ray tracing\n\n");
+
+    prerun_refine(&intensityfield);
 
     int block = 0;
 
@@ -130,7 +140,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    fprintf(stderr,"\nRay tracing done!\n\n");
+    fprintf(stderr, "\nRay tracing done!\n\n");
 
     compute_spec(intensityfield, energy_spectrum);
 
@@ -138,15 +148,15 @@ int main(int argc, char *argv[]) {
     /////////////////////
 
     output_files(intensityfield, energy_spectrum, frequencies);
-    
-    write_uniform_camera(intensityfield, frequencies[0],0);
+
+    write_uniform_camera(intensityfield, frequencies[0], 0);
 
     // FREE ALLOCATED POINTERS
     //////////////////////////
 
     free(intensityfield);
 
-    fprintf(stderr,"\nThat's all folks!\n");
+    fprintf(stderr, "\nThat's all folks!\n");
 
     // END OF PROGRAM
     /////////////////

@@ -201,11 +201,10 @@ void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4],
     LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
 }
 
-
-void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double *rQ,
-                     double *rU, double *rV, double *aI, double *aQ, double *aU,
-                     double *aV, double nu_p, struct GRMHD modvar,
-                     double pitch_ang) {
+void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
+                          double *rQ, double *rU, double *rV, double *aI,
+                          double *aQ, double *aU, double *aV, double nu_p,
+                          struct GRMHD modvar, double pitch_ang) {
     double jI_kappa;
     double jI_thermal;
     double aI_kappa;
@@ -222,23 +221,36 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
     double jQ_thermal;
     double aQ_kappa;
     double aQ_thermal;
-    double eps, epsilon;    
-    jI_kappa = J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    jI_thermal = j_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aI_kappa = A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, jI_thermal);
-    jV_kappa = J_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    jV_thermal = j_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aV_kappa = A_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aV_thermal = A_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, jV_thermal);
+    double eps, epsilon;
+    jI_kappa =
+        J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jI_thermal =
+        j_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aI_kappa =
+        A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+                             pitch_ang, jI_thermal);
+    jV_kappa =
+        J_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jV_thermal =
+        j_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aV_kappa =
+        A_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aV_thermal = A_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+                             pitch_ang, jV_thermal);
     jU_kappa = 0;
     jU_thermal = 0;
     aU_kappa = 0;
     aU_thermal = 0;
-    jQ_kappa = J_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    jQ_thermal = j_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aQ_kappa = A_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aQ_thermal = A_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, jQ_thermal);    // Transform to invariant forms
+    jQ_kappa =
+        J_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jQ_thermal =
+        j_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aQ_kappa =
+        A_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aQ_thermal =
+        A_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang,
+                    jQ_thermal); // Transform to invariant forms
     jI_kappa /= (nu_p * nu_p);
     jI_thermal /= (nu_p * nu_p);
     aI_kappa *= nu_p;
@@ -255,23 +267,24 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double
     jQ_thermal /= (nu_p * nu_p);
     aQ_kappa *= nu_p;
     aQ_thermal *= nu_p;
-//MIXED MODEL
+    // MIXED MODEL
     epsilon = 1.;
-    eps = epsilon*(1.-exp(-pow(modvar.beta, -2.)))*(1-exp(-pow(modvar.sigma/modvar.sigma_min, 2)));
-    *jI = (1.-eps)*jI_thermal + eps*jI_kappa;
-    *aI = (1.-eps)*aI_thermal + eps*aI_kappa;
-    *jV = (1.-eps)*jV_thermal + eps*jV_kappa;
-    *aV = (1.-eps)*aV_thermal + eps*aV_kappa;
-    *jU = (1.-eps)*jU_thermal + eps*jU_kappa;
-    *aU = (1.-eps)*aU_thermal + eps*aU_kappa;
-    *jQ = (1.-eps)*jQ_thermal + eps*jQ_kappa;
-    *aQ = (1.-eps)*aQ_thermal + eps*aQ_kappa;
+    eps = epsilon * (1. - exp(-pow(modvar.beta, -2.))) *
+          (1 - exp(-pow(modvar.sigma / modvar.sigma_min, 2)));
+    *jI = (1. - eps) * jI_thermal + eps * jI_kappa;
+    *aI = (1. - eps) * aI_thermal + eps * aI_kappa;
+    *jV = (1. - eps) * jV_thermal + eps * jV_kappa;
+    *aV = (1. - eps) * aV_thermal + eps * aV_kappa;
+    *jU = (1. - eps) * jU_thermal + eps * jU_kappa;
+    *aU = (1. - eps) * aU_thermal + eps * aU_kappa;
+    *jQ = (1. - eps) * jQ_thermal + eps * jQ_kappa;
+    *aQ = (1. - eps) * aQ_thermal + eps * aQ_kappa;
 }
 
-void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV, double *rQ,
-                     double *rU, double *rV, double *aI, double *aQ, double *aU,
-                     double *aV, double nu_p, struct GRMHD modvar,
-                     double pitch_ang) {
+void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
+                            double *rQ, double *rU, double *rV, double *aI,
+                            double *aQ, double *aU, double *aV, double nu_p,
+                            struct GRMHD modvar, double pitch_ang) {
     *jI = j_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *jQ = j_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *jU = 0.;
@@ -528,7 +541,6 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // CGS UNITS USED FROM HERE ON OUT
     //////////////////////////////////
-    double kdotk = four_velocity_norm(X_u, k_u);
 
     // Scale the wave vector to correct energy
     LOOP_i k_u[i] *= PLANCK_CONSTANT * frequency /
@@ -546,8 +558,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
-    evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU, &aV, nu_p,
-                    modvar, pitch_ang);
+    evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
+                           &aV, nu_p, modvar, pitch_ang);
 
     // Create tetrad, needed whether POLARIZATION_ACTIVE is true or
     // false.

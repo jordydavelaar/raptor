@@ -170,15 +170,15 @@ void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
 // EMISSION.C
 /////////////
 
-void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV, double *rQ,
-                     double *rU, double *rV, double *aI, double *aQ, double *aU,
-                     double *aV, double nu_p, struct GRMHD modvar,
-                     double pitch_ang);
+void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
+                          double *rQ, double *rU, double *rV, double *aI,
+                          double *aQ, double *aU, double *aV, double nu_p,
+                          struct GRMHD modvar, double pitch_ang);
 
-void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV, double *rQ,
-                     double *rU, double *rV, double *aI, double *aQ, double *aU,
-                     double *aV, double nu_p, struct GRMHD modvar,
-                     double pitch_ang);
+void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
+                            double *rQ, double *rU, double *rV, double *aI,
+                            double *aQ, double *aU, double *aV, double nu_p,
+                            struct GRMHD modvar, double pitch_ang);
 
 // Return emission coefficient j_nu for kappa distribution function
 double emission_coeff_kappa_FIT(double nu, double Ne, double Thetae, double B,
@@ -221,22 +221,30 @@ double backward_transfer(double alpha, double beta, double *photon_u,
 // POL_EMISSION.C
 /////////////////
 
-double j_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
-double A_I_thermal(double theta_e, double n_e, double nu, double B, double theta_B,
-           double j_I_thermal);
-double J_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double A_S_I_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double j_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
-double A_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B,
-           double j_V_thermal);
-double J_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double A_S_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double j_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
-double A_Q_thermal(double theta_e, double n_e, double nu, double B, double theta_B,
-           double j_Q_thermal);
-double J_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double A_S_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-
+double j_I_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double A_I_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B, double j_I_thermal);
+double J_S_I_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double j_V_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double A_V_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B, double j_V_thermal);
+double J_S_V_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double A_S_V_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double j_Q_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double A_Q_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B, double j_Q_thermal);
+double J_S_Q_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double A_S_Q_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
 
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B);
 
@@ -294,7 +302,6 @@ void init_grmhd_data(char *fname);
 
 void init_storage();
 
-
 void Xtoijk(double *X, int *i, int *j, int *k, double *del);
 
 // void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
@@ -313,6 +320,8 @@ void output_files(struct Camera *intesityfield,
 void write_image_hdf5(char *hdf5_filename, struct Camera *data,
                       double *frequencies, double factor);
 
+void write_uniform_camera(struct Camera *intensityfield, double frequency,
+                          int freq);
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
@@ -324,6 +333,8 @@ void init_camera(struct Camera **intensityfield);
 void add_block(struct Camera **intensityfield, int current_block);
 
 int refine_block();
+
+void prerun_refine(struct Camera **intensityfield);
 
 void get_impact_params(struct Camera **intensityfield, int block);
 #endif // FUNCTIONS_H

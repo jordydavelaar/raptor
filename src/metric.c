@@ -1274,6 +1274,8 @@ double f_Xg2(double Xg2, double Xr2) {
     return Xg2 + 0.5 * hslope * sin(2. * Xg2) - Xr2;
 
 #endif
+
+    return -1;
 }
 
 // Returns the value of f'(Xg2).
@@ -1287,6 +1289,8 @@ double f_primed_Xg2(double Xg2) {
     return 1 + hslope * cos(2. * Xg2);
 
 #endif
+
+    return -1;
 }
 
 // This function does "one Newton-Raphson step", i.e. it returns the NEW,
@@ -1312,6 +1316,8 @@ double f_Ug2(double Ug2, double Ur2, double Xg2) {
     return Ug2 * (1. + hslope * cos(2. * Xg2)) - Ur2;
 
 #endif
+
+    return -1;
 }
 
 // Returns the value of f'(Ug2).
@@ -1324,6 +1330,8 @@ double f_primed_Ug2(double Ug2, double Xg2) {
     return (1. + hslope * cos(2. * Xg2));
 
 #endif
+
+    return -1;
 }
 
 // This function does "one Newton-Raphson step", i.e. it returns the NEW,

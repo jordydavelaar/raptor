@@ -24,22 +24,22 @@ double f_m(double X) {
 // Bessel function approximations:
 double bessel_appr(int n, double x) {
 
-//use taylor expanded version
-if(x < 0.1){
-    if (n == 0)
-       return -log(x / 2.) - 0.5772;
+    // use taylor expanded version
+    if (x < 0.1) {
+        if (n == 0)
+            return -log(x / 2.) - 0.5772;
 
-    if (n == 1)
-       return 1. / x;
+        if (n == 1)
+            return 1. / x;
 
-    if (n == 2)
-       return 2. / x / x;
-}
-//in this case all bessel functions are really small... Theta_e is small, so no emission anyway.?
-else if(x>(1/0.004)){
-       return 1e-100;
-}
-else //use full versions in between.
+        if (n == 2)
+            return 2. / x / x;
+    }
+    // in this case all bessel functions are really small... Theta_e is small,
+    // so no emission anyway.?
+    else if (x > (1 / 0.004)) {
+        return 1e-100;
+    } else // use full versions in between.
         return gsl_sf_bessel_Kn(n, x);
 
     exit(0);
@@ -255,13 +255,14 @@ double J_S_I_kappa(double theta_e, double n_e, double nu, double B,
            J_S_factor_I;
 }
 
+double I_I(double x) {
+    return 2.5651 * (1 + 1.92 * pow(x, -1. / 3.) + 0.9977 * pow(x, -2. / 3.)) *
+           exp(-1.8899 * pow(x, 1. / 3.));
+}
+
 double j_I_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
-    double I_I(double x) {
-        return 2.5651 *
-               (1 + 1.92 * pow(x, -1. / 3.) + 0.9977 * pow(x, -2. / 3.)) *
-               exp(-1.8899 * pow(x, 1. / 3.));
-    }
+
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                   (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
                   theta_e;
@@ -321,13 +322,16 @@ double J_S_Q_kappa(double theta_e, double n_e, double nu, double B,
                -1. / J_x_Q) *
            J_S_factor_Q;
 }
+
+double I_Q(double x) {
+    return 2.5651 *
+           (1 + 0.93193 * pow(x, -1. / 3.) + 0.499873 * pow(x, -2. / 3.)) *
+           exp(-1.8899 * pow(x, 1. / 3.));
+}
+
 double j_Q_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
-    double I_Q(double x) {
-        return 2.5651 *
-               (1 + 0.93193 * pow(x, -1. / 3.) + 0.499873 * pow(x, -2. / 3.)) *
-               exp(-1.8899 * pow(x, 1. / 3.));
-    }
+
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                   (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
                   theta_e;
@@ -390,13 +394,16 @@ double J_S_V_kappa(double theta_e, double n_e, double nu, double B,
                -1. / J_x_V) *
            J_S_factor_V;
 }
+
+double I_V(double x) {
+    return (1.81348 / x + 3.42319 * pow(x, -2. / 3.) +
+            0.0292545 * pow(x, -0.5) + 2.03773 * pow(x, -1. / 3.)) *
+           exp(-1.8899 * pow(x, 1. / 3.));
+}
+
 double j_V_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
-    double I_V(double x) {
-        return (1.81348 / x + 3.42319 * pow(x, -2. / 3.) +
-                0.0292545 * pow(x, -0.5) + 2.03773 * pow(x, -1. / 3.)) *
-               exp(-1.8899 * pow(x, 1. / 3.));
-    }
+
     double nu_c = 3.0 * ELECTRON_CHARGE * B * sin(theta_B) /
                   (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
                   theta_e;
@@ -442,23 +449,22 @@ double hyp2F1_f(double theta_e) {
     double X = kappa * w;
     double z;
 
-    if(X<1e-4){
+    if (X < 1e-4) {
         return 0;
     }
 
-    else{
-        z=-X;
+    else {
+        z = -X;
         return pow(1. - z, -a) * tgamma(c) * tgamma(b - a) /
-               (tgamma(b) * tgamma(c - a)) *
-               gsl_sf_hyperg_2F1(a, c - b, a - b + 1., 1. / (1. - z)) +
-           pow(1. - z, -b) * tgamma(c) * tgamma(a - b) /
-               (tgamma(a) * tgamma(c - b)) *
-               gsl_sf_hyperg_2F1(b, c - a, b - a + 1., 1. / (1. - z));
+                   (tgamma(b) * tgamma(c - a)) *
+                   gsl_sf_hyperg_2F1(a, c - b, a - b + 1., 1. / (1. - z)) +
+               pow(1. - z, -b) * tgamma(c) * tgamma(a - b) /
+                   (tgamma(a) * tgamma(c - b)) *
+                   gsl_sf_hyperg_2F1(b, c - a, b - a + 1., 1. / (1. - z));
     }
 
     return 0;
 }
-
 
 double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
