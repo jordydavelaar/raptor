@@ -139,23 +139,32 @@ int refine_init_block(struct Camera intensity) {
     double radius_3 = 10;
     double radius_2 = 15;
 
-    double lcorner_x = intensity.lcorner[0];
-    double lcorer_y = intensity.lcorner[1];
-    double ucorner_x = intensity.lcorner[0] + intensity.dx[0] * num_pixels_1d;
-    double ucorer_y = intensity.lcorner[1] + intensity.dx[1] * num_pixels_1d;
+    BLOCK_SIZE_X = CAM_SIZE_X / (pow(2, intensity.level - 1) *
+                                 (double)(num_blocks));
+    BLOCK_SIZE_Y = CAM_SIZE_Y / (pow(2, intensity.level - 1) *
+                                 (double)(num_blocks));
 
-    double rl = sqrt(lcorner_x * lcorner_x + lcorer_y * lcorer_y);
-    double ru = sqrt(ucorner_x * ucorner_x + ucorer_y * ucorer_y);
+    double lcorner_x = intensity.lcorner[0];
+    double lcorner_y = intensity.lcorner[1];
+    double ucorner_x = intensity.lcorner[0] + BLOCK_SIZE_X;
+    double ucorner_y = intensity.lcorner[1] + BLOCK_SIZE_Y;
+
+    double rl = sqrt(lcorner_x * lcorner_x + lcorner_y * lcorner_y);
+    double ru = sqrt(ucorner_x * ucorner_x + ucorner_y * ucorner_y);
 
     double rmax = fmax(rl, ru);
     double rmin = fmin(rl, ru);
 
-    bool bool_3 = radius_3 > rmin && radius_3 < rmax;
-    bool bool_2 = radius_2 > rmin && radius_2 < rmax;
+    bool bool_3 = radius_3 > rmax;// && radius_3 < rmax;
+    bool bool_2 = radius_2 > rmax && radius_3 < rmax;// && radius_2 < rmax;
 
-    if (bool_3 && intensity.level < max_level)
+
+//    fprintf(stderr,"%e %e %e %e\n",ucorner_x,ucorner_y,lcorner_x,lcorner_y);
+    fprintf(stderr,"%d %d %e %e %e %e\n", bool_3,bool_2,rmin,rmax,radius_3,radius_2);
+
+    if (bool_3 && intensity.level < 3)
         return 1;
-    if (bool_2 && intensity.level < max_level - 1)
+    if (bool_2 && intensity.level < 2)
         return 1;
     else
         return 0;
@@ -164,7 +173,6 @@ int refine_init_block(struct Camera intensity) {
 void prerun_refine(struct Camera **intensityfield) {
     int block = 0;
     while (block < tot_blocks) {
-
         if (refine_init_block((*intensityfield)[block])) {
             add_block((intensityfield), block);
         } else {
