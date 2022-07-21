@@ -720,7 +720,6 @@ void set_units(double M_unit_) {
 
 void init_storage() {
     int i;
-    fprintf(stderr, "\nAllocation memory...\n");
     p = (double ****)malloc(
         NPRIM * sizeof(double ***)); // malloc_rank1(NPRIM, sizeof(double *));
     for (i = 0; i < NPRIM; i++) {
