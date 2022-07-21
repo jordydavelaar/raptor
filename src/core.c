@@ -49,8 +49,8 @@ void read_model(char *argv[]) {
     sscanf(argv[3], "%lf", &TIME_INIT);
 
     printf("\nModel parameters:\n\n");
-    printf("MBH \t\t= %g grams\n", MBH);
-    printf("DISTANCE \t= %g cm\n", source_dist);
+    printf("MBH \t\t= %g Msun\n", MBH);
+    printf("DISTANCE \t= %g kpc\n", source_dist);
     printf("M_UNIT \t\t= %g grams\n", M_UNIT);
     printf("R_LOW \t\t= %g \n", R_LOW);
     printf("R_HIGH \t\t= %g \n", R_HIGH);
@@ -64,6 +64,9 @@ void read_model(char *argv[]) {
     printf("FREQS_PER_DEC \t= %d \n", FREQS_PER_DEC);
     printf("FREQ_MIN \t= %g Hz\n", FREQ_MIN);
     printf("STEPSIZE \t= %g \n", STEPSIZE);
+
+    MBH *= MSUN;
+    source_dist *= KPCTOCM;
 
     fclose(input);
 }

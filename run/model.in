@@ -1,6 +1,6 @@
-MBH		(g)	1.233e43
+MBH		(Msun)	6.2e9
 M_UNIT		(g)	2.739e25
-DISTANCE		(cm)	1.22e25
+DISTANCE		(kpc) 3945
 R_LOW		(-)	1
 R_HIGH		(-)	1
 

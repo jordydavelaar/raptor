@@ -34,8 +34,8 @@ char inputfile[100];
 #define RAD_TRANS (1)
 #define POL (0)
 
-#define	AMR 0
-#define	SMR 1
+#define AMR 0
+#define SMR 1
 
 #define num_frequencies 1
 #define num_pixels_1d 10
@@ -65,12 +65,12 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
-// DISTRIBUTION CHOISES 
+// DISTRIBUTION CHOISES
 //////////////////
 #define KAPPA (0) // kappa distribution
-#define TH (1) // thermal distribution
+#define TH (1)    // thermal distribution
 #define POWER (2) // Power-law distribution
-#define DF (TH)  // Distribution function
+#define DF (TH)   // Distribution function
 #define kappa 5.0
 #define power 2.5
 #define gamma_min 1.
@@ -175,6 +175,7 @@ double STEPSIZE;
 #define MPCL2 (0.0015033)
 #define GGRAV (6.674e-8)
 #define MSUN (1.989e33)
+#define KPCTOCM (3.086e21)
 #define MPoME (PROTON_MASS / ELECTRON_MASS)
 //#define M_PI 3.14159265358979323846
 

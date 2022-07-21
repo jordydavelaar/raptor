@@ -41,8 +41,8 @@ char inputfile[100];
 
 #define FREQS (FREQLOG)
 
-#define	AMR 0
-#define	SMR 1
+#define AMR 0
+#define SMR 1
 
 #define num_pixels_1d 10
 #define tot_pixels 100
@@ -71,12 +71,12 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
-// DISTRIBUTION CHOISES 
+// DISTRIBUTION CHOISES
 //////////////////
 #define KAPPA (0) // kappa distribution
-#define TH (1) // thermal distribution
+#define TH (1)    // thermal distribution
 #define POWER (2) // Power-law distribution
-#define DF (TH)  // Distribution function
+#define DF (TH)   // Distribution function
 #define kappa 5.0
 #define power 2.5
 #define gamma_min 1.
@@ -109,7 +109,6 @@ extern double R0; // Parameter for MKS coords
        metric == MKSBHAC || metric == MKSN)
 #define logscale (1) // Modified BL/KS coordinates; logarithmic radius
 #endif
-
 
 // MODEL PARAMETERS
 ///////////////////
@@ -182,6 +181,7 @@ double STEPSIZE;
 #define MPCL2 (0.0015033)
 #define GGRAV (6.674e-8)
 #define MSUN (1.989e33)
+#define KPCTOCM (3.086e21)
 #define MPoME (PROTON_MASS / ELECTRON_MASS)
 //#define M_PI 3.14159265358979323846
 
