@@ -13,11 +13,9 @@ void init_model() {
     set_units(M_UNIT);
 
     // Initialize the BHAC AMR GRMHD data
-    fprintf(stderr, "\nREADING BHAC AMR SIMULATION DATA FROM %s", GRMHD_FILE);
+    fprintf(stderr, "\nStarting read in of BHAC GRMHD data...\n");
 
     init_grmhd_data(GRMHD_FILE);
-
-    fprintf(stderr, "DONE!");
 }
 
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
@@ -413,8 +411,6 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
 void init_grmhd_data(char *fname) {
 
-    fprintf(stderr, "\nReading HEADER...\n");
-
     /*
             nxlone1         = 192
             nxlone2         = 96
@@ -476,9 +472,11 @@ void init_grmhd_data(char *fname) {
     file_id = fopen(fname, "rb"); // r for read, b for binary
 
     if (file_id < 0) {
-        fprintf(stderr, "file %s does not exist, aborting...\n", fname);
+        fprintf(stderr, "\nCan't open sim data file... Abort!\n");
         fflush(stderr);
         exit(1234);
+    } else {
+        fprintf(stderr, "\nSuccessfully opened %s. \n\nReading", fname);
     }
 
     long int offset;
@@ -491,39 +489,30 @@ void init_grmhd_data(char *fname) {
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nleafs = buffer_i[0];
-    fprintf(stderr, "nleafs %d\n", nleafs);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     levmaxini = buffer_i[0];
-    fprintf(stderr, "levmax %d\n", levmaxini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     ndimini = buffer_i[0];
-    fprintf(stderr, "ndim %d\n", ndimini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     ndirini = buffer_i[0];
-    fprintf(stderr, "ndir %d\n", ndirini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nwini = buffer_i[0];
-    fprintf(stderr, "nw %d\n", nwini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nws = buffer_i[0];
-    printf("nws %d\n", nws);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     neqparini = buffer_i[0];
-    fprintf(stderr, "neqpar+nspecialpar %d \n", neqparini);
 
     fread(buffer_i, sizeof(int), 1, file_id);
     it = buffer_i[0];
-    fprintf(stderr, "it %d\n", it);
 
     fread(buffer, sizeof(double), 1, file_id);
     t = buffer[0];
-    fprintf(stderr, "t %e\n", t);
 
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
@@ -534,17 +523,14 @@ void init_grmhd_data(char *fname) {
     for (int k = 0; k < ndimini; k++) {
         fread(buffer_i, sizeof(int), 1, file_id);
         nx[k] = buffer_i[0];
-        fprintf(stderr, "block size %d %d\n", k, buffer_i[0]);
     }
     for (int k = 0; k < neqparini; k++) {
         fread(buffer, sizeof(double), 1, file_id);
         neqpar[k] = buffer[0];
-        fprintf(stderr, "eqpar %d %g\n", k, buffer[0]);
     }
 
     a = neqpar[3];
     Q = 0.0;
-    fprintf(stderr, "spin %g\n", a);
     // Q=0.66;//662912607362388;
     int cells = 1;
     for (int k = 0; k < ndimini; k++) {
@@ -573,7 +559,6 @@ void init_grmhd_data(char *fname) {
 
     for (int i = 0; i < ndimini; i++) {
         ng[i] = nxlone[i] / nx[i]; // number of blocks in each direction
-        printf("ng %d\n", ng[i]);
     }
     if (ndimini < 3)
         ng[2] = 1;
@@ -583,6 +568,7 @@ void init_grmhd_data(char *fname) {
     block_info = (struct block *)malloc(0);
 
     forest = (int *)malloc(sizeof(int));
+    fprintf(stderr, ".");
 
     int level = 1;
     for (int k = 0; k < ng[2]; k++) {
@@ -599,8 +585,6 @@ void init_grmhd_data(char *fname) {
         exit(1);
     }
 
-    fprintf(stderr, "%d %d \n", block_info[0].level, igrid);
-
     double *dx1, *dxc;
     dx1 = (double *)malloc(ndimini * sizeof(double));
     dxc = (double *)malloc(ndimini * sizeof(double));
@@ -608,9 +592,7 @@ void init_grmhd_data(char *fname) {
     for (int i = 0; i < ndimini; i++) {
         dx1[i] = (xprobmax[i] - xprobmin[i]) / ng[i];
         dxc[i] = (xprobmax[i] - xprobmin[i]) / nxlone[i];
-        //      fprintf(stderr,"block sizes %d %e\n",i,dxc[i]);
     }
-    // exit(1);
 
     double **values;
     values = (double **)malloc(nwini * sizeof(double *));
@@ -631,8 +613,10 @@ void init_grmhd_data(char *fname) {
 
     init_storage();
 
+    fprintf(stderr, ".");
+
     fseek(file_id, 0, SEEK_SET);
-    fprintf(stderr, "\nReading BODY...\n");
+
     for (int i = 0; i < nleafs; i++) {
         for (int n = 0; n < ndimini; n++) {
             block_info[i].lb[n] =
@@ -659,7 +643,7 @@ void init_grmhd_data(char *fname) {
             }
         }
 
-        //  #pragma omp parallel for shared(values,p) schedule(static,1)
+#pragma omp parallel for shared(values, p) schedule(static, 1)
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
@@ -670,9 +654,6 @@ void init_grmhd_data(char *fname) {
                 calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block,
                                Xbar[i][c]);
 
-//		fprintf(stderr,"x %e %e\n",Xgrid[i][c][0],Xbar[i][c][0]);
-//		fprintf(stderr,"y %e %e\n",Xgrid[i][c][1],Xbar[i][c][1]);
-//		fprintf(stderr,"z %e %e\n",Xgrid[i][c][2],Xbar[i][c][2]);
 #if (DEBUG)
                 if (isnan(Xgrid[i][c][0])) {
                     fprintf(stderr, "%d %d", c, i);
@@ -694,17 +675,17 @@ void init_grmhd_data(char *fname) {
                 p[B2][i][c][0] = prim[B2];
                 p[B3][i][c][0] = prim[B3];
             }
-            //                 count++;
+            if (i == int(nleafs / 2))
+                fprintf(stderr, ".");
         }
-        //#pragma omp barrier
-        //	exit(1);
+#pragma omp barrier
+
         offset = (nx[0] + 1) * (nx[1] + 1) * (nx[2] + 1) * nws * 8;
         fseek(file_id, offset, SEEK_CUR);
     }
-    fprintf(stderr, "\n DONE \n");
+    fprintf(stderr, "Done\n");
     free(values);
     free(forest);
-    fprintf(stderr, "%e\n", p[KRHO][0][0][0]);
 
     // exit(1);
 }

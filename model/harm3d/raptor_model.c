@@ -73,13 +73,11 @@ void init_grmhd_data(char *fname) {
                        &p[B3][i][j][k]);
             }
         }
-	if(i%(N1/3)==0)
-		fprintf(stderr, ".");
+        if (i % (N1 / 3) == 0)
+            fprintf(stderr, ".");
     }
 
-
     fprintf(stderr, "Done!\n");
-
 }
 
 // Current metric: modified Kerr-Schild, squashed in theta
