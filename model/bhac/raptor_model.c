@@ -682,7 +682,7 @@ void init_grmhd_data(char *fname) {
         //	exit(1);
         offset = (nx[0] + 1) * (nx[1] + 1) * (nx[2] + 1) * nws * 8;
         fseek(file_id, offset, SEEK_CUR);
-        if (i == int(nleafs / 2))
+        if (i == (nleafs / 2) && c == 0)
             fprintf(stderr, ".");
     }
     fprintf(stderr, "Done!\n");

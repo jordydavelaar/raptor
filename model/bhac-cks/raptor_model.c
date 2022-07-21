@@ -675,7 +675,7 @@ void init_grmhd_data(char *fname) {
                 p[B2][i][c][0] = prim[B2];
                 p[B3][i][c][0] = prim[B3];
             }
-            if (i == (nleafs / 2))
+            if (i == (nleafs / 2) && c == 0)
                 fprintf(stderr, ".");
         }
 #pragma omp barrier
