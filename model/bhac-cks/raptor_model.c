@@ -706,14 +706,9 @@ void set_units(double M_unit_) {
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
 
-    fprintf(stderr, "\nUNITS\n");
-    fprintf(stderr, "L,T,M: %g %g %g\n", L_unit, T_unit, M_unit_);
-
     RHO_unit = M_unit_ / pow(L_unit, 3);
     U_unit = RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
     B_unit = SPEED_OF_LIGHT * sqrt(4. * M_PI * RHO_unit);
-
-    fprintf(stderr, "rho,u,B: %g %g %g\n", RHO_unit, U_unit, B_unit);
 
     Ne_unit = RHO_unit / (PROTON_MASS + ELECTRON_MASS);
 }
