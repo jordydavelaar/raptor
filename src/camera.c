@@ -139,10 +139,10 @@ int refine_init_block(struct Camera intensity) {
     double radius_3 = 10;
     double radius_2 = 15;
 
-    BLOCK_SIZE_X = CAM_SIZE_X / (pow(2, intensity.level - 1) *
-                                 (double)(num_blocks));
-    BLOCK_SIZE_Y = CAM_SIZE_Y / (pow(2, intensity.level - 1) *
-                                 (double)(num_blocks));
+    BLOCK_SIZE_X =
+        CAM_SIZE_X / (pow(2, intensity.level - 1) * (double)(num_blocks));
+    BLOCK_SIZE_Y =
+        CAM_SIZE_Y / (pow(2, intensity.level - 1) * (double)(num_blocks));
 
     double lcorner_x = intensity.lcorner[0];
     double lcorner_y = intensity.lcorner[1];
@@ -155,12 +155,11 @@ int refine_init_block(struct Camera intensity) {
     double rmax = fmax(rl, ru);
     double rmin = fmin(rl, ru);
 
-    bool bool_3 = radius_3 > rmax;// && radius_3 < rmax;
-    bool bool_2 = radius_2 > rmax && radius_3 < rmax;// && radius_2 < rmax;
+    bool bool_3 = radius_3 > rmax;                    // && radius_3 < rmax;
+    bool bool_2 = radius_2 > rmax && radius_3 < rmax; // && radius_2 < rmax;
 
-
-//    fprintf(stderr,"%e %e %e %e\n",ucorner_x,ucorner_y,lcorner_x,lcorner_y);
-    fprintf(stderr,"%d %d %e %e %e %e\n", bool_3,bool_2,rmin,rmax,radius_3,radius_2);
+    //    fprintf(stderr,"%e %e %e
+    //    %e\n",ucorner_x,ucorner_y,lcorner_x,lcorner_y);
 
     if (bool_3 && intensity.level < 3)
         return 1;
