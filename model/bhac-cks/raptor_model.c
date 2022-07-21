@@ -767,19 +767,18 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     double block_start[4];
     double block_dx[4];
     int i, j, k;
-    /*
-        block_start[0] =
-            block_info[igrid].lb[0] + 0.5 * block_info[igrid].dxc_block[0];
-        block_dx[0] = block_info[igrid].dxc_block[0];
 
-        block_start[1] =
-            block_info[igrid].lb[1] + 0.5 * block_info[igrid].dxc_block[1];
-        block_dx[1] = block_info[igrid].dxc_block[1];
+    block_start[0] =
+        block_info[igrid].lb[0] + 0.5 * block_info[igrid].dxc_block[0];
+    block_dx[0] = block_info[igrid].dxc_block[0];
 
-        block_start[2] =
-            block_info[igrid].lb[2] + 0.5 * block_info[igrid].dxc_block[2];
-        block_dx[2] = block_info[igrid].dxc_block[2];
-    */
+    block_start[1] =
+        block_info[igrid].lb[1] + 0.5 * block_info[igrid].dxc_block[1];
+    block_dx[1] = block_info[igrid].dxc_block[1];
+
+    block_start[2] =
+        block_info[igrid].lb[2] + 0.5 * block_info[igrid].dxc_block[2];
+    block_dx[2] = block_info[igrid].dxc_block[2];
 
     i = (int)((X[1] - block_start[0]) / block_dx[0] - 0.5 + 1000) - 1000;
     j = (int)((X[2] - block_start[1]) / block_dx[1] - 0.5 + 1000) - 1000;
