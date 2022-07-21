@@ -13,7 +13,7 @@
 void read_model(char *argv[]) {
     // model to read
     sscanf(argv[1], "%s", inputfile);
-    fprintf(stderr,"\nUsing model parameter file %s\n",inputfile);
+    fprintf(stderr, "\nUsing model parameter file %s\n", inputfile);
     FILE *input;
     input = fopen(inputfile, "r");
     if (input == NULL) {
@@ -27,6 +27,7 @@ void read_model(char *argv[]) {
 
     // Model parameters
     fscanf(input, "%s %s %lf", temp, temp2, &MBH);
+    fscanf(input, "%s %s %lf", temp, temp2, &source_dist);
     fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT);
     fscanf(input, "%s %s %lf", temp, temp2, &R_LOW);
     fscanf(input, "%s %s %lf", temp, temp2, &R_HIGH);
@@ -49,6 +50,7 @@ void read_model(char *argv[]) {
 
     printf("\nModel parameters:\n\n");
     printf("MBH \t\t= %g grams\n", MBH);
+    printf("DISTANCE \t= %g cm\n", source_dist);
     printf("M_UNIT \t\t= %g grams\n", M_UNIT);
     printf("R_LOW \t\t= %g \n", R_LOW);
     printf("R_HIGH \t\t= %g \n", R_HIGH);
