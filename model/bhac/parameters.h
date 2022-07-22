@@ -136,8 +136,8 @@ int FREQS_PER_DEC;
 double FREQ_MIN;
 double FREQ_MAX;
 
-#define source_dist (5.061e25) // Distance to M87 (cm); for Sgr A* use (2.47e22)
-#define rcam (1e4) //(500.)    // Camera distance from the sing.(units of Rg)
+double source_dist; // Distance to M87 (cm); for Sgr A* use (2.47e22)
+#define rcam (1e4)  //(500.)    // Camera distance from the sing.(units of Rg)
 
 int IMG_WIDTH;
 int IMG_HEIGHT;
