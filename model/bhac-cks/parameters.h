@@ -34,12 +34,12 @@ char inputfile[100];
 #define RAD_TRANS (1)
 #define POL (1)
 
-#define num_frequencies 1
+#define num_frequencies 2
 
 #define FREQFILE (0)
 #define FREQLOG (1)
 
-#define FREQS (FREQLOG)
+#define FREQS (FREQFILE)
 
 #define AMR 0
 #define SMR 1
@@ -162,7 +162,7 @@ double CAM_SIZE_Y;
 
 double STEPSIZE;
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
-#define horizon_marg (1.e-5) // Stop tracing at this distance from E.H. [BL]
+#define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]
 #define VER (1)              //
 #define RK4 (2)              //
 #define RK45 (3)             //

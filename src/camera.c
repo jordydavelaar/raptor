@@ -161,9 +161,9 @@ int refine_init_block(struct Camera intensity) {
     //    fprintf(stderr,"%e %e %e
     //    %e\n",ucorner_x,ucorner_y,lcorner_x,lcorner_y);
 
-    if (bool_3 && intensity.level < 3)
+    if (bool_3 && intensity.level < 3 && max_level > 2)
         return 1;
-    if (bool_2 && intensity.level < 2)
+    if (bool_2 && intensity.level < 2 && max_level > 1)
         return 1;
     else
         return 0;

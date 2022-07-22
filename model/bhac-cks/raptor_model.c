@@ -744,54 +744,56 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     int i, j, k;
 
     block_start[0] =
-        block_info[igrid].lb[0] + 0.5 * block_info[igrid].dxc_block[0];
+        block_info[igrid].lb[0] + 0. * block_info[igrid].dxc_block[0];
     block_dx[0] = block_info[igrid].dxc_block[0];
 
     block_start[1] =
-        block_info[igrid].lb[1] + 0.5 * block_info[igrid].dxc_block[1];
+        block_info[igrid].lb[1] + 0. * block_info[igrid].dxc_block[1];
     block_dx[1] = block_info[igrid].dxc_block[1];
 
     block_start[2] =
-        block_info[igrid].lb[2] + 0.5 * block_info[igrid].dxc_block[2];
+        block_info[igrid].lb[2] + 0. * block_info[igrid].dxc_block[2];
     block_dx[2] = block_info[igrid].dxc_block[2];
 
-    i = (int)((X[1] - block_start[0]) / block_dx[0] - 0.5 + 1000) - 1000;
-    j = (int)((X[2] - block_start[1]) / block_dx[1] - 0.5 + 1000) - 1000;
-    k = (int)((X[3] - block_start[2]) / block_dx[2] + 1000 - 0.5) - 1000;
+    i = (int)((X[1] - block_start[0]) / block_dx[0]  + 1000) - 1000;
+    j = (int)((X[2] - block_start[1]) / block_dx[1]  + 1000) - 1000;
+    k = (int)((X[3] - block_start[2]) / block_dx[2]  + 1000) - 1000;
+
+
+    if(i<0 )
+	fprintf(stderr,"i %d X %e lb %e\n",i,X[1],block_start[0]);
+
 
     if (i < 0) {
         del[1] = 0.;
     } else if (i > nx[0] - 2) {
-        //        del[1] = 1.;
         del[1] =
-            (X[1] - ((i + 0.5) * block_dx[0] + block_start[0])) / block_dx[0];
+            (X[1] - ((i ) * block_dx[0] + block_start[0])) / block_dx[0];
 
     } else {
         del[1] =
-            (X[1] - ((i + 0.5) * block_dx[0] + block_start[0])) / block_dx[0];
+            (X[1] - ((i) * block_dx[0] + block_start[0])) / block_dx[0];
     }
 
     if (j < 0) {
         del[2] = 0.;
     } else if (j > nx[1] - 2) {
-        //        del[2] = 1.;
         del[2] =
-            (X[2] - ((j + 0.5) * block_dx[1] + block_start[1])) / block_dx[1];
+           (X[2] - ((j ) * block_dx[1] + block_start[1])) / block_dx[1];
 
     } else {
         del[2] =
-            (X[2] - ((j + 0.5) * block_dx[1] + block_start[1])) / block_dx[1];
+            (X[2] - ((j) * block_dx[1] + block_start[1])) / block_dx[1];
     }
 
     if (k < 0) {
         del[3] = 0.;
     } else if (k > nx[2] - 2) {
-        //        del[3] = 1.;
         del[3] =
-            (X[3] - ((k + 0.5) * block_dx[2] + block_start[2])) / block_dx[2];
+            (X[3] - ((k ) * block_dx[2] + block_start[2])) / block_dx[2];
     } else {
         del[3] =
-            (X[3] - ((k + 0.5) * block_dx[2] + block_start[2])) / block_dx[2];
+            (X[3] - ((k) * block_dx[2] + block_start[2])) / block_dx[2];
     }
 
     return;
@@ -830,7 +832,7 @@ double interp_scalar(double **var, int c, double coeff[4]) {
 
     if (c_ip >= nx[0]) {
         c_ip = c_i;
-        c_i--;
+       c_i--;
     }
 
     if (c_jp >= nx[1]) {
@@ -979,15 +981,16 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-        // fprintf(stderr,
-        //         "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
-        //        VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
-        //       p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
+         fprintf(stderr,
+                 "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
+                VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
+               p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
         //	issue with normalization, either due to inaccurate
         // interpolation/extrapolation typically only occurs very close to the
         // horizon setting it to a high value lfac=10
         LOOP_i V_u[i] *= sqrt(0.99 / VdotV);
         VdotV = 0.99;
+	return 0;
     }
 
     double lfac = 1 / sqrt(1 - VdotV);
@@ -1072,7 +1075,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 5.) || r > 2000. ||
+    if ((Bsq / (rho + 1e-20) > 1.) || r > 50. ||
         (*modvar).theta_e > 100.) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;

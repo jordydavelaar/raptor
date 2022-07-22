@@ -25,7 +25,7 @@ double f_m(double X) {
 double bessel_appr(int n, double x) {
 
     // use taylor expanded version
-    if (x < 0.1) {
+    if (x < 1/100.) {
         if (n == 0)
             return -log(x / 2.) - 0.5772;
 
@@ -37,7 +37,7 @@ double bessel_appr(int n, double x) {
     }
     // in this case all bessel functions are really small... Theta_e is small,
     // so no emission anyway.?
-    else if (x > (1 / 0.004)) {
+    else if (x > (1 / 0.00004)) {
         return 1e-100;
     } else // use full versions in between.
         return gsl_sf_bessel_Kn(n, x);
