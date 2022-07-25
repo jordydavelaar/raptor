@@ -8,6 +8,8 @@
 #include "parameters.h"
 #include <math.h>
 #include <stdio.h>
+
+// Initializes the camera
 void init_camera(struct Camera **intensityfield) {
     int x, y;
 
@@ -31,6 +33,7 @@ void init_camera(struct Camera **intensityfield) {
     }
 }
 
+// Iniatlized the impact parameters for every pixel in a block
 void get_impact_params(struct Camera **intensityfield, int block) {
     int xpixel, ypixel;
     double stepx, stepy, d_x, d_y;
@@ -69,17 +72,20 @@ void get_impact_params(struct Camera **intensityfield, int block) {
     }
 }
 
+// For new Adapative Grid Block it compute the new indices.
 void new_cindex(int child, int *new_i, int *new_j, int ip, int jp) {
     *new_i = 2 * (ip) + child % 2;
     *new_j = 2 * (jp) + child / 2;
 }
 
+// Shift array so that there is space for the new block
 void shift_camera_array(struct Camera **intensityfield, int current_block) {
     for (int block = tot_blocks - 1; block > current_block + 3; block--) {
         (*intensityfield)[block] = (*intensityfield)[block - 3];
     }
 }
 
+// Splits the original block in a new set of four blocks in the camera struct
 void add_block(struct Camera **intensityfield, int current_block) {
     int cind_i, cind_j;
 
@@ -103,10 +109,12 @@ void add_block(struct Camera **intensityfield, int current_block) {
     }
 }
 
+// Checks if a refinement criterion is met, returns 1 if that is the case
 int refine_block(struct Camera intensity) {
     int pixel1, pixel2, pixel3;
     double gradI_x, gradI_y;
     double gradImax = -1e100;
+
     for (int xpixel = 0; xpixel < num_pixels_1d - 1; xpixel++) {
         for (int ypixel = 0; ypixel < num_pixels_1d - 1; ypixel++) {
             for (int freq = 0; freq < num_frequencies; freq++) {
@@ -128,12 +136,15 @@ int refine_block(struct Camera intensity) {
             }
         }
     }
+
     if (gradImax > 0.25 && intensity.level < max_level)
         return 1;
     else
         return 0;
 }
 
+// Static Camera Grid, checks if a block should be refined before ray tracing
+// begins
 int refine_init_block(struct Camera intensity) {
 
     double radius_3 = 10;
@@ -155,11 +166,8 @@ int refine_init_block(struct Camera intensity) {
     double rmax = fmax(rl, ru);
     double rmin = fmin(rl, ru);
 
-    bool bool_3 = radius_3 > rmax;                    // && radius_3 < rmax;
-    bool bool_2 = radius_2 > rmax && radius_3 < rmax; // && radius_2 < rmax;
-
-    //    fprintf(stderr,"%e %e %e
-    //    %e\n",ucorner_x,ucorner_y,lcorner_x,lcorner_y);
+    bool bool_3 = radius_3 > rmax;
+    bool bool_2 = radius_2 > rmax && radius_3 < rmax;
 
     if (bool_3 && intensity.level < 3 && max_level > 2)
         return 1;
@@ -169,6 +177,8 @@ int refine_init_block(struct Camera intensity) {
         return 0;
 }
 
+// Goes over all blocks before ray tracing and adds new block if refinement
+// criterion is met
 void prerun_refine(struct Camera **intensityfield) {
     int block = 0;
     while (block < tot_blocks) {
@@ -180,6 +190,7 @@ void prerun_refine(struct Camera **intensityfield) {
     }
 }
 
+// Initialzies a single pixel, assigns wave vector to it.
 void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
 #if (LINEAR_IMPACT_CAM)
     double stepx = CAM_SIZE_X / (double)IMG_WIDTH;
@@ -195,6 +206,7 @@ void init_pixel(double alpha, double beta, double t, double photon_u[8]) {
 #endif
 }
 
+// Given an impact parameter, finds the corresponding block that it is in
 int find_block(double x[2], struct Camera *intensityfield) {
     double small = 1e-6;
     double dx[2];
@@ -219,6 +231,7 @@ int find_block(double x[2], struct Camera *intensityfield) {
     return -1;
 }
 
+// Given a impact parameter, finds the pixels it is closest to
 int find_pixel(double x[2], struct Camera *intensityfield, int block) {
     double dx[2];
     dx[0] = intensityfield[block].dx[0] * source_dist / R_GRAV;
@@ -232,6 +245,7 @@ int find_pixel(double x[2], struct Camera *intensityfield, int block) {
     return pixel;
 }
 
+// Outputs the ACG camera struct with a uniform resolution
 void write_uniform_camera(struct Camera *intensityfield, double frequency,
                           int freq) {
     int uniform_size = IMG_WIDTH * pow(2, max_level - 1);
