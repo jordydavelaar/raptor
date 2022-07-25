@@ -476,10 +476,9 @@ void init_grmhd_data(char *fname) {
     }
 
     a = neqpar[3];
-    if (metric != KN)
+    if (metric != MKSN)
         Q = 0.0;
 
-    fprintf(stderr, "\nUsing grid file grid.in\n", );
     FILE *inputgrid;
     inputgrid = fopen("grid.in", "r");
     if (inputgrid == NULL) {
@@ -498,7 +497,7 @@ void init_grmhd_data(char *fname) {
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[0]);
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[1]);
     if (ndimini == 3)
-        fscanf(input, "%s %s %lf", temp, temp2, &xprobmin[2]);
+        fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[2]);
 
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[0]);
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[1]);
