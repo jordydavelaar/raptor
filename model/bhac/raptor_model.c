@@ -21,8 +21,8 @@ void init_model() {
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
     double small = 1e-9;
 
-    if(x[2]>M_PI/2.)
-	small=-small;
+    if (x[2] > M_PI / 2.)
+        small = -small;
 
     for (int igrid = 0; igrid < nleafs; igrid++) {
         if (x[1] + small >= block_info[igrid].lb[0] &&
@@ -379,7 +379,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
     if (VdotV > 1.)
         fprintf(stderr, "issues with conserved %e %e %e %e\n", VdotV, gammaf,
-                conserved[LFAC][c],exp(X_u[1]));
+                conserved[LFAC][c], exp(X_u[1]));
 
 #if (DEBUG)
 
@@ -477,14 +477,13 @@ void init_grmhd_data(char *fname) {
     for (int k = 0; k < neqparini; k++) {
         fread(buffer, sizeof(double), 1, file_id);
         neqpar[k] = buffer[0];
-
     }
 
     a = neqpar[3];
 
     if (metric != MKSN)
         Q = 0.0;
-    Q=0.0;
+    Q = 0.0;
 
     FILE *inputgrid;
 
@@ -518,18 +517,15 @@ void init_grmhd_data(char *fname) {
 
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &hslope);
 
-
     fclose(inputgrid);
 
-    if(metric==MKSBHAC || metric==MKSN){
-       xprobmin[1]*=2.*M_PI;
-       xprobmin[2]*=2.*M_PI;
+    if (metric == MKSBHAC || metric == MKSN) {
+        xprobmin[1] *= 2. * M_PI;
+        xprobmin[2] *= 2. * M_PI;
 
-       xprobmax[1]*=2.*M_PI;
-       xprobmax[2]*=2.*M_PI;
+        xprobmax[1] *= 2. * M_PI;
+        xprobmax[2] *= 2. * M_PI;
     }
-
-    
 
     ng[0] = 1;
     ng[1] = 1;
@@ -538,7 +534,6 @@ void init_grmhd_data(char *fname) {
     startx[1] = xprobmin[0];
     startx[2] = xprobmin[1];
     startx[3] = xprobmin[2];
-
 
     stopx[1] = xprobmax[0];
     stopx[2] = xprobmax[1];
@@ -936,10 +931,12 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (igrid == -1) {
-        fprintf(stderr, "issues with finding igrid, too close to barrier, skipping... %e %e %e\n",
+        fprintf(stderr,
+                "issues with finding igrid, too close to barrier, skipping... "
+                "%e %e %e\n",
                 X[1], X[2], X[3]);
-	return 0;
-//        exit(1);
+        return 0;
+        //        exit(1);
     }
 
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
@@ -988,11 +985,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                 "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
                 VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
                 p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
-        //	issue with normalization, either due to inaccurate
-        // interpolation/extrapolation typically only occurs very close to the
-        // horizon setting it to a high value lfac=10
-        LOOP_i V_u[i] *= sqrt(0.99 / VdotV);
-        VdotV = 0.99;
+
         return 0;
     }
 
