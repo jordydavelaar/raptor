@@ -480,7 +480,12 @@ void init_grmhd_data(char *fname) {
         Q = 0.0;
 
     FILE *inputgrid;
-    inputgrid = fopen("grid.in", "r");
+
+    if (metric == CKS)
+        inputgrid = fopen("grid_cks.in", "r");
+    else
+        inputgrid = fopen("grid_mks.in", "r");
+
     if (inputgrid == NULL) {
         printf("Cannot read input file");
         // return 1;
