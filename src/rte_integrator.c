@@ -74,12 +74,12 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
             // Obtain emission coefficient in current plasma conditions
 
-#if(EMISUSER)
-            evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
-                            &aV, nu_p, modvar, pitch_ang);
+#if (EMISUSER)
+            evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ,
+                                 &aU, &aV, nu_p, modvar, pitch_ang);
 #else
-            evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
-                            &aV, nu_p, modvar, pitch_ang);
+            evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ,
+                                   &aU, &aV, nu_p, modvar, pitch_ang);
 #endif
             double C = Rg * PLANCK_CONSTANT /
                        (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
@@ -88,17 +88,20 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             double K_inv = aI;
             double j_inv = jI;
 
-#if(DEBUG)
-       if((j_inv != j_inv || isnan(Icurrent))){
-           fprintf(stderr,"NaN emissivity! I = %+.15e\n", Icurrent);
-           fprintf(stderr,"NaN emissivity! j_nu = %+.15e\n", j_inv);
-           fprintf(stderr,"NaN emissivity! nu_plasmaframe = %+.15e\n", nu_p);
-	   fprintf(stderr,"NaN emissivity! ne %e te %e B %e\n",modvar.n_e,modvar.theta_e,modvar.B);
-	   fprintf(stderr,"NaN emissivity! Unorm %e\n",four_velocity_norm(X_u, modvar.U_u)+1);
-	   fprintf(stderr,"NaN emissivity! knorm %e\n",four_velocity_norm(X_u, k_u));
-        }
+#if (DEBUG)
+            if ((j_inv != j_inv || isnan(Icurrent))) {
+                fprintf(stderr, "NaN emissivity! I = %+.15e\n", Icurrent);
+                fprintf(stderr, "NaN emissivity! j_nu = %+.15e\n", j_inv);
+                fprintf(stderr, "NaN emissivity! nu_plasmaframe = %+.15e\n",
+                        nu_p);
+                fprintf(stderr, "NaN emissivity! ne %e te %e B %e\n",
+                        modvar.n_e, modvar.theta_e, modvar.B);
+                fprintf(stderr, "NaN emissivity! Unorm %e\n",
+                        four_velocity_norm(X_u, modvar.U_u) + 1);
+                fprintf(stderr, "NaN emissivity! knorm %e\n",
+                        four_velocity_norm(X_u, k_u));
+            }
 #endif
-
 
             if (jI == jI) { // I_current += exp(-tau) * j_nu /
                             // nu_p / nu_p * dl_current * C;
@@ -119,9 +122,6 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
 
             //      }
         }
-
-
-         
     }
 
     IQUV[0] = Icurrent * pow(frequency, 3.);

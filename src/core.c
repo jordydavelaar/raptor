@@ -48,23 +48,22 @@ void read_model(char *argv[]) {
     sscanf(argv[2], "%s", GRMHD_FILE);
     sscanf(argv[3], "%lf", &TIME_INIT);
 
-    fprintf(stderr,"\nModel parameters:\n\n");
-    fprintf(stderr,"MBH \t\t= %g Msun\n", MBH);
-    fprintf(stderr,"DISTANCE \t= %g kpc\n", source_dist);
-    fprintf(stderr,"M_UNIT \t\t= %g grams\n", M_UNIT);
-    fprintf(stderr,"R_LOW \t\t= %g \n", R_LOW);
-    fprintf(stderr,"R_HIGH \t\t= %g \n", R_HIGH);
-    fprintf(stderr,"INCLINATION \t= %g deg\n", INCLINATION);
+    fprintf(stderr, "\nModel parameters:\n\n");
+    fprintf(stderr, "MBH \t\t= %g Msun\n", MBH);
+    fprintf(stderr, "DISTANCE \t= %g kpc\n", source_dist);
+    fprintf(stderr, "M_UNIT \t\t= %g grams\n", M_UNIT);
+    fprintf(stderr, "R_LOW \t\t= %g \n", R_LOW);
+    fprintf(stderr, "R_HIGH \t\t= %g \n", R_HIGH);
+    fprintf(stderr, "INCLINATION \t= %g deg\n", INCLINATION);
 
-    fprintf(stderr,"METRIC \t\t= ");
-#if(metric==MKSBHAC)
-    fprintf(stderr,"MKS BHAC\n");
-#elif(metric==CKS)
-    fprintf(stderr,"CKS BHAC\n");
-#elif(metric==MKSHARM)
-    fprintf(stderr,"MKS HARM3D\n");
+    fprintf(stderr, "METRIC \t\t= ");
+#if (metric == MKSBHAC)
+    fprintf(stderr, "MKS BHAC\n");
+#elif (metric == CKS)
+    fprintf(stderr, "CKS BHAC\n");
+#elif (metric == MKSHARM)
+    fprintf(stderr, "MKS HARM3D\n");
 #endif
-
 
     fprintf(stderr, "\nObserver parameters:\n\n");
     fprintf(stderr, "IMG_WIDTH \t= %d \n", IMG_WIDTH);

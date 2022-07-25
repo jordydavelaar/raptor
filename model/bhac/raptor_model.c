@@ -88,7 +88,7 @@ void read_node(FILE *file_id, int *igrid, int *refine, int ndimini, int level,
 
     if (leaf) {
         (*igrid)++;
-        int i = (*igrid); //+(*refine);
+        int i = (*igrid);
         if (i > forest_size) {
             forest = (int *)realloc(forest, i * sizeof(int));
             forest_size++;
@@ -142,6 +142,7 @@ double get_detgamma(double x, double y, double z) {
         g_dd[1][1] * (g_dd[2][2] * g_dd[3][3] - g_dd[3][2] * g_dd[2][3]) -
         g_dd[1][2] * (g_dd[2][1] * g_dd[3][3] - g_dd[3][1] * g_dd[2][3]) +
         g_dd[1][3] * (g_dd[2][1] * g_dd[3][2] - g_dd[2][2] * g_dd[3][1]);
+
 #if (DEBUG)
     if (isnan(sqrt(detgamma))) {
         double R2 = x * x + y * y + z * z;
@@ -156,6 +157,7 @@ double get_detgamma(double x, double y, double z) {
         exit(1);
     }
 #endif
+
     return sqrt(detgamma);
 }
 
@@ -275,6 +277,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     X_u[3] = X[2];
 
     double r_current = get_r(X);
+
     if (r_current < 1.00)
         return;
 
@@ -288,6 +291,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
     double B_d[4];
     double S_u[4];
+
     S_u[1] = 0;
     S_u[2] = 0;
     S_u[3] = 0;

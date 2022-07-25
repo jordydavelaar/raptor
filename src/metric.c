@@ -463,11 +463,11 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
             X_u_temp[j] = X_u[j];
         }
 
-#if(metric==CKS)
+#if (metric == CKS)
         double fac = fabs(X_u[i]);
 #else
-        double fac = 1.0;//fabs(X_u[i]);
-#endif        
+        double fac = 1.0; // fabs(X_u[i]);
+#endif
 
         X_u_temp[i] += delta_num * fac;
 
@@ -479,41 +479,25 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
         //	LOOP_kl fprintf(stderr,"gddm %d base %e\n",i,g_dd_m[l][k]);
         //	LOOP_kl fprintf(stderr,"gddp %d %e\n",i,g_dd_p[l][k]);
 
-        dg[i][0][0] =
-            (g_dd_p[0][0] - g_dd_m[0][0]) / (2. * delta_num * fac);
-        dg[i][1][0] =
-            (g_dd_p[1][0] - g_dd_m[1][0]) / (2. * delta_num * fac);
-        dg[i][2][0] =
-            (g_dd_p[2][0] - g_dd_m[2][0]) / (2. * delta_num * fac);
-        dg[i][3][0] =
-            (g_dd_p[3][0] - g_dd_m[3][0]) / (2. * delta_num * fac);
+        dg[i][0][0] = (g_dd_p[0][0] - g_dd_m[0][0]) / (2. * delta_num * fac);
+        dg[i][1][0] = (g_dd_p[1][0] - g_dd_m[1][0]) / (2. * delta_num * fac);
+        dg[i][2][0] = (g_dd_p[2][0] - g_dd_m[2][0]) / (2. * delta_num * fac);
+        dg[i][3][0] = (g_dd_p[3][0] - g_dd_m[3][0]) / (2. * delta_num * fac);
 
-        dg[i][0][1] =
-            (g_dd_p[0][1] - g_dd_m[0][1]) / (2. * delta_num * fac);
-        dg[i][1][1] =
-            (g_dd_p[1][1] - g_dd_m[1][1]) / (2. * delta_num * fac);
-        dg[i][2][1] =
-            (g_dd_p[2][1] - g_dd_m[2][1]) / (2. * delta_num * fac);
-        dg[i][3][1] =
-            (g_dd_p[3][1] - g_dd_m[3][1]) / (2. * delta_num * fac);
+        dg[i][0][1] = (g_dd_p[0][1] - g_dd_m[0][1]) / (2. * delta_num * fac);
+        dg[i][1][1] = (g_dd_p[1][1] - g_dd_m[1][1]) / (2. * delta_num * fac);
+        dg[i][2][1] = (g_dd_p[2][1] - g_dd_m[2][1]) / (2. * delta_num * fac);
+        dg[i][3][1] = (g_dd_p[3][1] - g_dd_m[3][1]) / (2. * delta_num * fac);
 
-        dg[i][0][2] =
-            (g_dd_p[0][2] - g_dd_m[0][2]) / (2. * delta_num * fac);
-        dg[i][1][2] =
-            (g_dd_p[1][2] - g_dd_m[1][2]) / (2. * delta_num * fac);
-        dg[i][2][2] =
-            (g_dd_p[2][2] - g_dd_m[2][2]) / (2. * delta_num * fac);
-        dg[i][3][2] =
-            (g_dd_p[3][2] - g_dd_m[3][2]) / (2. * delta_num * fac);
+        dg[i][0][2] = (g_dd_p[0][2] - g_dd_m[0][2]) / (2. * delta_num * fac);
+        dg[i][1][2] = (g_dd_p[1][2] - g_dd_m[1][2]) / (2. * delta_num * fac);
+        dg[i][2][2] = (g_dd_p[2][2] - g_dd_m[2][2]) / (2. * delta_num * fac);
+        dg[i][3][2] = (g_dd_p[3][2] - g_dd_m[3][2]) / (2. * delta_num * fac);
 
-        dg[i][0][3] =
-            (g_dd_p[0][3] - g_dd_m[0][3]) / (2. * delta_num * fac);
-        dg[i][1][3] =
-            (g_dd_p[1][3] - g_dd_m[1][3]) / (2. * delta_num * fac);
-        dg[i][2][3] =
-            (g_dd_p[2][3] - g_dd_m[2][3]) / (2. * delta_num * fac);
-        dg[i][3][3] =
-            (g_dd_p[3][3] - g_dd_m[3][3]) / (2. * delta_num * fac);
+        dg[i][0][3] = (g_dd_p[0][3] - g_dd_m[0][3]) / (2. * delta_num * fac);
+        dg[i][1][3] = (g_dd_p[1][3] - g_dd_m[1][3]) / (2. * delta_num * fac);
+        dg[i][2][3] = (g_dd_p[2][3] - g_dd_m[2][3]) / (2. * delta_num * fac);
+        dg[i][3][3] = (g_dd_p[3][3] - g_dd_m[3][3]) / (2. * delta_num * fac);
     }
     // Solve the Christoffel connection equation
     int alpha;

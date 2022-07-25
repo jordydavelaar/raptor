@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nStarting ray tracing\n\n");
 
-#if(SMR)
+#if (SMR)
     prerun_refine(&intensityfield);
 #endif
 
@@ -134,14 +134,14 @@ int main(int argc, char *argv[]) {
 
         calculate_image_block(&intensityfield[block], energy_spectrum,
                               frequencies);
-#if(AMR)
+#if (AMR)
         if (refine_block(intensityfield[block] && AMR)) {
             add_block(&intensityfield, block);
         } else {
             block++;
         }
 #else
-	block++;
+        block++;
 #endif
     }
 
