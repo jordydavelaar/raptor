@@ -286,7 +286,6 @@ void f_geodesic(double *y, double *fvector) {
     double A_u[4] = {0., 0., 0., 0.};         // d^2X/dLambda^2
 
     // Obtain the Christoffel symbols at the current location
-    // connection_udd(X_u, gamma_udd);
     connection_num_udd(X_u, gamma_udd);
 
     // Compute 4-acceleration using the geodesic equation
@@ -343,6 +342,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             X_u[i] = photon_u[i];
             k_u[i] = photon_u[i + 4];
         }
+
         // Enter current position/velocity/dlambda into lightpath
         for (q = 0; q < 8; q++)
             lightpath[*steps * 9 + q] = photon_u[q];
@@ -377,6 +377,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
         LOOP_i X_u[i] = photon_u[i];
         LOOP_i k_u[i] = photon_u[i + 4];
+
         // Advance (affine) parameter lambda
         lambda += fabs(dlambda_adaptive);
         r_current = get_r(X_u);

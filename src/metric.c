@@ -462,51 +462,58 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
         for (int j = 0; j < 4; j++) {
             X_u_temp[j] = X_u[j];
         }
-        X_u_temp[i] += delta_num * fabs(X_u[i]);
+
+#if(metric==CKS)
+        double fac = fabs(X_u[i]);
+#else
+        double fac = 1.0;//fabs(X_u[i]);
+#endif        
+
+        X_u_temp[i] += delta_num * fac;
 
         metric_dd(X_u_temp, g_dd_p);
 
-        X_u_temp[i] -= 2. * delta_num * fabs(X_u[i]);
+        X_u_temp[i] -= 2. * delta_num * fac;
         metric_dd(X_u_temp, g_dd_m);
 
         //	LOOP_kl fprintf(stderr,"gddm %d base %e\n",i,g_dd_m[l][k]);
         //	LOOP_kl fprintf(stderr,"gddp %d %e\n",i,g_dd_p[l][k]);
 
         dg[i][0][0] =
-            (g_dd_p[0][0] - g_dd_m[0][0]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[0][0] - g_dd_m[0][0]) / (2. * delta_num * fac);
         dg[i][1][0] =
-            (g_dd_p[1][0] - g_dd_m[1][0]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[1][0] - g_dd_m[1][0]) / (2. * delta_num * fac);
         dg[i][2][0] =
-            (g_dd_p[2][0] - g_dd_m[2][0]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[2][0] - g_dd_m[2][0]) / (2. * delta_num * fac);
         dg[i][3][0] =
-            (g_dd_p[3][0] - g_dd_m[3][0]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[3][0] - g_dd_m[3][0]) / (2. * delta_num * fac);
 
         dg[i][0][1] =
-            (g_dd_p[0][1] - g_dd_m[0][1]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[0][1] - g_dd_m[0][1]) / (2. * delta_num * fac);
         dg[i][1][1] =
-            (g_dd_p[1][1] - g_dd_m[1][1]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[1][1] - g_dd_m[1][1]) / (2. * delta_num * fac);
         dg[i][2][1] =
-            (g_dd_p[2][1] - g_dd_m[2][1]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[2][1] - g_dd_m[2][1]) / (2. * delta_num * fac);
         dg[i][3][1] =
-            (g_dd_p[3][1] - g_dd_m[3][1]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[3][1] - g_dd_m[3][1]) / (2. * delta_num * fac);
 
         dg[i][0][2] =
-            (g_dd_p[0][2] - g_dd_m[0][2]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[0][2] - g_dd_m[0][2]) / (2. * delta_num * fac);
         dg[i][1][2] =
-            (g_dd_p[1][2] - g_dd_m[1][2]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[1][2] - g_dd_m[1][2]) / (2. * delta_num * fac);
         dg[i][2][2] =
-            (g_dd_p[2][2] - g_dd_m[2][2]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[2][2] - g_dd_m[2][2]) / (2. * delta_num * fac);
         dg[i][3][2] =
-            (g_dd_p[3][2] - g_dd_m[3][2]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[3][2] - g_dd_m[3][2]) / (2. * delta_num * fac);
 
         dg[i][0][3] =
-            (g_dd_p[0][3] - g_dd_m[0][3]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[0][3] - g_dd_m[0][3]) / (2. * delta_num * fac);
         dg[i][1][3] =
-            (g_dd_p[1][3] - g_dd_m[1][3]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[1][3] - g_dd_m[1][3]) / (2. * delta_num * fac);
         dg[i][2][3] =
-            (g_dd_p[2][3] - g_dd_m[2][3]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[2][3] - g_dd_m[2][3]) / (2. * delta_num * fac);
         dg[i][3][3] =
-            (g_dd_p[3][3] - g_dd_m[3][3]) / (2. * delta_num * fabs(X_u[i]));
+            (g_dd_p[3][3] - g_dd_m[3][3]) / (2. * delta_num * fac);
     }
     // Solve the Christoffel connection equation
     int alpha;
@@ -1159,9 +1166,11 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 #endif
 
 #if (metric == MKSHARM || metric == MKSBHAC)
+
     photon_u[2] =
         Xg2_approx_rand(photon_u[2]); // We only transform theta - r is
                                       // already exponential and R0 = 0
+
     photon_u[6] =
         Ug2_approx_rand(photon_u[6],
                         photon_u[2]); // We only transform theta - r is
@@ -1371,7 +1380,7 @@ double Xg2_approx_rand(double Xr2) {
     }
 
     // Clamp output value between 0 and 1
-    return fmin(1., fmax(Xg2_current, 0.));
+    return Xg2_current;
 }
 
 // Given the U2 coordinate in RAPTOR's convention, Ur2, we compute and return

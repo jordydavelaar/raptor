@@ -1,3 +1,4 @@
+
 /*
  * raptor_BHAC_AMR_model.c
  *
@@ -18,7 +19,10 @@ void init_model() {
 }
 
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
-    double small = 1e-12;
+    double small = 1e-9;
+
+    if(x[2]>M_PI/2.)
+	small=-small;
 
     for (int igrid = 0; igrid < nleafs; igrid++) {
         if (x[1] + small >= block_info[igrid].lb[0] &&
@@ -279,7 +283,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     X_u[3] = X[2]; // - dxc[0];
 
     double r_current = get_r(X);
-    if (r_current < 1.)
+    if (r_current < 1.00)
         return;
 
     metric_dd(X_u, g_dd);
@@ -374,8 +378,8 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     double gammaf = 1. / sqrt(1 - VdotV);
 
     if (VdotV > 1.)
-        fprintf(stderr, "issues with conserved %e %e %e\n", VdotV, gammaf,
-                conserved[LFAC][c]);
+        fprintf(stderr, "issues with conserved %e %e %e %e\n", VdotV, gammaf,
+                conserved[LFAC][c],exp(X_u[1]));
 
 #if (DEBUG)
 
@@ -410,60 +414,6 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
 void init_grmhd_data(char *fname) {
 
-    /*
-            nxlone1         = 192
-            nxlone2         = 96
-            xprobmin1         = 0.19325057145871735
-            xprobmax1         = 7.824046010856292
-            xprobmin2         = 0.0d0
-            xprobmax2         = 0.5d0
-    */
-    ng[0] = 1;
-    ng[1] = 1;
-    ng[2] = 1;
-    hslope = 1.0;
-
-#if (metric == MKSBHAC || metric == MKSN)
-    nxlone[0] = 128;
-    nxlone[1] = 48;
-    nxlone[2] = 48;
-
-    xprobmax[0] = 8.1117280833;
-    xprobmax[1] = M_PI;
-    xprobmax[2] = 2. * M_PI;
-
-    xprobmin[0] = 0.17;
-    xprobmin[1] = 0.;
-    xprobmin[2] = 0.;
-
-#elif (metric == CKS)
-
-    nxlone[0] = 96;
-    nxlone[1] = 96;
-    nxlone[2] = 384;
-
-    xprobmax[0] = 500;
-    xprobmax[1] = 500;
-    xprobmax[2] = 2000.;
-
-    xprobmin[0] = -500;
-    xprobmin[1] = -500;
-    xprobmin[2] = -2000;
-#else
-
-    fprintf(stderr, "Not a metric supported by BHAC. Aborting...\n");
-    exit(1);
-
-#endif
-
-    startx[1] = xprobmin[0];
-    startx[2] = xprobmin[1];
-    startx[3] = xprobmin[2];
-
-    stopx[1] = xprobmax[0];
-    stopx[2] = xprobmax[1];
-    stopx[3] = xprobmax[2];
-
     double buffer[1];
     unsigned int buffer_i[1];
     FILE *file_id;
@@ -480,7 +430,7 @@ void init_grmhd_data(char *fname) {
 
     long int offset;
 
-    int levmaxini, ndimini, ndirini, nwini, nws, neqparini, it;
+    int levmaxini, ndirini, nwini, nws, neqparini, it;
     double t;
     fseek(file_id, 0, SEEK_END);
     offset = -36 - 4; // -4; // 7 int, 1 double = 7 * 4 + 1*8 = 56?
@@ -516,7 +466,6 @@ void init_grmhd_data(char *fname) {
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
 
-    int *nx;
     neqpar = (double *)malloc(neqparini * sizeof(double));
     nx = (int *)malloc(ndimini * sizeof(int));
 
@@ -524,14 +473,77 @@ void init_grmhd_data(char *fname) {
         fread(buffer_i, sizeof(int), 1, file_id);
         nx[k] = buffer_i[0];
     }
+
     for (int k = 0; k < neqparini; k++) {
         fread(buffer, sizeof(double), 1, file_id);
         neqpar[k] = buffer[0];
+
     }
 
     a = neqpar[3];
-    Q = 0.0;
-    // Q=0.66;//662912607362388;
+
+    if (metric != MKSN)
+        Q = 0.0;
+    Q=0.0;
+
+    FILE *inputgrid;
+
+    if (metric == CKS)
+        inputgrid = fopen("grid_cks.in", "r");
+    else
+        inputgrid = fopen("grid_mks.in", "r");
+
+    if (inputgrid == NULL) {
+        printf("Cannot read input file");
+        // return 1;
+    }
+
+    char temp[100], temp2[100];
+
+    // Model parameters
+    fscanf(inputgrid, "%s %s %d", temp, temp2, &nxlone[0]);
+    fscanf(inputgrid, "%s %s %d", temp, temp2, &nxlone[1]);
+    if (ndimini == 3)
+        fscanf(inputgrid, "%s %s %d", temp, temp2, &nxlone[2]);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[0]);
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[1]);
+    if (ndimini == 3)
+        fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[2]);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[0]);
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[1]);
+    if (ndimini == 3)
+        fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[2]);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &hslope);
+
+
+    fclose(inputgrid);
+
+    if(metric==MKSBHAC || metric==MKSN){
+       xprobmin[1]*=2.*M_PI;
+       xprobmin[2]*=2.*M_PI;
+
+       xprobmax[1]*=2.*M_PI;
+       xprobmax[2]*=2.*M_PI;
+    }
+
+    
+
+    ng[0] = 1;
+    ng[1] = 1;
+    ng[2] = 1;
+
+    startx[1] = xprobmin[0];
+    startx[2] = xprobmin[1];
+    startx[3] = xprobmin[2];
+
+
+    stopx[1] = xprobmax[0];
+    stopx[2] = xprobmax[1];
+    stopx[3] = xprobmax[2];
+
     int cells = 1;
     for (int k = 0; k < ndimini; k++) {
         cells *= nx[k];
@@ -569,6 +581,7 @@ void init_grmhd_data(char *fname) {
 
     forest = (int *)malloc(sizeof(int));
     fprintf(stderr, ".");
+
     int level = 1;
     for (int k = 0; k < ng[2]; k++) {
         for (int j = 0; j < ng[1]; j++) {
@@ -642,20 +655,17 @@ void init_grmhd_data(char *fname) {
             }
         }
 
-        //#pragma omp parallel for shared(values,p) schedule(static,1)
+#pragma omp parallel for shared(values, p) schedule(static, 1)
         for (int c = 0; c < cells; c++) {
             calc_coord(c, nx, ndimini, block_info[i].lb,
                        block_info[i].dxc_block, Xgrid[i][c]);
             double X_u[4] = {0, Xgrid[i][c][0], Xgrid[i][c][1], Xgrid[i][c][2]};
             double r = get_r(X_u);
-            if (r > 1) {
+            if (r > 1.0) {
 
                 calc_coord_bar(Xgrid[i][c], block_info[i].dxc_block,
                                Xbar[i][c]);
 
-//		fprintf(stderr,"x %e %e\n",Xgrid[i][c][0],Xbar[i][c][0]);
-//		fprintf(stderr,"y %e %e\n",Xgrid[i][c][1],Xbar[i][c][1]);
-//		fprintf(stderr,"z %e %e\n",Xgrid[i][c][2],Xbar[i][c][2]);
 #if (DEBUG)
                 if (isnan(Xgrid[i][c][0])) {
                     fprintf(stderr, "%d %d", c, i);
@@ -677,15 +687,15 @@ void init_grmhd_data(char *fname) {
                 p[B2][i][c][0] = prim[B2];
                 p[B3][i][c][0] = prim[B3];
             }
-            //                 count++;
+            if (i == (nleafs / 2) && c == 0)
+                fprintf(stderr, ".");
         }
-        //	exit(1);
+#pragma omp barrier
+
         offset = (nx[0] + 1) * (nx[1] + 1) * (nx[2] + 1) * nws * 8;
         fseek(file_id, offset, SEEK_CUR);
-        if (i == (nleafs / 2) && c == 0)
-            fprintf(stderr, ".");
     }
-    fprintf(stderr, "Done!\n");
+    fprintf(stderr, "Done\n");
     free(values);
     free(forest);
 
@@ -693,6 +703,18 @@ void init_grmhd_data(char *fname) {
 }
 
 void set_units(double M_unit_) {
+    //	double MBH;
+
+    /* set black hole mass */
+    /** could be read in from file here,
+        along with M_unit and other parameters **/
+    //	MBH = 4.e6;
+
+    /** input parameters appropriate to Sgr A* **/
+    // double BH_MASS = MBH * MSUN;
+
+    /** from this, calculate units of length, time, mass,
+        and derivative units **/
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
 
@@ -705,7 +727,6 @@ void set_units(double M_unit_) {
 
 void init_storage() {
     int i;
-
     p = (double ****)malloc(
         NPRIM * sizeof(double ***)); // malloc_rank1(NPRIM, sizeof(double *));
     for (i = 0; i < NPRIM; i++) {
@@ -727,19 +748,158 @@ void init_storage() {
     return;
 }
 
-// Get the flud parameters in the local co-moving plasma frame.
+void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
+                  double del[NDIM]) {
+
+    double block_start[4];
+    double block_dx[4];
+    int i, j, k;
+
+    block_start[0] =
+        block_info[igrid].lb[0] + 0. * block_info[igrid].dxc_block[0];
+    block_dx[0] = block_info[igrid].dxc_block[0];
+
+    block_start[1] =
+        block_info[igrid].lb[1] + 0. * block_info[igrid].dxc_block[1];
+    block_dx[1] = block_info[igrid].dxc_block[1];
+
+    block_start[2] =
+        block_info[igrid].lb[2] + 0. * block_info[igrid].dxc_block[2];
+    block_dx[2] = block_info[igrid].dxc_block[2];
+
+    i = (int)((X[1] - block_start[0]) / block_dx[0] + 1000) - 1000;
+    j = (int)((X[2] - block_start[1]) / block_dx[1] + 1000) - 1000;
+    k = (int)((X[3] - block_start[2]) / block_dx[2] + 1000) - 1000;
+
+    if (i < 0) {
+        del[1] = 0.;
+    } else if (i > nx[0] - 2) {
+        del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
+
+    } else {
+        del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
+    }
+
+    if (j < 0) {
+        del[2] = 0.;
+    } else if (j > nx[1] - 2) {
+        del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
+
+    } else {
+        del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
+    }
+
+    if (k < 0) {
+        del[3] = 0.;
+    } else if (k > nx[2] - 2) {
+        del[3] = (X[3] - ((k)*block_dx[2] + block_start[2])) / block_dx[2];
+    } else {
+        del[3] = (X[3] - ((k)*block_dx[2] + block_start[2])) / block_dx[2];
+    }
+
+    return;
+}
+
+int compute_c(int i, int j, int k) {
+    // computes "c" index for p array given a set of i,j,k indices
+    return i + j * nx[0] + k * nx[0] * nx[1];
+}
+
+double interp_scalar(double **var, int c, double coeff[4]) {
+
+    double interp;
+    int c_ip, c_jp, c_kp;
+    int c_i, c_j, c_k = 0;
+    double b1, b2, b3, del[NDIM];
+    int cindex[2][2][2];
+
+    del[1] = coeff[1];
+    del[2] = coeff[2];
+    del[3] = coeff[3];
+    if (del[1] > 1 || del[2] > 1 || del[3] > 1 || del[1] < 0 || del[2] < 0 ||
+        del[3] < 0)
+        fprintf(stderr, "del[1] %e \n del[2] %e\n del[3] %e\n", del[1], del[2],
+                del[3]);
+
+    c_i = (int)((c % nx[0]));
+    c_j = (int)(fmod((((double)c) / ((double)nx[0])), (double)nx[1]));
+    if (ndimini == 3) {
+        c_k = (int)(((double)c) / ((double)nx[0] * nx[1]));
+    }
+
+    c_ip = c_i + 1;
+    c_jp = c_j + 1;
+    c_kp = c_k + 1;
+
+    if (c_ip >= nx[0]) {
+        c_ip = c_i;
+        c_i--;
+    }
+
+    if (c_jp >= nx[1]) {
+        c_jp = c_j;
+        c_j--;
+    }
+
+    if (c_kp >= nx[2]) {
+        c_kp = c_k;
+        c_k--;
+    }
+
+    b1 = 1. - del[1];
+    b2 = 1. - del[2];
+    b3 = 1. - del[3];
+
+    cindex[0][0][0] = compute_c(c_i, c_j, c_k);
+    cindex[1][0][0] = compute_c(c_ip, c_j, c_k);
+    cindex[0][1][0] = compute_c(c_i, c_jp, c_k);
+    cindex[0][0][1] = compute_c(c_i, c_j, c_kp);
+    cindex[1][1][0] = compute_c(c_ip, c_jp, c_k);
+    cindex[1][0][1] = compute_c(c_ip, c_j, c_kp);
+    cindex[0][1][1] = compute_c(c_i, c_jp, c_kp);
+    cindex[1][1][1] = compute_c(c_ip, c_jp, c_kp);
+
+    /*
+        fprintf(stderr,"c %d\n",c);
+        fprintf(stderr,"c_i %d c_j %d c_k %d\n",c_i,c_j,c_k);
+        fprintf(stderr,"c_ip %d c_jp %d c_kp %d\n",c_ip,c_jp,c_kp);
+
+        fprintf(stderr,"000 %d\n",cindex[0][0][0]);
+        fprintf(stderr,"100 %d\n",cindex[1][0][0]);
+        fprintf(stderr,"010 %d\n",cindex[0][1][0]);
+        fprintf(stderr,"001 %d\n",cindex[0][0][1]);
+        fprintf(stderr,"110 %d\n",cindex[1][1][0]);
+        fprintf(stderr,"101 %d\n",cindex[1][0][1]);
+        fprintf(stderr,"011 %d\n",cindex[0][1][1]);
+        fprintf(stderr,"111 %d\n",cindex[1][1][1]);
+    */
+    interp = var[cindex[0][0][0]][0] * b1 * b2 +
+             var[cindex[0][1][0]][0] * b1 * del[2] +
+             var[cindex[1][0][0]][0] * del[1] * b2 +
+             var[cindex[1][1][0]][0] * del[1] * del[2];
+
+    /* Now interpolate above in x3 */
+    interp = b3 * interp + del[3] * (var[cindex[0][0][1]][0] * b1 * b2 +
+                                     var[cindex[0][1][1]][0] * b1 * del[2] +
+                                     var[cindex[1][0][1]][0] * del[1] * b2 +
+                                     var[cindex[1][1][1]][0] * del[1] * del[2]);
+
+    return interp;
+}
+
+// Get the fluid parameters in the local co-moving plasma frame.
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
     int i, c;
-
+    double del[NDIM];
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
 
 #if (metric == MKSBHAC || metric == MKSN)
     X[3] = fmod(X[3], 2 * M_PI);
-    X[2] = fmod(X[2], M_PI);
+    X[2] = fmod(X[2], M_PI) - 1e-6;
     if (X[3] < 0.)
         X[3] = 2. * M_PI + X[3];
     if (X[2] < 0.)
@@ -747,13 +907,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 #endif
 
     double r = get_r(X);
-    if (r < 1.)
+
+    if (r < 1.00)
         return 0;
 
-    // X[3]=fmod(X[3],2*M_PI);
     double smalll = 1.e-6;
     double small = 0;
-    // _uversie van coordinaat naar cel i,j
+
     if (X[1] > stopx[1] || X[1] < startx[1] || X[2] < startx[2] ||
         X[2] > stopx[2] || X[3] < startx[3] || X[3] > stopx[3]) {
         return 0;
@@ -776,49 +936,38 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (igrid == -1) {
-        fprintf(stderr, "issues with finding igrid, exiting... %e %e %e\n",
+        fprintf(stderr, "issues with finding igrid, too close to barrier, skipping... %e %e %e\n",
                 X[1], X[2], X[3]);
-        exit(1);
-    }
-
-    if (igrid >= 7192) {
-        fprintf(stderr, "running out of grid!");
-        return 0;
+	return 0;
+//        exit(1);
     }
 
     (*modvar).dx_local = block_info[igrid].dxc_block[0];
-    //		      fprintf(stderr,"igrid %d dxc %e\n",igrid,*dx_local);
 
     c = find_cell(X, block_info, igrid, Xgrid);
-    double X_u[4];
-    X_u[0] = 0;
-    X_u[1] = Xbar[igrid][c][0]; // - dxc[0];
-    X_u[2] = Xbar[igrid][c][1]; // - dxc[0];
-    X_u[3] = Xbar[igrid][c][2]; // - dxc[0];
 
-    metric_uu(X_u, g_uu); // cell centered, nearest neighbour so need
-                          // metric at cell position
-    metric_dd(X_u, g_dd);
+    metric_uu(X, g_uu);
 
-    // inteprolatie van je primitieve variabelen
-    rho = p[KRHO][igrid][c][0];
-    uu = p[UU][igrid][c][0];
-    // bepalen van de plasma number density en electron temperatuur
+    metric_dd(X, g_dd);
+
+    coefficients(X, block_info, igrid, c, del);
+
+    rho = interp_scalar(p[KRHO][igrid], c, del);
+    uu = interp_scalar(p[UU][igrid], c, del);
+
     (*modvar).n_e = rho * Ne_unit + smalll;
 
-    Bp[1] = p[B1][igrid][c][0]; // interp_scalar_3d(p[B1], i, j,k,del);
-    Bp[2] = p[B2][igrid][c][0]; // interp_scalar_3d(p[B2], i, j,k, del);
-    Bp[3] = p[B3][igrid][c][0]; // interp_scalar_3d(p[B3], i, j,k, del);
-
-    V_u[1] = p[U1][igrid][c][0];
-    V_u[2] = p[U2][igrid][c][0];
-    V_u[3] = p[U3][igrid][c][0];
+    Bp[1] = interp_scalar(p[B1][igrid], c, del);
+    Bp[2] = interp_scalar(p[B2][igrid], c, del);
+    Bp[3] = interp_scalar(p[B3][igrid], c, del);
+    V_u[1] = interp_scalar(p[U1][igrid], c, del);
+    V_u[2] = interp_scalar(p[U2][igrid], c, del);
+    V_u[3] = interp_scalar(p[U3][igrid], c, del);
 
     double gamma_dd[4][4];
     for (int i = 1; i < 4; i++) {
         for (int j = 1; j < 4; j++) {
-            gamma_dd[i][j] =
-                g_dd[i][j]; // + g_uu[0][i]*g_uu[0][j]/(-g_uu[0][0]);
+            gamma_dd[i][j] = g_dd[i][j];
         }
     }
     double shift[4];
@@ -835,16 +984,22 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     if (VdotV > 1.) {
-        fprintf(stderr, "VdotV too large %e %d %e %e %e\n", VdotV, igrid,
-                exp(X[1]), X[2], X[3]);
-        VdotV = 0;
+        fprintf(stderr,
+                "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
+                VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
+                p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
+        //	issue with normalization, either due to inaccurate
+        // interpolation/extrapolation typically only occurs very close to the
+        // horizon setting it to a high value lfac=10
+        LOOP_i V_u[i] *= sqrt(0.99 / VdotV);
+        VdotV = 0.99;
+        return 0;
     }
 
     double lfac = 1 / sqrt(1 - VdotV);
 
     (*modvar).U_u[0] = lfac / alpha;
 
-    // U_u[0] = gamma/alpha;
     for (int i = 1; i < NDIM; i++) {
         (*modvar).U_u[i] = 0;
         (*modvar).U_u[i] = V_u[i] * lfac - shift[i] * lfac / alpha;
@@ -907,24 +1062,24 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double beta_trans = 1.0;
 
-    double b2 = pow(uu * (gam - 1.) / (0.5 * (Bsq + smalll) * beta_trans), 2.);
+    (*modvar).beta = uu * (gam - 1.) / (0.5 * (Bsq + smalll));
 
-    (*modvar).sigma = Bsq / (rho + smalll); // *(1.+ uu/rho*gam));
+    double b2 = pow(((*modvar).beta / beta_trans), 2.);
 
+    (*modvar).sigma = Bsq / (rho + smalll);
+
+    (*modvar).sigma_min = 1.0;
     double Rhigh = R_HIGH;
     double Rlow = R_LOW;
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-    //    double two_temp_gam =
-    //      0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
-
     Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 5.) || r > 2000 ||
-        (*modvar).theta_e > 20) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > 1.) || r > 50. ||
+        (*modvar).theta_e > 100.) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }

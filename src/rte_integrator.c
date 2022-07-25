@@ -73,15 +73,32 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             // Compute the photon frequency in the plasma frame:
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
             // Obtain emission coefficient in current plasma conditions
+
+#if(EMISUSER)
             evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
                             &aV, nu_p, modvar, pitch_ang);
-
+#else
+            evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
+                            &aV, nu_p, modvar, pitch_ang);
+#endif
             double C = Rg * PLANCK_CONSTANT /
                        (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
             double dtau = (aI * dl_current * C + dtau_old);
             double K_inv = aI;
             double j_inv = jI;
+
+#if(DEBUG)
+       if((j_inv != j_inv || isnan(Icurrent))){
+           fprintf(stderr,"NaN emissivity! I = %+.15e\n", Icurrent);
+           fprintf(stderr,"NaN emissivity! j_nu = %+.15e\n", j_inv);
+           fprintf(stderr,"NaN emissivity! nu_plasmaframe = %+.15e\n", nu_p);
+	   fprintf(stderr,"NaN emissivity! ne %e te %e B %e\n",modvar.n_e,modvar.theta_e,modvar.B);
+	   fprintf(stderr,"NaN emissivity! Unorm %e\n",four_velocity_norm(X_u, modvar.U_u)+1);
+	   fprintf(stderr,"NaN emissivity! knorm %e\n",four_velocity_norm(X_u, k_u));
+        }
+#endif
+
 
             if (jI == jI) { // I_current += exp(-tau) * j_nu /
                             // nu_p / nu_p * dl_current * C;
@@ -103,24 +120,8 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             //      }
         }
 
-        /*
-           if(0 && (j_nu != j_nu || isnan(j_nu))){
-           printf("NaN emissivity! X_u[2], theta = %+.15e %+.15e\n",
-           X_u[2],M_PI*X_u[2] + 2*0.35/M_PI *
-           sin(2*M_PI*X_u[2])*atan2(2.*(log(50.)-X_u[1]),1.)); printf("NaN
-           emissivity! expX_u[1], innercutoff = %+.15e %e\n",
-           exp(X_u[1]),cutoff_inner); printf("NaN emissivity! pitch_angle =
-           %+.15e\n", pitch_ang); printf("NaN emissivity! B = %+.15e\n", B);
-           printf("NaN emissivity! THETAe = %+.15e\n", THETA_e);
-           printf("NaN emissivity! nu_plasmaframe = %+.15e\n", nu_p);
-           printf("NaN emissivity! n_e = %+.15e\n", n_e);
-           printf("NaN emissivity! j_nu = %+.15e\n", j_nu);
-           printf("NaN emissivity! tau = %+.15e\n", tau);
-           printf("NaN emissivity! U dot U = %+.15e\n\n", inner_product(X_u,
-           Uplasma_u, Uplasma_u)); printf("NaN emissivity! k dot k =
-           %+.15e\n\n", inner_product(X_u, k_u, k_u));
-           }
-         */
+
+         
     }
 
     IQUV[0] = Icurrent * pow(frequency, 3.);

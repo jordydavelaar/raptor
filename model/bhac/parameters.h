@@ -32,12 +32,20 @@ char inputfile[100];
 #define IMGFILE (1)
 #define SPECFILE (1)
 #define RAD_TRANS (1)
-#define POL (0)
+#define POL (1)
+
+#define num_frequencies 1
+
+#define FREQFILE (0)
+#define FREQLOG (1)
+
+#define FREQS (FREQLOG)
+
+#define EMISUSER (0)
 
 #define AMR 0
 #define SMR 1
 
-#define num_frequencies 1
 #define num_pixels_1d 10
 #define tot_pixels 100
 int num_blocks, tot_blocks, tot_blocks_alloc;
@@ -96,7 +104,7 @@ extern double a, Q;
 extern double R0; // Parameter for MKS coords
 
 // Metric
-#define metric (MKSBHAC)
+#define metric (CKS)
 #if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
@@ -156,7 +164,7 @@ double CAM_SIZE_Y;
 
 double STEPSIZE;
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
-#define horizon_marg (1.e-5) // Stop tracing at this distance from E.H. [BL]
+#define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]
 #define VER (1)              //
 #define RK4 (2)              //
 #define RK45 (3)             //

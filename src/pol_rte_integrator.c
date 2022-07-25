@@ -27,7 +27,11 @@ void f_parallel(const double y[], double complex f_u[], double fvector[],
     double complex A_u[4] = {0., 0., 0., 0.}; // d^2X/dLambda^2
 
     // Obtain the Christoffel symbols at the current location
+#if(metriic==MKSBHAC || metric==MKSHARM)
+    connection_udd(X_u, gamma_udd);
+#else
     connection_num_udd(X_u, gamma_udd);
+#endif
 
     // Compute 4-acceleration using the geodesic equation
     LOOP_ijk A_u[i] -= gamma_udd[i][j][k] * U_u[j] * U_u[k];
