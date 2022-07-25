@@ -411,60 +411,6 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
 void init_grmhd_data(char *fname) {
 
-    /*
-            nxlone1         = 192
-            nxlone2         = 96
-            xprobmin1         = 0.19325057145871735
-            xprobmax1         = 7.824046010856292
-            xprobmin2         = 0.0d0
-            xprobmax2         = 0.5d0
-    */
-    ng[0] = 1;
-    ng[1] = 1;
-    ng[2] = 1;
-    hslope = 1.0;
-
-#if (metric == MKSBHAC || metric == MKSN)
-    nxlone[0] = 128;
-    nxlone[1] = 48;
-    nxlone[2] = 48;
-
-    xprobmax[0] = 8.1117280833;
-    xprobmax[1] = M_PI;
-    xprobmax[2] = 2. * M_PI;
-
-    xprobmin[0] = 0.17;
-    xprobmin[1] = 0.;
-    xprobmin[2] = 0.;
-
-#elif (metric == CKS)
-
-    nxlone[0] = 96;
-    nxlone[1] = 96;
-    nxlone[2] = 384;
-
-    xprobmax[0] = 500;
-    xprobmax[1] = 500;
-    xprobmax[2] = 2000.;
-
-    xprobmin[0] = -500;
-    xprobmin[1] = -500;
-    xprobmin[2] = -2000;
-#else
-
-    fprintf(stderr, "Not a metric supported by BHAC. Aborting...\n");
-    exit(1);
-
-#endif
-
-    startx[1] = xprobmin[0];
-    startx[2] = xprobmin[1];
-    startx[3] = xprobmin[2];
-
-    stopx[1] = xprobmax[0];
-    stopx[2] = xprobmax[1];
-    stopx[3] = xprobmax[2];
-
     double buffer[1];
     unsigned int buffer_i[1];
     FILE *file_id;
@@ -530,8 +476,51 @@ void init_grmhd_data(char *fname) {
     }
 
     a = neqpar[3];
-    Q = 0.0;
-    // Q=0.66;//662912607362388;
+    if (metric != KN)
+        Q = 0.0;
+
+    fprintf(stderr, "\nUsing grid file grid.in\n", );
+    FILE *inputgrid;
+    inputgrid = fopen("grid.in", "r");
+    if (inputgrid == NULL) {
+        printf("Cannot read input file");
+        // return 1;
+    }
+
+    char temp[100], temp2[100];
+
+    // Model parameters
+    fscanf(inputgrid, "%s %s %d", temp, temp2, &nxlone[0]);
+    fscanf(inputgrid, "%s %s %d", temp, temp2, &nxlone[1]);
+    if (ndimini == 3)
+        fscanf(inputgrid, "%s %s %d", temp, temp2, &nxlone[2]);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[0]);
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmin[1]);
+    if (ndimini == 3)
+        fscanf(input, "%s %s %lf", temp, temp2, &xprobmin[2]);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[0]);
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[1]);
+    if (ndimini == 3)
+        fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[2]);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &hslope);
+
+    fclose(inputgrid);
+
+    ng[0] = 1;
+    ng[1] = 1;
+    ng[2] = 1;
+
+    startx[1] = xprobmin[0];
+    startx[2] = xprobmin[1];
+    startx[3] = xprobmin[2];
+
+    stopx[1] = xprobmax[0];
+    stopx[2] = xprobmax[1];
+    stopx[3] = xprobmax[2];
+
     int cells = 1;
     for (int k = 0; k < ndimini; k++) {
         cells *= nx[k];
