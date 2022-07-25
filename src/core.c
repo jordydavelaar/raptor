@@ -48,22 +48,32 @@ void read_model(char *argv[]) {
     sscanf(argv[2], "%s", GRMHD_FILE);
     sscanf(argv[3], "%lf", &TIME_INIT);
 
-    printf("\nModel parameters:\n\n");
-    printf("MBH \t\t= %g Msun\n", MBH);
-    printf("DISTANCE \t= %g kpc\n", source_dist);
-    printf("M_UNIT \t\t= %g grams\n", M_UNIT);
-    printf("R_LOW \t\t= %g \n", R_LOW);
-    printf("R_HIGH \t\t= %g \n", R_HIGH);
-    printf("INCLINATION \t= %g deg\n", INCLINATION);
+    fprintf(stderr,"\nModel parameters:\n\n");
+    fprintf(stderr,"MBH \t\t= %g Msun\n", MBH);
+    fprintf(stderr,"DISTANCE \t= %g kpc\n", source_dist);
+    fprintf(stderr,"M_UNIT \t\t= %g grams\n", M_UNIT);
+    fprintf(stderr,"R_LOW \t\t= %g \n", R_LOW);
+    fprintf(stderr,"R_HIGH \t\t= %g \n", R_HIGH);
+    fprintf(stderr,"INCLINATION \t= %g deg\n", INCLINATION);
 
-    printf("\nObserver parameters:\n\n");
-    printf("IMG_WIDTH \t= %d \n", IMG_WIDTH);
-    printf("IMG_HEIGHT \t= %d \n", IMG_HEIGHT);
-    printf("CAM_SIZE_X \t= %g GM/c2\n", CAM_SIZE_X);
-    printf("CAM_SIZE_Y \t= %g GM/c2\n", CAM_SIZE_Y);
-    printf("FREQS_PER_DEC \t= %d \n", FREQS_PER_DEC);
-    printf("FREQ_MIN \t= %g Hz\n", FREQ_MIN);
-    printf("STEPSIZE \t= %g \n", STEPSIZE);
+    fprintf(stderr,"METRIC \t\t= ");
+#if(metric==MKSBHAC)
+    fprintf(stderr,"MKS BHAC\n");
+#elif(metric==CKS)
+    fprintf(stderr,"CKS BHAC\n");
+#elif(metric==MKSHARM)
+    fprintf(stderr,"MKS HARM3D\n");
+#endif
+
+
+    fprintf(stderr, "\nObserver parameters:\n\n");
+    fprintf(stderr, "IMG_WIDTH \t= %d \n", IMG_WIDTH);
+    fprintf(stderr, "IMG_HEIGHT \t= %d \n", IMG_HEIGHT);
+    fprintf(stderr, "CAM_SIZE_X \t= %g GM/c2\n", CAM_SIZE_X);
+    fprintf(stderr, "CAM_SIZE_Y \t= %g GM/c2\n", CAM_SIZE_Y);
+    fprintf(stderr, "FREQS_PER_DEC \t= %d \n", FREQS_PER_DEC);
+    fprintf(stderr, "FREQ_MIN \t= %g Hz\n", FREQ_MIN);
+    fprintf(stderr, "STEPSIZE \t= %g \n", STEPSIZE);
 
     MBH *= MSUN;
     source_dist *= KPCTOCM;
