@@ -276,7 +276,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     X_u[2] = X[1];
     X_u[3] = X[2];
 
-    double r_current = get_r(X);
+    double r_current = get_r(X_u);
 
     if (r_current < 1.00)
         return;
