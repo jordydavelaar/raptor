@@ -12,7 +12,9 @@ Bronzwaer, Davelaar et al. 2018, A&A, 613, A2
 
 Davelaar, Bronzwaer et al. 2018, CompAC, 5, 1, 1
 
-Bronzwaer, Younsi, Davelaar et al. 2020, 641, A126
+Bronzwaer, Younsi, Davelaar et al. 2020, A&A, 641, A126
+
+Davelaar and Haiman 2022, PRD, 105, 10, 103010 
 
 # Installation
 
