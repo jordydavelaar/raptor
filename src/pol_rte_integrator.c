@@ -209,52 +209,43 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
                           double *rQ, double *rU, double *rV, double *aI,
                           double *aQ, double *aU, double *aV, double nu_p,
                           struct GRMHD modvar, double pitch_ang) {
-    double jI_kappa;
-    double jI_thermal;
-    double aI_kappa;
-    double aI_thermal;
-    double jV_kappa;
-    double jV_thermal;
-    double aV_kappa;
-    double aV_thermal;
-    double jU_kappa;
-    double jU_thermal;
-    double aU_kappa;
-    double aU_thermal;
-    double jQ_kappa;
-    double jQ_thermal;
-    double aQ_kappa;
-    double aQ_thermal;
+    double jI_thermal, jV_kappa, jV_thermal, jU_thermal = 0;
+    double jI_kappa, jV_kappa, jQ_kappa, jQ_thermal, jU_kappa = 0;
+
+    double aI_kappa, aV_kappa, aQ_kappa, aU_kappa = 0;
+    double aI_thermal, aV_thermal, aQ_thermal, aU_thermal = 0;
+
     double eps, epsilon;
-    jI_kappa =
-        J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+
     jI_thermal =
         j_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aI_kappa =
-        A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
-                             pitch_ang, jI_thermal);
-    jV_kappa =
-        J_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     jV_thermal =
         j_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aV_kappa =
-        A_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aV_thermal = A_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
-                             pitch_ang, jV_thermal);
-    jU_kappa = 0;
-    jU_thermal = 0;
-    aU_kappa = 0;
-    aU_thermal = 0;
-    jQ_kappa =
-        J_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     jQ_thermal =
         j_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+
+    aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+                             pitch_ang, jI_thermal);
+    aV_thermal = A_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+                             pitch_ang, jV_thermal);
+    aQ_thermal = A_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+                             pitch_ang, jQ_thermal);
+
+    jI_kappa =
+        J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jV_kappa =
+        J_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jQ_kappa =
+        J_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+
+    aI_kappa =
+        A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aV_kappa =
+        A_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     aQ_kappa =
         A_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aQ_thermal =
-        A_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang,
-                    jQ_thermal); // Transform to invariant forms
+
+    // to invariant forms...
     jI_kappa /= (nu_p * nu_p);
     jI_thermal /= (nu_p * nu_p);
     aI_kappa *= nu_p;
@@ -271,18 +262,20 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     jQ_thermal /= (nu_p * nu_p);
     aQ_kappa *= nu_p;
     aQ_thermal *= nu_p;
+
     // MIXED MODEL
     epsilon = 1.;
     eps = epsilon * (1. - exp(-pow(modvar.beta, -2.))) *
           (1 - exp(-pow(modvar.sigma / modvar.sigma_min, 2)));
+
     *jI = (1. - eps) * jI_thermal + eps * jI_kappa;
-    *aI = (1. - eps) * aI_thermal + eps * aI_kappa;
     *jV = (1. - eps) * jV_thermal + eps * jV_kappa;
-    *aV = (1. - eps) * aV_thermal + eps * aV_kappa;
-    *jU = (1. - eps) * jU_thermal + eps * jU_kappa;
-    *aU = (1. - eps) * aU_thermal + eps * aU_kappa;
+    *jU = 0.0;
     *jQ = (1. - eps) * jQ_thermal + eps * jQ_kappa;
+
+    *aV = (1. - eps) * aV_thermal + eps * aV_kappa;
     *aQ = (1. - eps) * aQ_thermal + eps * aQ_kappa;
+    *aU = 0.0 * aI = (1. - eps) * aI_thermal + eps * aI_kappa;
 }
 
 void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
