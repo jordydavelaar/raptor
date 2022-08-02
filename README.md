@@ -37,6 +37,12 @@ To setup a RAPTOR run, first create a run directory. Copy setup.sh to the run di
 
 where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. This setup should only be used for initialization of a setup folder, it should not run when a model file is present. For recompiling the code used ```make all```.   
 
+In the case of BHAC there are two coordinate systems supported either MKSBHAC or CKS. The default is currently CKS. The metric can be changed either in the paramters.h file at line 107 "#define metric (CKS)" -> "#define metric (MKSBHAC)" or by using
+
+```
+./setup.sh bhac mks
+```
+
 # Running RAPTOR
 
 RAPTOR run command is given by

@@ -29,15 +29,23 @@ echo "Copying files"
 if [ "$1" == "bhac" ] ;
 then
 	cp -v -n $RAPTOR/model/bhac/* .
-elif [ "$1" == "bhac-cks" ] ;
-then
-       	cp -v -n $RAPTOR/model/bhac-cks/* .
+
+	echo "done copying"
+
 elif  [ "$1" == "harm3d" ] ;
 then
         cp -v -n $RAPTOR/model/harm3d/* .
 else
  echo "no grmhd model picked. Aborting."
  exit
+fi
+
+if [ "$1" == "bhac" ] ;
+then
+	if [ "$2" == "mks" ] ;
+	then
+		sed -i 's/#define metric (CKS)/#define metric (MKSBHAC)/' parameters.h
+	fi
 fi
 
 echo " "
