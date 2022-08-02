@@ -210,7 +210,7 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
                           double *aQ, double *aU, double *aV, double nu_p,
                           struct GRMHD modvar, double pitch_ang) {
     double jI_thermal, jQ_thermal, jV_thermal, jU_thermal = 0;
-    double jI_kappa, jQ_kappa, jV_kappa,  jU_kappa = 0;
+    double jI_kappa, jQ_kappa, jV_kappa, jU_kappa = 0;
 
     double aI_kappa, aV_kappa, aQ_kappa, aU_kappa = 0;
     double aI_thermal, aV_thermal, aQ_thermal, aU_thermal = 0;
@@ -246,22 +246,21 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
         A_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
     // to invariant forms...
-    jI_kappa /= (nu_p * nu_p);
     jI_thermal /= (nu_p * nu_p);
-    aI_kappa *= nu_p;
-    aI_thermal *= nu_p;
-    jV_kappa /= (nu_p * nu_p);
     jV_thermal /= (nu_p * nu_p);
-    aV_kappa *= nu_p;
-    aV_thermal *= nu_p;
-    jU_kappa /= (nu_p * nu_p);
-    jU_thermal /= (nu_p * nu_p);
-    aU_kappa *= nu_p;
-    aU_thermal *= nu_p;
-    jQ_kappa /= (nu_p * nu_p);
     jQ_thermal /= (nu_p * nu_p);
-    aQ_kappa *= nu_p;
+
+    aI_thermal *= nu_p;
+    aV_thermal *= nu_p;
     aQ_thermal *= nu_p;
+
+    jI_kappa /= (nu_p * nu_p);
+    jV_kappa /= (nu_p * nu_p);
+    jQ_kappa /= (nu_p * nu_p);
+
+    aI_kappa *= nu_p;
+    aV_kappa *= nu_p;
+    aQ_kappa *= nu_p;
 
     // MIXED MODEL
     epsilon = 1.;
@@ -300,16 +299,13 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
     // Transform to invariant forms
     *jI /= (nu_p * nu_p);
     *jQ /= (nu_p * nu_p);
-    *jU /= (nu_p * nu_p);
     *jV /= (nu_p * nu_p);
 
     *aI *= nu_p;
     *aQ *= nu_p;
-    *aU *= nu_p;
     *aV *= nu_p;
 
     *rQ *= nu_p;
-    *rU *= nu_p;
     *rV *= nu_p;
 }
 int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
