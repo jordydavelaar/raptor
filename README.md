@@ -2,15 +2,9 @@
 
 This is the developer branch of RAPTOR.
 
-Main developers
-Thomas Bronzwaer
-Jordy Davelaar
+Main developers; Thomas Bronzwaer, Jordy Davelaar
 
-Contributors;
-Ziri Younsi
-Joost de Kleuver
-Bram van der Berg
-Renze Oosterhuis
+Contributors; Ziri Younsi, Monika Moscibrodzka, Joost de Kleuver, Bram van der Berg, Renze Oosterhuis
 
 Code related papers;
 
