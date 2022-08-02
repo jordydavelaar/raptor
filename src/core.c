@@ -20,7 +20,7 @@ void read_model(char *argv[]) {
 
     input = fopen(inputfile, "r");
     if (input == NULL) {
-        fprintf(stderr, "Can't read file %s! Aborting", input);
+        fprintf(stderr, "Can't read file %s! Aborting", inputfile);
         exit(1);
     }
 
