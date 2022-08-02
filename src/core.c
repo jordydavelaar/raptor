@@ -10,20 +10,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Read model parameters from model.in
 void read_model(char *argv[]) {
-    // model to read
-    sscanf(argv[1], "%s", inputfile);
-    fprintf(stderr, "\nUsing model parameter file %s\n", inputfile);
+    char temp[100], temp2[100];
     FILE *input;
+
+    sscanf(argv[1], "%s", inputfile);
+    fprintf(stdout, "\nUsing model parameter file %s\n", inputfile);
+
     input = fopen(inputfile, "r");
     if (input == NULL) {
-        printf("Cannot read input file");
-        // return 1;
+        fprintf(stderr, "Can't read file %s! Aborting", input);
+        exit(1);
     }
-
-    char temp[100], temp2[100];
-
-    //    read_in_table("symphony_pure_thermal.txt");
 
     // Model parameters
     fscanf(input, "%s %s %lf", temp, temp2, &MBH);
@@ -74,28 +73,23 @@ void read_model(char *argv[]) {
     fprintf(stderr, "FREQ_MIN \t= %g Hz\n", FREQ_MIN);
     fprintf(stderr, "STEPSIZE \t= %g \n", STEPSIZE);
 
+    // to cgs units
     MBH *= MSUN;
     source_dist *= KPCTOCM;
 
     fclose(input);
 }
 
+// For a single block this function will iterate over the pixels and call
+// geodesic integrations as well as radiation transfer
 void calculate_image_block(struct Camera *intensityfield,
                            double energy_spectrum[num_frequencies],
                            double frequencies[num_frequencies]) {
 
-    for (int pixel = 0; pixel < tot_pixels; pixel++) {
-        for (int freq = 0; freq < num_frequencies; freq++) {
-            for (int s = 0; s < 4; s++) {
-                (*intensityfield).IQUV[pixel][freq][s] = 0;
-            }
-        }
-    }
 #pragma omp parallel for shared(energy_spectrum, frequencies, intensityfield,  \
                                 p) schedule(static, 1)
-    for (int pixel = 0; pixel < tot_pixels; pixel++) { // tot_pixels
+    for (int pixel = 0; pixel < tot_pixels; pixel++) {
         int steps = 0;
-        // For all pixel rows (distributed over threads)...
 
         double *lightpath2 = malloc(9 * max_steps * sizeof(double));
 
@@ -104,7 +98,6 @@ void calculate_image_block(struct Camera *intensityfield,
         double p = 0.;
 
         // INTEGRATE THIS PIXEL'S GEODESIC
-
         integrate_geodesic((*intensityfield).alpha[pixel],
                            (*intensityfield).beta[pixel], lightpath2, &steps,
                            CUTOFF_INNER);
@@ -125,6 +118,8 @@ void calculate_image_block(struct Camera *intensityfield,
 #pragma omp barrier
 }
 
+// Functions that computes a spectrum at every frequency
+// by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies]) {
     double dA;
