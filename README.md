@@ -1,7 +1,16 @@
 # RAPTOR++
 
 This is the developer branch of RAPTOR.
-Contributors; Thomas Bronzwaer, Jordy Davelaar, Ziri Younsi.
+
+Main developers
+Thomas Bronzwaer
+Jordy Davelaar
+
+Contributors;
+Ziri Younsi
+Joost de Kleuver
+Bram van der Berg
+Renze Oosterhuis
 
 Code related papers;
 
