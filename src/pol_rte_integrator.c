@@ -224,26 +224,20 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     jQ_thermal =
         j_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
-    aI_thermal = A_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+    aI_thermal = a_I_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
                              pitch_ang, jI_thermal);
-    aV_thermal = A_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+    aV_thermal = a_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
                              pitch_ang, jV_thermal);
-    aQ_thermal = A_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
+    aQ_thermal = a_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B,
                              pitch_ang, jQ_thermal);
 
-    jI_kappa =
-        J_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    jV_kappa =
-        J_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    jQ_kappa =
-        J_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jI_kappa = j_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jV_kappa = j_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    jQ_kappa = j_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
-    aI_kappa =
-        A_S_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aV_kappa =
-        A_S_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    aQ_kappa =
-        A_S_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aI_kappa = a_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aV_kappa = a_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    aQ_kappa = a_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
     // to invariant forms...
     jI_thermal /= (nu_p * nu_p);

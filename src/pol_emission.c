@@ -25,7 +25,7 @@ double f_m(double X) {
 double bessel_appr(int n, double x) {
 
     // use taylor expanded version
-    if (x < 1/100.) {
+    if (x < 1 / 100.) {
         if (n == 0)
             return -log(x / 2.) - 0.5772;
 
@@ -229,8 +229,8 @@ double rho_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////J
 /// for thermal and kappa
-double J_S_I_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B) {
+double j_I_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B) {
     double w = get_w(theta_e);
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -273,11 +273,11 @@ double j_I_thermal(double theta_e, double n_e, double nu, double B,
            SPEED_OF_LIGHT / theta_e / theta_e * I_I(x);
 }
 
-double J_I_power(double theta_e, double n_e, double nu, double B,
+double j_I_power(double theta_e, double n_e, double nu, double B,
                  double theta_B) {
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double J_I_power_factor = 1;
+    double j_I_power_factor = 1;
     double prefac =
         n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nuc / SPEED_OF_LIGHT;
     return prefac * (pow(3, power / 2.) * (power - 1) * sin(theta_B)) /
@@ -285,20 +285,20 @@ double J_I_power(double theta_e, double n_e, double nu, double B,
             (pow(gamma_min, 1 - power) - pow(gamma_max, 1 - power))) *
            tgamma((3 * power - 1) / 12.) * tgamma((3 * power + 19) / 12.) *
            pow((nu) / (nuc * sin(theta_B)), -(power - 1) / 2.) *
-           J_I_power_factor;
+           j_I_power_factor;
 }
 
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B) {
 #if (DF == KAPPA)
-    return J_S_I_kappa(theta_e, n_e, nu, B, theta_B);
+    return j_I_kappa(theta_e, n_e, nu, B, theta_B);
 #elif (DF == POWER)
-    return J_I_power(theta_e, n_e, nu, B, theta_B);
+    return j_I_power(theta_e, n_e, nu, B, theta_B);
 #elif (DF == TH)
     return j_I_thermal(theta_e, n_e, nu, B, theta_B);
 #endif
 }
-double J_S_Q_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B) {
+double j_Q_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B) {
     double w = get_w(theta_e);
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -339,11 +339,11 @@ double j_Q_thermal(double theta_e, double n_e, double nu, double B,
     return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
            SPEED_OF_LIGHT / theta_e / theta_e * I_Q(x);
 }
-double J_Q_power(double theta_e, double n_e, double nu, double B,
+double j_Q_power(double theta_e, double n_e, double nu, double B,
                  double theta_B) {
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double J_Q_power_factor = -(power + 1) / (power + 7. / 3.);
+    double j_Q_power_factor = -(power + 1) / (power + 7. / 3.);
     double prefac =
         n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nuc / SPEED_OF_LIGHT;
     return prefac * (pow(3, power / 2.) * (power - 1) * sin(theta_B)) /
@@ -351,21 +351,21 @@ double J_Q_power(double theta_e, double n_e, double nu, double B,
             (pow(gamma_min, 1 - power) - pow(gamma_max, 1 - power))) *
            tgamma((3 * power - 1) / 12.) * tgamma((3 * power + 19) / 12.) *
            pow((nu) / (nuc * sin(theta_B)), -(power - 1) / 2.) *
-           J_Q_power_factor;
+           j_Q_power_factor;
 }
 
 double j_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 #if (DF == KAPPA)
-    return J_S_Q_kappa(theta_e, n_e, nu, B, theta_B);
+    return j_Q_kappa(theta_e, n_e, nu, B, theta_B);
 #elif (DF == POWER)
-    return J_Q_power(theta_e, n_e, nu, B, theta_B);
+    return j_Q_power(theta_e, n_e, nu, B, theta_B);
 #elif (DF == TH)
     return j_Q_thermal(theta_e, n_e, nu, B, theta_B);
 #endif
 }
 
-double J_S_V_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B) {
+double j_V_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B) {
     double w = get_w(theta_e);
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -413,11 +413,11 @@ double j_V_thermal(double theta_e, double n_e, double nu, double B,
            I_V(x);
 }
 
-double J_V_power(double theta_e, double n_e, double nu, double B,
+double j_V_power(double theta_e, double n_e, double nu, double B,
                  double theta_B) {
     double nuc =
         ELECTRON_CHARGE * B / (2. * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double J_V_power_factor = (171. / 250.) *
+    double j_V_power_factor = (171. / 250.) *
                               (pow(power, 49. / 100.) / tan(theta_B)) *
                               pow(nu / (3. * nuc * sin(theta_B)), -1. / 2.);
     double prefac =
@@ -427,14 +427,14 @@ double J_V_power(double theta_e, double n_e, double nu, double B,
             (pow(gamma_min, 1. - power) - pow(gamma_max, 1. - power))) *
            tgamma((3. * power - 1.) / 12.) * tgamma((3. * power + 19.) / 12.) *
            pow(nu / (nuc * sin(theta_B)), -(power - 1.) / 2.) *
-           J_V_power_factor;
+           j_V_power_factor;
 }
 
 double j_V(double theta_e, double n_e, double nu, double B, double theta_B) {
 #if (DF == KAPPA)
-    return J_S_V_kappa(theta_e, n_e, nu, B, theta_B);
+    return j_V_kappa(theta_e, n_e, nu, B, theta_B);
 #elif (DF == POWER)
-    return J_V_power(theta_e, n_e, nu, B, theta_B);
+    return j_V_power(theta_e, n_e, nu, B, theta_B);
 #elif (DF == TH)
     return j_V_thermal(theta_e, n_e, nu, B, theta_B);
 #endif
@@ -466,8 +466,8 @@ double hyp2F1_f(double theta_e) {
     return 0;
 }
 
-double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B) {
+double a_I_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B) {
     double w = get_w(theta_e);
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -493,38 +493,39 @@ double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
            A_S_factor_I;
 }
 
-double A_I_thermal(double theta_e, double n_e, double nu, double B,
+double a_I_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B, double j_I_thermal) {
     double B_nu = planck_function(nu, theta_e); // Planck function
     return j_I_thermal / B_nu;
 }
 
-double A_I_power(double theta_e, double n_e, double nu, double B,
+double a_I_power(double theta_e, double n_e, double nu, double B,
                  double theta_B) {
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double A_I_power_factor = 1;
+    double a_I_power_factor = 1;
     double prefac = n_e * ELECTRON_CHARGE * ELECTRON_CHARGE /
                     (ELECTRON_MASS * SPEED_OF_LIGHT * nu);
     return prefac * (pow(3, (power + 1) / 2.) * (power - 1)) /
            (4 * (pow(gamma_min, 1 - power) - pow(gamma_max, 1 - power))) *
            tgamma((3 * power + 2) / 12.) * tgamma((3 * power + 22) / 12.) *
            pow((nu) / (nuc * sin(theta_B)), -(power + 2) / 2.) *
-           A_I_power_factor;
+           a_I_power_factor;
 }
+
 double a_I(double theta_e, double n_e, double nu, double B, double theta_B,
            double j_I_thermal) {
 #if (DF == KAPPA)
-    return A_S_I_kappa(theta_e, n_e, nu, B, theta_B);
+    return a_I_kappa(theta_e, n_e, nu, B, theta_B);
 #elif (DF == POWER)
-    return A_I_power(theta_e, n_e, nu, B, theta_B);
+    return a_I_power(theta_e, n_e, nu, B, theta_B);
 #elif (DF == TH)
-    return A_I_thermal(theta_e, n_e, nu, B, theta_B, j_I_thermal);
+    return a_I_thermal(theta_e, n_e, nu, B, theta_B, j_I_thermal);
 #endif
 }
 
-double A_S_Q_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B) {
+double a_Q_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B) {
     double w = get_w(theta_e);
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -551,17 +552,18 @@ double A_S_Q_kappa(double theta_e, double n_e, double nu, double B,
                -1. / A_x_Q) *
            A_S_factor_Q;
 }
-double A_Q_thermal(double theta_e, double n_e, double nu, double B,
+
+double a_Q_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B, double j_Q_thermal) {
     double B_nu = planck_function(nu, theta_e); // Planck function
     return j_Q_thermal / B_nu;
 }
 
-double A_Q_power(double theta_e, double n_e, double nu, double B,
+double a_Q_power(double theta_e, double n_e, double nu, double B,
                  double theta_B) {
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double A_Q_power_factor =
+    double a_Q_power_factor =
         -pow(((17 * power / 500.) - 43. / 1250.), 43. / 500.);
     double prefac = n_e * ELECTRON_CHARGE * ELECTRON_CHARGE /
                     (ELECTRON_MASS * SPEED_OF_LIGHT * nu);
@@ -570,21 +572,22 @@ double A_Q_power(double theta_e, double n_e, double nu, double B,
            (4 * (pow(gamma_min, 1 - power) - pow(gamma_max, 1 - power))) *
            tgamma((3 * power + 2) / 12.) * tgamma((3 * power + 22) / 12.) *
            pow((nu) / (nuc * sin(theta_B)), -(power + 2) / 2.) *
-           A_Q_power_factor;
+           a_Q_power_factor;
 }
+
 double a_Q(double theta_e, double n_e, double nu, double B, double theta_B,
            double j_Q_thermal) {
 #if (DF == KAPPA)
-    return A_S_Q_kappa(theta_e, n_e, nu, B, theta_B);
+    return a_Q_kappa(theta_e, n_e, nu, B, theta_B);
 #elif (DF == POWER)
-    return A_Q_power(theta_e, n_e, nu, B, theta_B);
+    return a_Q_power(theta_e, n_e, nu, B, theta_B);
 #elif (DF == TH)
-    return A_Q_thermal(theta_e, n_e, nu, B, theta_B, j_Q_thermal);
+    return a_Q_thermal(theta_e, n_e, nu, B, theta_B, j_Q_thermal);
 #endif
 }
 
-double A_S_V_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B) {
+double a_V_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B) {
     double w = get_w(theta_e);
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
@@ -617,17 +620,18 @@ double A_S_V_kappa(double theta_e, double n_e, double nu, double B,
                -1. / A_x_V) *
            A_S_factor_V;
 }
-double A_V_thermal(double theta_e, double n_e, double nu, double B,
+
+double a_V_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B, double j_V_thermal) {
     double B_nu = planck_function(nu, theta_e); // Planck function
     return j_V_thermal / B_nu;
 }
 
-double A_V_power(double theta_e, double n_e, double nu, double B,
+double a_V_power(double theta_e, double n_e, double nu, double B,
                  double theta_B) {
     double nuc =
         ELECTRON_CHARGE * B / (2 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT);
-    double A_V_power_factor =
+    double a_V_power_factor =
         pow(((71. * power / 100.) + 22. / 625.), 197. / 500.) *
         pow(((31. / 10.) * pow(sin(theta_B), -48. / 25.) - 31. / 10.),
             64. / 125.) *
@@ -638,16 +642,17 @@ double A_V_power(double theta_e, double n_e, double nu, double B,
            (4. * (pow(gamma_min, 1. - power) - pow(gamma_max, 1. - power))) *
            tgamma((3. * power + 2.) / 12.) * tgamma((3. * power + 22.) / 12.) *
            pow((nu) / (nuc * sin(theta_B)), -(power + 2.) / 2.) *
-           A_V_power_factor;
+           a_V_power_factor;
 }
+
 double a_V(double theta_e, double n_e, double nu, double B, double theta_B,
            double j_V_thermal) {
 #if (DF == KAPPA)
-    return A_S_V_kappa(theta_e, n_e, nu, B, theta_B);
+    return a_V_kappa(theta_e, n_e, nu, B, theta_B);
 #elif (DF == POWER)
-    return A_V_power(theta_e, n_e, nu, B, theta_B);
+    return a_V_power(theta_e, n_e, nu, B, theta_B);
 #elif (DF == TH)
-    return A_V_thermal(theta_e, n_e, nu, B, theta_B, j_V_thermal);
+    return a_V_thermal(theta_e, n_e, nu, B, theta_B, j_V_thermal);
 #endif
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -223,46 +223,44 @@ double backward_transfer(double alpha, double beta, double *photon_u,
 
 double j_I_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B);
-double A_I_thermal(double theta_e, double n_e, double nu, double B,
-                   double theta_B, double j_I_thermal);
-double J_S_I_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B);
-double A_S_I_kappa(double theta_e, double n_e, double nu, double B,
+double j_Q_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B);
 double j_V_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B);
-double A_V_thermal(double theta_e, double n_e, double nu, double B,
-                   double theta_B, double j_V_thermal);
-double J_S_V_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B);
-double A_S_V_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B);
-double j_Q_thermal(double theta_e, double n_e, double nu, double B,
-                   double theta_B);
-double A_Q_thermal(double theta_e, double n_e, double nu, double B,
+
+double a_I_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B, double j_I_thermal);
+double a_Q_thermal(double theta_e, double n_e, double nu, double B,
                    double theta_B, double j_Q_thermal);
-double J_S_Q_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B);
-double A_S_Q_kappa(double theta_e, double n_e, double nu, double B,
-                   double theta_B);
+double a_V_thermal(double theta_e, double n_e, double nu, double B,
+                   double theta_B, double j_V_thermal);
+
+double j_I_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B);
+double j_V_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B);
+double j_Q_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B);
+
+double a_I_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B);
+double a_V_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B);
+double a_Q_kappa(double theta_e, double n_e, double nu, double B,
+                 double theta_B);
 
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B);
-
 double j_Q(double theta_e, double n_e, double nu, double B, double theta_B);
-
 double j_V(double theta_e, double n_e, double nu, double B, double theta_B);
 
 double a_I(double theta_e, double n_e, double nu, double B, double theta_B,
            double j_I_thermal);
-
 double a_Q(double theta_e, double n_e, double nu, double B, double theta_B,
            double j_Q_thermal);
-
 double a_V(double theta_e, double n_e, double nu, double B, double theta_B,
            double j_V_thermal);
 
 double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B);
-
 double rho_V(double theta_e, double n_e, double nu, double B, double theta_B);
 
 // UTILITIES.C
