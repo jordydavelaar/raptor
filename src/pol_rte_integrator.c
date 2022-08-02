@@ -209,8 +209,8 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
                           double *rQ, double *rU, double *rV, double *aI,
                           double *aQ, double *aU, double *aV, double nu_p,
                           struct GRMHD modvar, double pitch_ang) {
-    double jI_thermal, jV_kappa, jV_thermal, jU_thermal = 0;
-    double jI_kappa, jV_kappa, jQ_kappa, jQ_thermal, jU_kappa = 0;
+    double jI_thermal, jQ_thermal, jV_thermal, jU_thermal = 0;
+    double jI_kappa, jQ_kappa, jV_kappa,  jU_kappa = 0;
 
     double aI_kappa, aV_kappa, aQ_kappa, aU_kappa = 0;
     double aI_thermal, aV_thermal, aQ_thermal, aU_thermal = 0;
@@ -275,7 +275,8 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
 
     *aV = (1. - eps) * aV_thermal + eps * aV_kappa;
     *aQ = (1. - eps) * aQ_thermal + eps * aQ_kappa;
-    *aU = 0.0 * aI = (1. - eps) * aI_thermal + eps * aI_kappa;
+    *aU = 0.0;
+    *aI = (1. - eps) * aI_thermal + eps * aI_kappa;
 }
 
 void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
