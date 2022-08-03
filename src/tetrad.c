@@ -56,13 +56,12 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
     metric_uu(X_u, g_uu);
     metric_dd(X_u, g_dd);
 
-    // IN GAMMIE 2012 NOTATION:
     double e_u_t[4];
-    LOOP_i e_u_t[i] = U_u[i]; // Check
+    LOOP_i e_u_t[i] = U_u[i];
 
     double e_u_K[4];
-    double omega = -inner_product(X_u, k_u, U_u); // Ziri calls omega "g"
-    LOOP_i e_u_K[i] = k_u[i] / omega - U_u[i];    // Check
+    double omega = -inner_product(X_u, k_u, U_u);
+    LOOP_i e_u_K[i] = k_u[i] / omega - U_u[i];
 
     double e_u_para[4];
 
@@ -98,8 +97,6 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
         LOOP_i b_u[i] = 1. / sqrt(3.) * (double)rand() / (double)RAND_MAX;
     }
 
-    // Now we have b_u s.t. b dot b is spacelike. CHECK!
-
     // First some required quantities:
     double Beta = inner_product(X_u, U_u, b_u);
     double Ccursive = inner_product(X_u, k_u, b_u) / omega - Beta;
@@ -108,7 +105,7 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
 
     // Now we can construct e_u_para:
     LOOP_i e_u_para[i] =
-        (b_u[i] + Beta * U_u[i] - Ccursive * e_u_K[i]) / Ncursive; // CHECK
+        (b_u[i] + Beta * U_u[i] - Ccursive * e_u_K[i]) / Ncursive;
 
     // Permutation symbol eta, [ijkl]. Can be made into the contravariant
     // Levi-Civita tensor by multiplying with -1/sqrt(g), g being the
@@ -132,7 +129,7 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
     LOOP_i e_u_perp[i] = 0.;
     LOOP_ijkl e_u_perp[i] +=
         (-1. / sqrt(-g) * eps[i][j][k][l] * U_d[j] * k_d[k] * b_d[l]) /
-        (omega * Ncursive); // Check
+        (omega * Ncursive);
 
     // Construct the tetrad with contravariant coordinate index
     // CONVENTION: t, para, perp, K <=> t, x, y, z
@@ -170,13 +167,12 @@ void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
     metric_uu(X_u, g_uu);
     metric_dd(X_u, g_dd);
 
-    // IN GAMMIE 2012 NOTATION:
     double e_u_t[4];
-    LOOP_i e_u_t[i] = U_u[i]; // Check
+    LOOP_i e_u_t[i] = U_u[i];
 
     double e_u_K[4];
-    double omega = -inner_product(X_u, k_u, U_u); // Ziri calls omega "g"
-    LOOP_i e_u_K[i] = k_u[i] / omega - U_u[i];    // Check
+    double omega = -inner_product(X_u, k_u, U_u);
+    LOOP_i e_u_K[i] = k_u[i] / omega - U_u[i];
 
     double e_u_para[4];
 
@@ -205,7 +201,7 @@ void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
 
     // Now we can construct e_u_para:
     LOOP_i e_u_para[i] =
-        (b_u[i] + Beta * U_u[i] - Ccursive * e_u_K[i]) / Ncursive; // CHECK
+        (b_u[i] + Beta * U_u[i] - Ccursive * e_u_K[i]) / Ncursive;
 
     // Permutation symbol eta, [ijkl]. Can be made into the contravariant
     // Levi-Civita tensor by multiplying with -1/sqrt(g), g being the
@@ -229,7 +225,7 @@ void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
     LOOP_i e_u_perp[i] = 0.;
     LOOP_ijkl e_u_perp[i] +=
         (-1. / sqrt(-g) * eps[i][j][k][l] * U_d[j] * k_d[k] * b_d[l]) /
-        (omega * Ncursive); // Check
+        (omega * Ncursive);
 
     // Construct the tetrad with contravariant coordinate index
     // CONVENTION: t, para, perp, K <=> t, x, y, z
