@@ -247,38 +247,3 @@ int find_pixel(double x[2], struct Camera *intensityfield, int block) {
 
     return pixel;
 }
-
-// Outputs the ACG camera struct with a uniform resolution
-void write_uniform_camera(struct Camera *intensityfield, double frequency,
-                          int freq) {
-    int uniform_size = IMG_WIDTH * pow(2, max_level - 1);
-    double uniform_dx = CAM_SIZE_X / (double)uniform_size;
-    double x[2];
-    char spec_folder[64] = "output";
-    char uniform_filename[256] = "";
-    sprintf(uniform_filename, "%s/uniform_img_%.02e_%d.dat", spec_folder,
-            frequency, (int)TIME_INIT);
-
-    FILE *uniformfile = fopen(uniform_filename, "w");
-
-    double UNIT_FACTOR = JANSKY_FACTOR * uniform_dx * uniform_dx * R_GRAV *
-                         R_GRAV / source_dist / source_dist;
-    double arcsec_factor = 206265.0 * R_GRAV / source_dist;
-
-    for (int i = 0; i < uniform_size; i++) {
-        for (int j = 0; j < uniform_size; j++) {
-            x[0] = -CAM_SIZE_X / 2. + (i + 0.5) * uniform_dx;
-            x[1] = -CAM_SIZE_X / 2. + (j + 0.5) * uniform_dx;
-            int block = find_block(x, intensityfield);
-            if (block == -1) {
-                fprintf(stderr, "camera block not found!\n");
-                exit(1);
-            }
-            int pixel = find_pixel(x, intensityfield, block);
-            fprintf(uniformfile, "%+.15e\t%+.15e\t%+.15e \n",
-                    x[0] * arcsec_factor, x[1] * arcsec_factor,
-                    intensityfield[block].IQUV[pixel][freq][0] * UNIT_FACTOR);
-        }
-    }
-    fclose(uniformfile);
-}
