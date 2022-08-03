@@ -61,7 +61,6 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
 
             // CGS UNITS USED FROM HERE ON OUT
             //////////////////////////////////
-            //  if(tau[f] < log(1000.) ) {
 
             // Scale the wave vector to correct energy
             LOOP_i k_u[i] *= PLANCK_CONSTANT * frequency /
@@ -103,9 +102,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             }
 #endif
 
-            if (jI == jI) { // I_current += exp(-tau) * j_nu /
-                            // nu_p / nu_p * dl_current * C;
-                //         I_current += dI; // Old way of integrating
+            if (jI == jI) {
                 double Ii = Icurrent;
                 double S = j_inv / K_inv;
                 if (K_inv == 0)
