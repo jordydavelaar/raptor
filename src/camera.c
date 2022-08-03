@@ -165,7 +165,6 @@ int refine_init_block(struct Camera intensity) {
     double ru = sqrt(ucorner_x * ucorner_x + ucorner_y * ucorner_y);
 
     double rmax = fmax(rl, ru);
-    double rmin = fmin(rl, ru);
 
     bool bool_4 = radius_4 > rmax;
     bool bool_3 = radius_3 > rmax && radius_4 < rmax;

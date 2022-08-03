@@ -93,10 +93,6 @@ void calculate_image_block(struct Camera *intensityfield,
 
         double *lightpath2 = malloc(9 * max_steps * sizeof(double));
 
-        double f_x = 0.;
-        double f_y = 0.;
-        double p = 0.;
-
         // INTEGRATE THIS PIXEL'S GEODESIC
         integrate_geodesic((*intensityfield).alpha[pixel],
                            (*intensityfield).beta[pixel], lightpath2, &steps,
