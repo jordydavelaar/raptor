@@ -88,10 +88,6 @@ int main(int argc, char *argv[]) {
     // MAIN PROGRAM LOOP
     ////////////////////
 
-    // Change this to:
-    // initialize_ray(x, y, photon_u);
-    // img[y * IMG_WIDTH + x] = integrate_backward(photon_u);
-
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
     double energy_spectrum[num_frequencies];
@@ -111,9 +107,10 @@ int main(int argc, char *argv[]) {
     FILE *input;
     input = fopen("./frequencies.txt", "r");
 
-    if (input == NULL)
-        fprintf(stderr, "Cannot read input file\n");
-    // return 1;
+    if (input == NULL) {
+        fprintf(stderr, "Cannot read frequencies.txt\n", );
+        exit(1);
+    }
     for (int f = 0; f < num_frequencies; f++) {
         fscanf(input, "%lf", &frequencies[f]);
         fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
