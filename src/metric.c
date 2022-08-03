@@ -134,7 +134,7 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
 
 #elif (metric == MKSN)
     double r = exp(X_u[1]) + R0;
-    double theta = X_u[2]; //+ 0.5 * (1. - hslope) * sin(2. *  X_u[2]);
+    double theta = X_u[2];
 
     double sinth = sin(theta);
     double sin2th = sinth * sinth;
@@ -143,7 +143,7 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
 
     tfac = 1.;
     rfac = (r - R0);
-    hfac = 1.; ///( 1. + (1. - hslope) * 1. * cos(2. * M_PI * X_u[2]));
+    hfac = 1.;
     pfac = 1.;
 
     double Sigma = r * r + a * a * costh * costh;
@@ -184,12 +184,12 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
         isig = 1 / sig;
     idel = 1 / (del);
 
-    double f = 2. * r2 * r * isig; //(r2*r2+a2*X_u[3]*X_u[3]);
+    double f = 2. * r2 * r * isig;
     double l[4];
 
     l[0] = 1;
-    l[1] = (r * X_u[1] + a * X_u[2]) * idel; //(r2+a2);
-    l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
+    l[1] = (r * X_u[1] + a * X_u[2]) * idel;
+    l[2] = (r * X_u[2] - a * X_u[1]) * idel;
     l[3] = (X_u[3]) / (r + 1e-3);
 
     for (int i = 0; i < 4; i++) {
@@ -318,7 +318,7 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
 #elif (metric == MKSN)
 
     double r = exp(X_u[1]) + R0;
-    double theta = X_u[2]; // + 0.5 * (1. - hslope) * sin(2. * M_PI * X_u[2]);
+    double theta = X_u[2];
 
     double sinth = sin(theta);
     double sin2th = sinth * sinth;
@@ -327,7 +327,7 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
 
     tfac = 1.;
     rfac = (r - R0);
-    hfac = 1; // + (1. - hslope) * 1* cos(2. * M_PI * X_u[2]);
+    hfac = 1;
     pfac = 1.;
 
     double Sigma = r * r + a * a * costh * costh;
@@ -372,13 +372,13 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
         isig = 1 / sig;
     idel = 1 / (del);
 
-    double f = 2. * r2 * r * isig; //(r2*r2+a2*X_u[3]*X_u[3]);
+    double f = 2. * r2 * r * isig;
 
     double l[4];
 
     l[0] = -1.;
-    l[1] = (r * X_u[1] + a * X_u[2]) * idel; //(r2+a2);
-    l[2] = (r * X_u[2] - a * X_u[1]) * idel; //(r2+a2);
+    l[1] = (r * X_u[1] + a * X_u[2]) * idel;
+    l[2] = (r * X_u[2] - a * X_u[1]) * idel;
     l[3] = (X_u[3]) / (r);
 
     for (int i = 0; i < 4; i++) {
@@ -438,7 +438,6 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
         gamma_udd[i][j][k] = 0.;
         dg[i][j][k] = 0.0;
     }
-    // memset(gamma_udd, 0, 64 * sizeof(double ));
 
     // Obtain metric at current position (contravariant form)
     double g_uu[4][4], g_dd[4][4], g_dd_m[4][4], g_dd_p[4][4];
@@ -451,13 +450,6 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
 
     LOOP_ijk delta[i][j] += g_uu[i][k] * g_dd[k][j];
 
-    //	fprintf(stderr,"%e\n",exp(X_u[1]));
-
-    //  LOOP_ij fprintf(stderr,"%d %d %e\n",i,j,delta[i][j]);
-    // fprintf(stderr,"\n");
-
-    //     LOOP_ijk fprintf(stderr,"gamma init %e\n",gamma_udd[i][j][k]);
-    //	LOOP_ij fprintf(stderr,"gdd at base %e\n",g_dd[i][j]);
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             X_u_temp[j] = X_u[j];
@@ -466,7 +458,7 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
 #if (metric == CKS)
         double fac = fabs(X_u[i]);
 #else
-        double fac = 1.0; // fabs(X_u[i]);
+        double fac = 1.0;
 #endif
 
         X_u_temp[i] += delta_num * fac;
@@ -475,9 +467,6 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
 
         X_u_temp[i] -= 2. * delta_num * fac;
         metric_dd(X_u_temp, g_dd_m);
-
-        //	LOOP_kl fprintf(stderr,"gddm %d base %e\n",i,g_dd_m[l][k]);
-        //	LOOP_kl fprintf(stderr,"gddp %d %e\n",i,g_dd_p[l][k]);
 
         dg[i][0][0] = (g_dd_p[0][0] - g_dd_m[0][0]) / (2. * delta_num * fac);
         dg[i][1][0] = (g_dd_p[1][0] - g_dd_m[1][0]) / (2. * delta_num * fac);
@@ -501,7 +490,6 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
     }
     // Solve the Christoffel connection equation
     int alpha;
-    //      LOOP_ijk fprintf(stderr,"dg %e\n",dg[i][j][k]);
 
     for (alpha = 0; alpha < 4; alpha++) {
         for (int k = 0; k < 4; k++) {
@@ -675,9 +663,9 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
     gamma[0][0][3] = -2. * a * r1sth2 * fac1_rho23;
 
     gamma[0][1][0] = gamma[0][0][1];
-    gamma[0][1][1] = 2. * (r2 - a2 * cth2) * (r1 + r2 + a2 * cth2) /
-                     pow(r2 + a2 * cth2, 3.);                               //
-    gamma[0][1][2] = -(2. * a2 * r1 * cth * sth) / pow(r2 + a2 * cth2, 2.); //
+    gamma[0][1][1] =
+        2. * (r2 - a2 * cth2) * (r1 + r2 + a2 * cth2) / pow(r2 + a2 * cth2, 3.);
+    gamma[0][1][2] = -(2. * a2 * r1 * cth * sth) / pow(r2 + a2 * cth2, 2.);
     gamma[0][1][3] = a * (-r2 + a2 * cth2) * (r1 * (2. + r1) + a2 * cth2) *
                      sth2 / pow(r2 + a2 * cth2, 3.); //
 
@@ -702,8 +690,8 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
           a2 * fac3 * sth2)); //
     gamma[1][0][1] = 2. * (-a2 + 4. * r1 + a2 * cos(2. * th)) *
                      (a2 - 2. * r2 + a2 * cos(2. * th)) /
-                     pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.); //
-    gamma[1][0][2] = 0.;                                        //
+                     pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.);
+    gamma[1][0][2] = 0.;
     gamma[1][0][3] =
         a * (a2 - 2. * r2 + a2 * cos(2. * th)) * sth2 *
         ((a2 + (r1 - 2.) * r1) * (a4 + 2. * r4 + a2 * r1 * (3. * r1 - 2.) +
@@ -716,15 +704,15 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
     gamma[1][1][0] = gamma[1][0][1];
     gamma[1][1][1] = 4. * (a2 - 2. * r2 + a2 * cos(2. * th)) *
                      (fac5 + a2 * cos(2. * th)) /
-                     pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.); //
+                     pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.);
 
-    gamma[1][1][2] = -a2 * sin(2. * th) / (a2 + 2. * r2 + a2 * cos(2. * th)); //
+    gamma[1][1][2] = -a2 * sin(2. * th) / (a2 + 2. * r2 + a2 * cos(2. * th));
     gamma[1][1][3] = a *
                      (a4 - 8. * a2 * r1 + 3. * a4 * r1 - 4. * a2 * r2 +
                       16. * r3 + 8. * a2 * r3 + 8. * r4 * r1 +
                       4. * a2 * r1 * (-2. + a2 + r1 + 2. * r2) * cos(2. * th) +
                       a4 * (r1 - 1.) * cos(4. * th)) *
-                     sth2 / pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.); //
+                     sth2 / pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.);
 
     gamma[1][2][0] = gamma[1][0][2];
     gamma[1][2][1] = gamma[1][1][2];
@@ -735,8 +723,8 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
            2. * a2 * (r1 * (r1 - 2.) + a2 * cth2) * fac3 * sth2)) /
         (2. * fac4 *
          (pow(a2 + r2, 2.) - a2 * (fac5 + a2 * cth2) * sth2 -
-          a2 * fac3 * sth2)); //
-    gamma[1][2][3] = 0.;      //
+          a2 * fac3 * sth2));
+    gamma[1][2][3] = 0.;
 
     gamma[1][3][0] = gamma[1][0][3];
     gamma[1][3][1] = gamma[1][1][3];
@@ -746,16 +734,16 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
         (8. * r4 * r1 + 4. * a2 * r2 * (2. * r1 - 1.) + a4 * (1. + 3. * r1) +
          4. * a2 * r1 * (a2 + r1 + 2. * r2) * cos(2. * th) +
          a4 * (r1 - 1.) * cos(4. * th)) *
-        sth2 / pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.); //
+        sth2 / pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.);
 
     gamma[2][0][0] = -a2 * r1 * s2th * irho23_dthdx2;
-    gamma[2][0][1] = -2. * a2 * r1 * cth * sth / pow(r2 + a2 * cth2, 3.); //
+    gamma[2][0][1] = -2. * a2 * r1 * cth * sth / pow(r2 + a2 * cth2, 3.);
     gamma[2][0][2] = 0.0;
     gamma[2][0][3] = a * r1 * (a2 + r2) * s2th * irho23_dthdx2;
 
     gamma[2][1][0] = gamma[2][0][1];
-    gamma[2][1][1] = -2. * a2 * r1 * cth * sth / pow(r2 + a2 * cth2, 3.); //
-    gamma[2][1][2] = r1 / (r2 + a2 * cth2);                               //
+    gamma[2][1][1] = -2. * a2 * r1 * cth * sth / pow(r2 + a2 * cth2, 3.);
+    gamma[2][1][2] = r1 / (r2 + a2 * cth2);
     gamma[2][1][3] = a * cth * sth *
                      (r3 * (2. + r1) + 2. * a2 * r1 * (1. + r1) * cth2 +
                       a4 * cth4 + 2. * a2 * r1 * sth2) /
@@ -778,13 +766,13 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
     gamma[3][0][1] =
         (a * r2 - a3 * cth2) /
         ((r2 + a2 * cth2) * (pow(a2 + r2, 2.) - a2 * (fac5 + a2 * cth2) * sth2 -
-                             a2 * fac3 * sth2)); //
+                             a2 * fac3 * sth2));
     gamma[3][0][2] = -2. * a * r1 * cth * dthdx2 / (sth * rho22);
     gamma[3][0][3] = -a2sth2 * fac1_rho23;
 
     gamma[3][1][0] = gamma[3][0][1];
-    gamma[3][1][1] = 8. * (a * r2 - a3 * cth2) /
-                     pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.); //
+    gamma[3][1][1] =
+        8. * (a * r2 - a3 * cth2) / pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.);
     gamma[3][1][2] = (a * (fac5 + a2 * cth2) * (1. / tan(th))) /
                      (-pow(a2 + r2, 2.) + a2 * (fac5 + a2 * cth2) * sth2 +
                       a2 * fac3 * sth2); //
@@ -792,7 +780,7 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
         (8. * r4 * r1 + 4. * a2 * r2 * (2. * r1 - 1.) + a4 * (1. + 3. * r1) +
          4. * a2 * r1 * (a2 + r1 + 2. * r2) * cos(2. * th) +
          a4 * (r1 - 1.) * cos(4. * th)) /
-        pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.); //
+        pow(a2 + 2. * r2 + a2 * cos(2. * th), 3.);
 
     gamma[3][2][0] = gamma[3][0][2];
     gamma[3][2][1] = gamma[3][1][2];
@@ -812,9 +800,6 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
     double r3 = r2 * r1;
     double r4 = r3 * r1;
 
-    //        double sx=sin(2.*M_PI*X_u[2]);
-    //        double cx=cos(2.*M_PI*X_u[2]);
-
     double th = X_u[2];
     double dthdx2 = 1.0;
     double d2thdx22 = 0.0;
@@ -830,7 +815,6 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
     double cth4 = cth2 * cth2;
     double s2th = 2. * sth * cth;
     double c2th = 2. * cth2 - 1.;
-    //        double c4th = cth4 - 6.*cth2*sth2 + sth4;
 
     double a2 = a * a;
     double a2sth2 = a2 * sth2;
@@ -1074,8 +1058,6 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
 void initialize_photon(double alpha, double beta, double photon_u[8],
                        double t_init) {
 
-    //    beta *= -1.;
-
     double mu0 = cos(INCLINATION / 180. * M_PI);
     double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), 0.};
     double En = 1.;
@@ -1118,10 +1100,6 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
     k_u[1] =
         sqrt((-k_u[0] * k_d[0] - k_u[2] * k_d[2] - k_u[3] * k_d[3]) / g_dd_11);
 
-    // Normalize the photon wavevector with cam_freq in Hz
-    //    LOOP_i k_u[i] *= PLANCK_CONSTANT * cam_freq /
-    //                   (ELECTRON_MASS * SPEED_OF_LIGHT*SPEED_OF_LIGHT);
-
     // Place wave vector into "photon_u"
     photon_u[0] = Xcam_u[0];
     photon_u[1] = Xcam_u[1];
@@ -1131,10 +1109,6 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
     photon_u[5] = k_u[1];
     photon_u[6] = k_u[2];
     photon_u[7] = k_u[3];
-
-//    printf("\nFirst we build k in BL coords");
-//    LOOP_i printf("\n%+.15e", photon_u[i]);
-//    LOOP_i printf("\n%+.15e", photon_u[i+4]);
 
 // Convert k_u to the coordinate system that is currently used
 #if (metric == KS || metric == MKS || metric == MKSHARM || metric == MKSN ||   \
@@ -1352,7 +1326,6 @@ double Xg2_approx_rand(double Xr2) {
     // Main loop
     while (fabs(Xg2_current - Xg2_prev) > tolerance) {
         Xg2_current = (double)rand() / (double)RAND_MAX;
-        // Xg2_current = 1.e-16;
         steps = 0;
         count++;
 
