@@ -41,6 +41,8 @@ char inputfile[100];
 
 #define FREQS (FREQLOG)
 
+#define UNIF (1)
+
 #define AMR 0
 #define SMR 1
 

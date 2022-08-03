@@ -151,8 +151,9 @@ int main(int argc, char *argv[]) {
 
     output_files(intensityfield, energy_spectrum, frequencies);
 
+#if (UNIF)
     write_uniform_camera(intensityfield, frequencies[0], 0);
-
+#endif
     // FREE ALLOCATED POINTERS
     //////////////////////////
 

@@ -43,6 +43,8 @@ char inputfile[100];
 
 #define EMISUSER (0)
 
+#define UNIF (1)
+
 #define AMR 0
 #define SMR 1
 
