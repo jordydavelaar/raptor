@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 // Returns the covariant metric g_dd at location X_u
-void metric_dd(const double X_u[4], double g_dd[4][4]) {
+void metric_dd(double X_u[4], double g_dd[4][4]) {
     // Initialize: set all elements to 0
 
     LOOP_ij g_dd[i][j] = 0.;
@@ -207,7 +207,7 @@ void metric_dd(const double X_u[4], double g_dd[4][4]) {
 }
 
 // Returns the contravariant metric g_uu at location X
-void metric_uu(const double X_u[4], double g_uu[4][4]) {
+void metric_uu(double X_u[4], double g_uu[4][4]) {
     // Initialize: set all elements to 0
 
     LOOP_ij g_uu[i][j] = 0.;
@@ -396,7 +396,7 @@ void metric_uu(const double X_u[4], double g_uu[4][4]) {
 }
 
 // Returns the contravariant metric g_uu at location X
-void metric_KS_uu(const double X_u[4], double g_uu[4][4]) {
+void metric_KS_uu(double X_u[4], double g_uu[4][4]) {
     // Initialize: set all elements to 0
 
     LOOP_ij g_uu[i][j] = 0.;
@@ -430,7 +430,7 @@ void metric_KS_uu(const double X_u[4], double g_uu[4][4]) {
 
 // Computes the Christoffel symbols at location X numerically
 // (Requires the metric to be specified everywhere!)
-void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
+void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
 
     double dg[4][4][4];
 
@@ -548,7 +548,7 @@ void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]) {
 
 // Computes the Christoffel symbols at location X based on an exact metric
 // In the form gamma_udd (contr, cov, cov indices)
-void connection_udd(const double X_u[4], double gamma[4][4][4]) {
+void connection_udd(double X_u[4], double gamma[4][4][4]) {
     // CASE 0: Minkowski metric
     //////////////////////
 

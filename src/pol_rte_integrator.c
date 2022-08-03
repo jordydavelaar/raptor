@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 // y contains the 4-position and the 4-velocity for one lightray/particle.
-void f_parallel(const double y[], double complex f_u[], double fvector[],
+void f_parallel(double y[], double complex f_u[], double fvector[],
                 double complex f_u_vector[]) {
     // Create variable (on the stack) for the connection
     double gamma_udd[4][4][4];
@@ -131,7 +131,7 @@ void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
 
 // NOTE: works only in Kerr metric
 // Ziri's suggestion: construct U vecs
-void construct_U_vector(const double X_u[], double U_u[]) {
+void construct_U_vector(double X_u[], double U_u[]) {
 // Obtain relevant metric terms:
 #if (metric == CKS)
     double U_KS[4];
