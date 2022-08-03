@@ -9,7 +9,7 @@ OBJDIR=build
 
 TARGET=RAPTOR
 
-SOURCES=main.c core.c io.c GRmath.c gr_integrator.c rte_integrator.c pol_rte_integrator.c metric.c emission.c pol_emission.c tetrad.c raptor_model.c utilities.c camera.c
+SOURCES=main.c core.c io.c GRmath.c gr_integrator.c rte_integrator.c pol_rte_integrator.c metric.c pol_emission.c tetrad.c raptor_model.c utilities.c camera.c
 OBJECTS := $(patsubst %.c,$(OBJDIR)/%.o,$(SOURCES))
 
 all: create_directories $(SOURCES) $(TARGET)

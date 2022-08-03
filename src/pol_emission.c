@@ -45,6 +45,15 @@ double bessel_appr(int n, double x) {
     exit(0);
 }
 
+// Planck function
+double planck_function(double nu, double THETA_e) {
+    double T = THETA_e * ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT /
+               BOLTZMANN_CONSTANT;
+    return 2. * PLANCK_CONSTANT * nu * nu * nu /
+           (SPEED_OF_LIGHT * SPEED_OF_LIGHT) * 1. /
+           (exp(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T)) - 1.);
+}
+
 double DeltaJ_5(double X) {
     return 0.43793091 * log(1. + 0.00185777 * pow(X, 1.50316886));
 }
