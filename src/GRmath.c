@@ -29,7 +29,7 @@ double get_r(double X_u[4]) {
 
 // Lowers the index of the contravariant vector V_u, storing the results in a
 // covariant one (V_d), based on the metric at position X_u
-void lower_index(const double X_u[4], double V_u[4], double V_d[4]) {
+void lower_index(double X_u[4], double V_u[4], double V_d[4]) {
     // Obtain the covariant metric g_dd at X_u
     double g_dd[4][4];
     metric_dd(X_u, g_dd);
@@ -56,7 +56,7 @@ void lower_two_indices(double N_uu[4][4], double N_dd[4][4], double X_u[4]) {
 }
 
 // Lowers the index of a contravariant vector V_u in BL coordinates.
-void BL_lower_index(const double X_u[4], double V_u[4], double V_d[4]) {
+void BL_lower_index(double X_u[4], double V_u[4], double V_d[4]) {
     double r = logscale ? exp(X_u[1]) : X_u[1];
     double rfactor = logscale ? r : 1.;
     double theta = X_u[2];
@@ -81,7 +81,7 @@ void BL_lower_index(const double X_u[4], double V_u[4], double V_d[4]) {
 
 // Raises the index of the covariant vector V_d, storing the results in a
 // contravariant one (V_u), based on the metric at position X_u
-void raise_index(const double X_u[4], double V_d[4], double V_u[4]) {
+void raise_index(double X_u[4], double V_d[4], double V_u[4]) {
     // Obtain the contravariant metric g_uu at X_u
     double g_uu[4][4];
     metric_uu(X_u, g_uu);
@@ -100,7 +100,7 @@ void raise_index(const double X_u[4], double V_d[4], double V_u[4]) {
 // Raises the index of the covariant vector V_d, storing the results in a
 // contravariant one (V_u), based on the metric at position X_u
 // Uses MKS BHAC metric. Needed for CKS coordinates.
-void raise_index_KS(const double X_u[4], double V_d[4], double V_u[4]) {
+void raise_index_KS(double X_u[4], double V_d[4], double V_u[4]) {
     // Obtain the contravariant metric g_uu at X_u
     double g_uu[4][4];
     metric_KS_uu(X_u, g_uu);
