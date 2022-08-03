@@ -128,6 +128,7 @@ double rho_Q_thermal(double theta_e, double n_e, double nu, double B,
            (bessel_appr(1, Thetaer) / bessel_appr(2, Thetaer) + 6. * theta_e) *
            sin(theta_B) * sin(theta_B);
 }
+
 double rho_Q_power(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
     double nuc =
@@ -142,6 +143,7 @@ double rho_Q_power(double theta_e, double n_e, double nu, double B,
             pow((2. * nuc * sin(theta_B) * gamma_min * gamma_min) / (3. * nu),
                 (power / 2.) - 1.));
 }
+
 double rho_Q(double theta_e, double n_e, double nu, double B, double theta_B) {
 #if (DF == KAPPA)
     return rho_Q_kappa(theta_e, n_e, nu, B, theta_B);
