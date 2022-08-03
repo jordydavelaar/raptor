@@ -24,22 +24,22 @@ double get_r(double X_u[4]);
 
 // Lowers the index of the contravariant vector V_u, storing the results in
 // a covariant one (V_d), based on the metric at position X_u
-void lower_index(const double X_u[4], double V_u[4], double V_d[4]);
+void lower_index(double X_u[4], double V_u[4], double V_d[4]);
 
 // Lowers two indices of a rank (2, 0) tensor
 void lower_two_indices(double N_uu[4][4], double N_dd[4][4], double X_u[4]);
 
 // Lowers the index of a contravariant vector V_u in BL coordinates.
-void BL_lower_index(const double X_u[4], double V_u[4], double V_d[4]);
+void BL_lower_index(double X_u[4], double V_u[4], double V_d[4]);
 
 // Raises the index of the covariant vector V_d, storing the results in a
 // contravariant one (V_u), based on the metric at position X_u
-void raise_index(const double X_u[4], double V_d[4], double V_u[4]);
+void raise_index(double X_u[4], double V_d[4], double V_u[4]);
 
 // Raises the index of the covariant vector V_d, storing the results in a
 // contravariant one (V_u), based on the metric at position X_u
 // Needed for CKS coordinates
-void raise_index_KS(const double X_u[4], double V_d[4], double V_u[4]);
+void raise_index_KS(double X_u[4], double V_d[4], double V_u[4]);
 
 // Adjusts y[4] = U_u[0] so that y describes a lightray/null geodesic
 void normalize_null(double X_u[4], double U_u[4]);
@@ -77,7 +77,7 @@ double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 // void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
 // double complex f_tetrad_u[4]);
 
-// void construct_U_vector(const double X_u[], double U_u[]);
+// void construct_U_vector( double X_u[], double U_u[]);
 
 // INTEGRATOR.C
 ///////////////
@@ -113,19 +113,19 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
 ///////////
 
 // Computes the metric at location X
-void metric_dd(const double X_u[4], double g_dd[4][4]);
+void metric_dd(double X_u[4], double g_dd[4][4]);
 
 // Computes the inverse metric at location X
-void metric_uu(const double X_u[4], double g_uu[4][4]);
+void metric_uu(double X_u[4], double g_uu[4][4]);
 
 // Computes the inverse metric at location X
-void metric_KS_uu(const double X_u[4], double g_uu[4][4]);
+void metric_KS_uu(double X_u[4], double g_uu[4][4]);
 
 // Computes the Christoffel symbols at location X numerically (general metric)
-void connection_num_udd(const double X_u[4], double gamma_udd[4][4][4]);
+void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]);
 
 // Computes the Christoffel symbols at location X based on an exact metric
-void connection_udd(const double X_u[4], double gamma_udd[4][4][4]);
+void connection_udd(double X_u[4], double gamma_udd[4][4][4]);
 
 // This function initializes a single 'superphoton' or light ray.
 void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
@@ -146,26 +146,21 @@ void create_tetrad(double X_u[], double k_u[], double U_u[],
 void create_observer_tetrad(double X_u[], double k_u[], double U_u[],
                             double b_u[], double tetrad_u[][4]);
 
-double tetrad_identity_eta(const double X_u[4], const double tetrad_u[4][4],
-                           const int a, const int b);
+double tetrad_identity_eta(double X_u[4], double tetrad_u[4][4], int a, int b);
 
-double tetrad_identity_g(const double tetrad_u[][4], const int mu,
-                         const int nu);
+double tetrad_identity_g(double tetrad_u[][4], int mu, int nu);
 
-double tetrad_identity_sum_latin(const double tetrad_u[4][4],
-                                 const double tetrad_d[4][4], const int mu,
-                                 const int nu);
+double tetrad_identity_sum_latin(double tetrad_u[4][4], double tetrad_d[4][4],
+                                 int mu, int nu);
 
-double tetrad_identity_sum_greek(const double tetrad_u[4][4],
-                                 const double tetrad_d[4][4], const int a,
-                                 const int b);
+double tetrad_identity_sum_greek(double tetrad_u[4][4], double tetrad_d[4][4],
+                                 int a, int b);
 
-void create_tetrad_d(const double X_u[], const double tetrad_u[][4],
-                     double tetrad_d[][4]);
+void create_tetrad_d(double X_u[], double tetrad_u[][4], double tetrad_d[][4]);
 
-double check_tetrad_compact(const double X_u[], const double tetrad_u[][4]);
+double check_tetrad_compact(double X_u[], double tetrad_u[][4]);
 
-void check_tetrad_identities(const double X_u[], double tetrad_u[][4]);
+void check_tetrad_identities(double X_u[], double tetrad_u[][4]);
 
 // EMISSION.C
 /////////////
