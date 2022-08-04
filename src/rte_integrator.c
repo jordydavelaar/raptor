@@ -17,7 +17,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
     int path_counter;
     double pitch_ang, nu_p;
 
-    double X_u[4], k_d[4], k_u[4] , k_u_s[4], dl_current;
+    double X_u[4], k_d[4], k_u[4], k_u_s[4], dl_current;
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
 
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
@@ -54,7 +54,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
         if (get_fluid_params(X_u, &modvar)) {
             for (int f = 0; f < num_frequencies; f++) {
                 // Obtain pitch angle: still no units (geometric)
-                Icurrent = IQUV[0][f];
+                Icurrent = IQUV[f][0];
 
                 lower_index(X_u, k_u, k_d);
                 pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
@@ -122,7 +122,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 }
                 dtau_old = 0;
 
-                IQUV[0][f] = Icurrent;
+                IQUV[f][0] = Icurrent;
             }
         }
     }
