@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 void output_files(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies],
+                  double energy_spectrum[num_frequencies][4],
                   double frequencies[num_frequencies]) {
     struct stat st = {0};
     char spec_folder[64] = "output";
@@ -40,10 +40,10 @@ void output_files(struct Camera *intensityfield,
 #endif
 
         fprintf(stderr, "Frequency %.5e Hz Integrated flux density = %.5e Jy\n",
-                frequencies[f], JANSKY_FACTOR * energy_spectrum[f]);
+                frequencies[f], JANSKY_FACTOR * energy_spectrum[f][0]);
         fprintf(stderr, "Frequency %.5e Hz Bol Luminosity = %.5e ergs/s\n",
                 frequencies[f],
-                frequencies[f] * energy_spectrum[f] * JANSKY_FACTOR * 4 * M_PI *
+                frequencies[f] * energy_spectrum[f][0] * JANSKY_FACTOR * 4 * M_PI *
                     source_dist * source_dist / 1e23);
 
 #if (SPECFILE)
