@@ -83,11 +83,10 @@ void read_model(char *argv[]) {
 // For a single block this function will iterate over the pixels and call
 // geodesic integrations as well as radiation transfer
 void calculate_image_block(struct Camera *intensityfield,
-                           double energy_spectrum[num_frequencies],
                            double frequencies[num_frequencies]) {
 
-#pragma omp parallel for shared(energy_spectrum, frequencies, intensityfield,  \
-                                p) schedule(static, 1)
+#pragma omp parallel for shared(frequencies, intensityfield, p)                \
+    schedule(static, 1)
     for (int pixel = 0; pixel < tot_pixels; pixel++) {
         int steps = 0;
 
@@ -127,7 +126,7 @@ void calculate_image_block(struct Camera *intensityfield,
 // Functions that computes a spectrum at every frequency
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies]) {
+                  double energy_spectrum[num_frequencies][4]) {
     double dA, I, Q, U, V, I_lin, I_v, p;
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];

@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
-    double energy_spectrum[num_frequencies];
+    double energy_spectrum[num_frequencies][4];
     double frequencies[num_frequencies];
 
     struct Camera *intensityfield;
@@ -100,7 +100,8 @@ int main(int argc, char *argv[]) {
 #if (FREQS == FREQLOG)
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
         frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
-        energy_spectrum[f] = 0.;
+        for (int s = 0; s < 4; s++)
+            energy_spectrum[f][s] = 0.;
         fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
     }
 #elif (FREQS == FREQFILE)
@@ -129,8 +130,7 @@ int main(int argc, char *argv[]) {
         if (block % (10) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
-        calculate_image_block(&intensityfield[block], energy_spectrum,
-                              frequencies);
+        calculate_image_block(&intensityfield[block], frequencies);
 #if (AMR)
         if (refine_block(intensityfield[block] && AMR)) {
             add_block(&intensityfield, block);

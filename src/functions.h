@@ -108,7 +108,8 @@ void radiative_transfer_polarized(double *lightpath, int steps,
                                   double *p, int PRINT_POLAR, double *IQUV);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
-                                      double *frequency, double IQUV[num_frequencies][4]);
+                                      double *frequency,
+                                      double IQUV[num_frequencies][4]);
 // METRIC.C
 ///////////
 
@@ -303,7 +304,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar);
 // IO
 
 void compute_spec(struct Camera *intensity,
-                  double energy_spectrum[num_frequencies]);
+                  double energy_spectrum[num_frequencies][4]);
 
 // Create output files (image, spectrum, etc.)
 void output_files(struct Camera *intesityfield,
@@ -318,7 +319,6 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
-                           double energy_spectrum[num_frequencies],
                            double frequencies[num_frequencies]);
 /// CAMERA.C
 void init_camera(struct Camera **intensityfield);
