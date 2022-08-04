@@ -104,16 +104,22 @@ void calculate_image_block(struct Camera *intensityfield,
                            CUTOFF_INNER);
 
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
-        for (int f = 0; f < num_frequencies; f++) {
 #if (POL)
+        for (int f = 0; f < num_frequencies; f++) {
+
             radiative_transfer_polarized(lightpath2, steps, frequencies[f],
                                          &f_x, &f_y, &p, 0,
                                          (*intensityfield).IQUV[pixel][f]);
-#else
-            radiative_transfer_unpolarized(lightpath2, steps, frequencies[f],
-                                           (*intensityfield).IQUV[pixel][f]);
-#endif
         }
+
+#else
+        radiative_transfer_unpolarized(lightpath2, steps, frequencies,
+                                       (*intensityfield).IQUV[pixel]);
+
+        for (int f = 0; f < num_frequencies; f++) {
+            (*intensityfield).IQUV[pixel] *= pow(frequencies[f], 3.);
+        }
+#endif
         free(lightpath2);
     }
 #pragma omp barrier
