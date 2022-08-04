@@ -43,8 +43,8 @@ void output_files(struct Camera *intensityfield,
                 frequencies[f], JANSKY_FACTOR * energy_spectrum[f][0]);
         fprintf(stderr, "Frequency %.5e Hz Bol Luminosity = %.5e ergs/s\n",
                 frequencies[f],
-                frequencies[f] * energy_spectrum[f][0] * JANSKY_FACTOR * 4 * M_PI *
-                    source_dist * source_dist / 1e23);
+                frequencies[f] * energy_spectrum[f][0] * JANSKY_FACTOR * 4 *
+                    M_PI * source_dist * source_dist / 1e23);
 
 #if (SPECFILE)
 #if (POL)
