@@ -108,7 +108,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
                                   double *p, int PRINT_POLAR, double *IQUV);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
-                                      double *frequency, double **IQUV);
+                                      double *frequency, double IQUV[num_frequencies][4]);
 // METRIC.C
 ///////////
 

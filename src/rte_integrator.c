@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
-                                      double *frequency, double **IQUV) {
+                                      double *frequency, double IQUV[num_frequencies][4]) {
 
     int path_counter;
     double pitch_ang, nu_p;
@@ -54,6 +54,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
         if (get_fluid_params(X_u, &modvar)) {
             for (int f = 0; f < num_frequencies; f++) {
                 // Obtain pitch angle: still no units (geometric)
+
                 Icurrent = IQUV[f][0];
 
                 lower_index(X_u, k_u, k_d);
@@ -123,6 +124,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 dtau_old = 0;
 
                 IQUV[f][0] = Icurrent;
+
             }
         }
     }
