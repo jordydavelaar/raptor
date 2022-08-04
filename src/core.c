@@ -117,7 +117,7 @@ void calculate_image_block(struct Camera *intensityfield,
                                        (*intensityfield).IQUV[pixel]);
 
         for (int f = 0; f < num_frequencies; f++) {
-            (*intensityfield).IQUV[pixel] *= pow(frequencies[f], 3.);
+            (*intensityfield).IQUV[pixel][0][f] *= pow(frequencies[f], 3.);
         }
 #endif
         free(lightpath2);

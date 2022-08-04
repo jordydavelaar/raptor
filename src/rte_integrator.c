@@ -17,7 +17,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
     int path_counter;
     double pitch_ang, nu_p;
 
-    double X_u[4], k_d[4], k_u[4], , k_u_s[4], dl_current;
+    double X_u[4], k_d[4], k_u[4] , k_u_s[4], dl_current;
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
 
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
