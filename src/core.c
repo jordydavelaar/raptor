@@ -128,13 +128,34 @@ void calculate_image_block(struct Camera *intensityfield,
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies]) {
-    double dA;
+    double dA, I, Q, U, V, I_lin, I_v, p;
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
         for (int pixel = 0; pixel < tot_pixels; pixel++) {
             for (int freq = 0; freq < num_frequencies; freq++) {
-                energy_spectrum[freq] +=
+#if (POL)
+
+                I = (intensityfield)[block].IQUV[pixel][freq][0];
+                Q = (intensityfield)[block].IQUV[pixel][freq][1];
+                U = (intensityfield)[block].IQUV[pixel][freq][2];
+                V = (intensityfield)[block].IQUV[pixel][freq][3];
+
+                // Stokes I
+                energy_spectrum[freq][0] += I * dA;
+
+                // I pol
+                energy_spectrum[freq][1] += sqrt(Q * Q + U * U + V * V) * dA;
+
+                // amount of lin pol
+                energy_spectrum[freq][2] += sqrt(Q * Q + U * U) * dA;
+
+                // amount of circ pol
+                energy_spectrum[freq][3] += sqrt(V * V) * dA;
+
+#else
+                energy_spectrum[freq][0] +=
                     (intensityfield)[block].IQUV[pixel][freq][0] * dA;
+#endif
             }
         }
     }
