@@ -214,6 +214,9 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
 
     double aI_kappa, aV_kappa, aQ_kappa;
     double aI_thermal, aV_thermal, aQ_thermal;
+  
+    double rV_kappa, rQ_kappa;
+    double rV_thermal, rQ_thermal;
 
     double eps, epsilon;
 
@@ -238,7 +241,12 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     aI_kappa = a_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     aV_kappa = a_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     aQ_kappa = a_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-
+  
+    rV_kappa = rho_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    rQ_kappa = rho_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    rV_thermal = rho_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    rQ_thermal = rho_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+  
     // to invariant forms...
     jI_thermal /= (nu_p * nu_p);
     jV_thermal /= (nu_p * nu_p);
@@ -255,6 +263,11 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     aI_kappa *= nu_p;
     aV_kappa *= nu_p;
     aQ_kappa *= nu_p;
+  
+    rQ_kappa *= nu_p;
+    rV_kappa *= nu_p;
+    rQ_thermal *= nu_p;
+    rV_thermal *= nu_p;
 
     // MIXED MODEL
     epsilon = 1.;
@@ -270,6 +283,9 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     *aQ = (1. - eps) * aQ_thermal + eps * aQ_kappa;
     *aU = 0.0;
     *aI = (1. - eps) * aI_thermal + eps * aI_kappa;
+    
+    *rV = (1. - eps) * rV_thermal + eps * rV_kappa;
+    *rQ = (1. - eps) * rQ_thermal + eps * rQ_kappa;  
 }
 
 void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
