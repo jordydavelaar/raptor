@@ -245,11 +245,14 @@ double a_V_kappa(double theta_e, double n_e, double nu, double B,
 double a_Q_kappa(double theta_e, double n_e, double nu, double B,
                  double theta_B);
 
-double rho_V_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double rho_V_thermal(double theta_e, double n_e, double nu, double B, double theta_B);
-double rho_Q_kappa(double theta_e, double n_e, double nu, double B, double theta_B);
-double rho_Q_thermal(double theta_e, double n_e, double nu, double B, doubletheta_B);
-
+double rho_V_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double rho_V_thermal(double theta_e, double n_e, double nu, double B,
+                     double theta_B);
+double rho_Q_kappa(double theta_e, double n_e, double nu, double B,
+                   double theta_B);
+double rho_Q_thermal(double theta_e, double n_e, double nu, double B,
+                     double theta_B);
 
 double j_I(double theta_e, double n_e, double nu, double B, double theta_B);
 double j_Q(double theta_e, double n_e, double nu, double B, double theta_B);
