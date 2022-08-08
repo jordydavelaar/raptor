@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     input = fopen("./frequencies.txt", "r");
 
     if (input == NULL) {
-        fprintf(stderr, "Cannot read frequencies.txt\n", );
+        fprintf(stderr, "Cannot read frequencies.txt\n");
         exit(1);
     }
     for (int f = 0; f < num_frequencies; f++) {
