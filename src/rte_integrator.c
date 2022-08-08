@@ -52,15 +52,19 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
         metric_uu(X_u, g_uu);
 
         if (get_fluid_params(X_u, &modvar)) {
+            lower_index(X_u, k_u, k_d);
+            pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
+
+	    if(pitch_ang<1e-9)
+		continue;
+
             for (int f = 0; f < num_frequencies; f++) {
                 // Obtain pitch angle: still no units (geometric)
 
                 Icurrent = IQUV[f][0];
 
-                lower_index(X_u, k_u, k_d);
-                pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 
-                dl_current *=
+		dl_current *=
                     (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
                     (PLANCK_CONSTANT * frequency[f]);
 

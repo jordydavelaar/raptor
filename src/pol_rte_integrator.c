@@ -286,6 +286,14 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     
     *rV = (1. - eps) * rV_thermal + eps * rV_kappa;
     *rQ = (1. - eps) * rQ_thermal + eps * rQ_kappa;  
+
+    if ((*jI != *jI || isnan(*jI))) {
+	fprintf(stderr,"issue in user emis:\n");
+        fprintf(stderr,"jI %e jkappa %e jth %e\n",*jI, jI_kappa, jI_thermal);
+	fprintf(stderr," eps %e beta %e sigma %e sigma min %e\n",eps, modvar.beta, modvar.sigma, modvar.sigma_min);
+	fprintf(stderr, "te %e ne %e nu_p %e B %e pitch %e\n", modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+	exit(1);
+   }
 }
 
 void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
