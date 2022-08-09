@@ -548,10 +548,12 @@ void init_grmhd_data(char *fname) {
                 cells, N2, 1, N3);
     }
 
-    long int size_block = cells * (nwini)*8; // size of a block in bytes
+    long int nleafs_long = nleafs;
+    long int size_block = cells * (nwini)*8;
+    long int stag =
+        nleafs_long * (nx[0] + 1) * (nx[1] + 1) * (nx[2] + 1) * nws * 8;
 
-    offset = nleafs * size_block +
-             nleafs * (nx[0] + 1) * (nx[1] + 1) * (nx[2] + 1) * nws * 8;
+    offset = nleafs * size_block + stag;
 
     fseek(file_id, 0, SEEK_SET);
     fseek(file_id, offset, SEEK_CUR);
