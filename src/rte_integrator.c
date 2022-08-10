@@ -12,12 +12,13 @@
 #include <stdlib.h>
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
-                                      double *frequency, double IQUV[num_frequencies][4]) {
+                                      double *frequency,
+                                      double IQUV[num_frequencies][4]) {
 
     int path_counter;
     double pitch_ang, nu_p;
 
-    double X_u[4], k_d[4], k_u[4], k_u_s[4], dl_current;
+    double X_u[4], k_d[4], k_u[4], k_u_s[4], dl_current, dl_current_s;
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
 
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
@@ -55,16 +56,16 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
             lower_index(X_u, k_u, k_d);
             pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 
-	    if(pitch_ang<1e-9)
-		continue;
+            if (pitch_ang < 1e-9)
+                continue;
 
             for (int f = 0; f < num_frequencies; f++) {
                 // Obtain pitch angle: still no units (geometric)
 
                 Icurrent = IQUV[f][0];
 
-
-		dl_current *=
+                dl_current_s =
+                    dl_current *
                     (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
                     (PLANCK_CONSTANT * frequency[f]);
 
@@ -93,7 +94,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 double C = Rg * PLANCK_CONSTANT /
                            (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
-                double dtau = (aI * dl_current * C + dtau_old);
+                double dtau = (aI * dl_current_s * C + dtau_old);
                 double K_inv = aI;
                 double j_inv = jI;
 
@@ -128,7 +129,6 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 dtau_old = 0;
 
                 IQUV[f][0] = Icurrent;
-
             }
         }
     }
