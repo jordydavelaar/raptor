@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 
         calculate_image_block(&intensityfield[block], frequencies);
 #if (AMR)
-        if (refine_block(intensityfield[block] && AMR)) {
+        if (refine_block(intensityfield[block])) {
             add_block(&intensityfield, block);
         } else {
             block++;
