@@ -325,6 +325,25 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
 
     *rQ *= nu_p;
     *rV *= nu_p;
+
+
+//somtimes in very specific cells issue with Ipol>S_I, numerical round off issues
+// and/or scheme handling pure polarizaiton states poorly. renormalizing to ensure pol_frac<1.0.    
+  
+    double pol_frac = sqrt((*jQ)*(*jQ)+(*jV)*(*jV))/(*jI);
+    if(pol_frac > 1.){
+       *jQ *= (pol_frac - 0.005);
+       *jU *= (pol_frac - 0.005);
+       *jV *= (pol_frac - 0.005);
+    }
+
+    pol_frac = sqrt((*aQ)*(*aQ)+(*aV)*(*aV))/(*aI);
+    if(pol_frac	> 1.){
+       *aQ *= (pol_frac - 0.005);
+       *aU *= (pol_frac - 0.005);
+       *aV *= (pol_frac - 0.005);
+    }
+
 }
 int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
                     double rU, double rV, double aI, double aQ, double aU,
@@ -366,7 +385,7 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
 
     int STIFF = 0;
 
-    double STIFFTHRESH = 0.99;
+    double STIFFTHRESH = 0.8;
 
     if (res1 > STIFFTHRESH || res2 > STIFFTHRESH || res3 > STIFFTHRESH ||
         res4 > STIFFTHRESH)
@@ -607,9 +626,23 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // FROM STOKES TO F VECTOR
     ///////////////////////////
+//somtimes in very specific cells issue with Ipol>S_I, numerical round off issues? renormalizing.
+    double pol_frac = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3])/sqrt(S_A[0]*S_A[0]);
+
+    if(pol_frac>1.){
+//	fprintf(stderr,"unphysical in pol step, skipping step. %e %e \n", sqrt(S_A[0]*S_A[0]), sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]));
+        S_A[1]/=(pol_frac+0.005);
+        S_A[2]/=(pol_frac+0.005);
+        S_A[3]/=(pol_frac+0.005);
+
+//	return;
+    }
+
 
     *Iinv = S_A[0];
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
+
+    
 
     //        fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
     //        fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);

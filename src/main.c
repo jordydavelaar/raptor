@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
-    double energy_spectrum[num_frequencies][4];
+    double energy_spectrum[num_frequencies][8];
     double frequencies[num_frequencies];
 
     struct Camera *intensityfield;

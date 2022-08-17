@@ -267,7 +267,7 @@ double stepsize(double X_u[4], double U_u[4]) {
     double idlx3 = 1. / (fabs(dlx3) + SMALL * SMALL);
 #if (metric == CKS)
     double r = get_r(X_u);
-    return -sqrt(r) / (idlx1 + idlx2 + idlx3);
+    return -(r) / (idlx1 + idlx2 + idlx3);
 #else
     return -1. / (idlx1 + idlx2 + idlx3);
 #endif
