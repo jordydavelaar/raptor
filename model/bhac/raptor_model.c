@@ -374,7 +374,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
             VdotV += g_dd[i][j] * prim[U1 + i - 1] * prim[U1 + j - 1];
         }
     }
-    double gammaf = 1. / sqrt(1 - VdotV);
+    double gammaf = sqrt(gVdotgV * gVdotgV + 1.);
 
     if (VdotV > 1.)
         fprintf(stderr, "issues with conserved %e %e %e %e\n", VdotV, gammaf,
