@@ -114,7 +114,7 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
 
     tfac = 1.;
     rfac = r;
-    hfac = 1 + hslope * cos(2. * X_u[2]);
+    hfac = 1. + hslope * cos(2. * X_u[2]);
     pfac = 1.;
 
     g_dd[0][0] = (-1. + 2. * r / rho2) * tfac * tfac;
@@ -301,7 +301,7 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
 
     double irho2 = 1. / (r * r + a * a * costh * costh);
 
-    double hfac = 1 + hslope * cos(2. * X_u[2]);
+    double hfac = 1. + hslope * cos(2. * X_u[2]);
 
     g_uu[0][0] = -1. - 2. * r * irho2;
     g_uu[0][1] = 2. * irho2;

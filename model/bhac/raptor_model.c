@@ -374,11 +374,11 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
             VdotV += g_dd[i][j] * prim[U1 + i - 1] * prim[U1 + j - 1];
         }
     }
-    double gammaf = sqrt(gVdotgV * gVdotgV + 1.);
+    double gammaf = sqrt(VdotV  + 1.);
 
-    if (VdotV > 1.)
-        fprintf(stderr, "issues with conserved %e %e %e %e\n", VdotV, gammaf,
-                conserved[LFAC][c], exp(X_u[1]));
+//    if (VdotV > 1.)
+//        fprintf(stderr, "issues with conserved %e %e %e %e\n", VdotV, gammaf,
+//                conserved[LFAC][c], exp(X_u[1]));
 
 #if (DEBUG)
 
@@ -948,7 +948,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         }
     }
 
-    double lfac = sqrt(gVdotgV * gVdotgV + 1.);
+    double lfac = sqrt(gVdotgV + 1.);
 
     V_u[1] = gV_u[1] / lfac;
     V_u[2] = gV_u[2] / lfac;

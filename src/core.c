@@ -126,7 +126,7 @@ void calculate_image_block(struct Camera *intensityfield,
 // Functions that computes a spectrum at every frequency
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies][8]) {
+                  double energy_spectrum[num_frequencies][14]) {
     double dA, I, Q, U, V, I_lin, I_v, p, x, y , r;
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
@@ -142,31 +142,49 @@ void compute_spec(struct Camera *intensityfield,
                 // Stokes I
                 energy_spectrum[freq][0] += I * dA;
 
-                // I pol
-                energy_spectrum[freq][1] += sqrt(Q * Q + U * U + V * V) * dA;
+                // Stokes Q
+                energy_spectrum[freq][1] += Q  * dA;
+
+                // Stokes U
+                energy_spectrum[freq][2] += U * dA;
+
+                // stokes V
+                energy_spectrum[freq][3] += V  * dA;
+
+               	// I pol
+               	energy_spectrum[freq][4] += sqrt(Q*Q + U*U + V*V)  * dA;
 
                 // amount of lin pol
-                energy_spectrum[freq][2] += sqrt(Q * Q + U * U) * dA;
+                energy_spectrum[freq][5] += sqrt(Q*Q + U*U)* dA;
 
                 // amount of circ pol
-                energy_spectrum[freq][3] += sqrt(V * V) * dA;
+                energy_spectrum[freq][6] += sqrt(V*V)  * dA;
 
 		x = (intensityfield)[block].alpha[pixel];
 		y = (intensityfield)[block].beta[pixel];
 		r = sqrt(x*x+y*y);
 
 		if(r > 20){ //mask the core
-                	// Stokes I
-	                energy_spectrum[freq][4] += I * dA;
+               // Stokes I
+                energy_spectrum[freq][7] += I * dA;
 
-	                // I pol
-	                energy_spectrum[freq][5] += sqrt(Q * Q + U * U + V * V) * dA;
+                // Stokes Q
+                energy_spectrum[freq][8] += Q  * dA;
 
-	                // amount of lin pol
-	                energy_spectrum[freq][6] += sqrt(Q * Q + U * U) * dA;
+                // Stokes U
+                energy_spectrum[freq][9] += U * dA;
 
-	                // amount of circ pol
-	                energy_spectrum[freq][7] += sqrt(V * V) * dA;
+                // stokes V
+                energy_spectrum[freq][10] += V  * dA;
+
+                // I pol
+                energy_spectrum[freq][11] += sqrt(Q*Q + U*U + V*V)  * dA;
+
+                // amount of lin pol
+                energy_spectrum[freq][12] += sqrt(Q*Q + U*U)* dA;
+
+                // amount of circ pol
+                energy_spectrum[freq][13] += sqrt(V*V)  * dA;
 		}
 
 

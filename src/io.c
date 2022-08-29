@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 void output_files(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies][8],
+                  double energy_spectrum[num_frequencies][14],
                   double frequencies[num_frequencies]) {
     struct stat st = {0};
     char spec_folder[64] = "output";
@@ -48,15 +48,22 @@ void output_files(struct Camera *intensityfield,
 
 #if (SPECFILE)
 #if (POL)
-        fprintf(specfile, "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n",
-                frequencies[f], JANSKY_FACTOR * energy_spectrum[f][0],
+        fprintf(specfile, "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n",
+                frequencies[f], 
+                JANSKY_FACTOR * energy_spectrum[f][0],
                 JANSKY_FACTOR * energy_spectrum[f][1],
                 JANSKY_FACTOR * energy_spectrum[f][2],
                 JANSKY_FACTOR * energy_spectrum[f][3],
                 JANSKY_FACTOR * energy_spectrum[f][4],
                 JANSKY_FACTOR * energy_spectrum[f][5],
                 JANSKY_FACTOR * energy_spectrum[f][6],
-                JANSKY_FACTOR * energy_spectrum[f][7]);
+                JANSKY_FACTOR * energy_spectrum[f][7],
+                JANSKY_FACTOR * energy_spectrum[f][8],
+                JANSKY_FACTOR * energy_spectrum[f][9],
+                JANSKY_FACTOR * energy_spectrum[f][10],
+                JANSKY_FACTOR * energy_spectrum[f][11],
+                JANSKY_FACTOR * energy_spectrum[f][12],
+                JANSKY_FACTOR * energy_spectrum[f][13]);
 #else
         fprintf(specfile, "%+.15e\t%+.15e\n", frequencies[f],
                 JANSKY_FACTOR * energy_spectrum[f][0]);

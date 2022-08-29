@@ -313,11 +313,11 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar);
 // IO
 
 void compute_spec(struct Camera *intensity,
-                  double energy_spectrum[num_frequencies][8]);
+                  double energy_spectrum[num_frequencies][14]);
 
 // Create output files (image, spectrum, etc.)
 void output_files(struct Camera *intesityfield,
-                  double spectrum[num_frequencies][8],
+                  double spectrum[num_frequencies][14],
                   double frequencies[num_frequencies]);
 
 void write_image_hdf5(char *hdf5_filename, struct Camera *data,

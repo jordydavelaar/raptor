@@ -90,18 +90,22 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
-    double energy_spectrum[num_frequencies][8];
+    double energy_spectrum[num_frequencies][14];
     double frequencies[num_frequencies];
 
     struct Camera *intensityfield;
 
     init_camera(&intensityfield);
 
+    for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+        for (int s = 0; s < 14; s++)
+            energy_spectrum[f][s] = 0.;
+    }
+
+
 #if (FREQS == FREQLOG)
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
         frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
-        for (int s = 0; s < 4; s++)
-            energy_spectrum[f][s] = 0.;
         fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
     }
 #elif (FREQS == FREQFILE)
