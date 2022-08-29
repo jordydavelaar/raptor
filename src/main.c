@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
-    double energy_spectrum[num_frequencies][14];
+    double energy_spectrum[num_frequencies][4];
     double frequencies[num_frequencies];
 
     struct Camera *intensityfield;
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     init_camera(&intensityfield);
 
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-        for (int s = 0; s < 14; s++)
+        for (int s = 0; s < 4; s++)
             energy_spectrum[f][s] = 0.;
     }
 
