@@ -344,6 +344,10 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
         S_u[3] / (conserved[XI][c] + Bsq) +
         conserved[B3][c] * BS / (conserved[XI][c] * (conserved[XI][c] + Bsq));
 
+    prim[U1] *= conserved[LFAC][c];
+    prim[U2] *= conserved[LFAC][c];
+    prim[U3] *= conserved[LFAC][c];
+
     prim[B1] = conserved[B1][c];
     prim[B2] = conserved[B2][c];
     prim[B3] = conserved[B3][c];
@@ -853,6 +857,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double del[NDIM];
     double rho, uu;
     double Bp[NDIM], V_u[NDIM], VdotV;
+    double gV_u[NDIM], gVdotgV;
 
 #if (metric == MKSBHAC || metric == MKSN)
     X[3] = fmod(X[3], 2 * M_PI);
@@ -919,9 +924,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     Bp[1] = interp_scalar(p[B1][igrid], c, del);
     Bp[2] = interp_scalar(p[B2][igrid], c, del);
     Bp[3] = interp_scalar(p[B3][igrid], c, del);
-    V_u[1] = interp_scalar(p[U1][igrid], c, del);
-    V_u[2] = interp_scalar(p[U2][igrid], c, del);
-    V_u[3] = interp_scalar(p[U3][igrid], c, del);
+
+    gV_u[1] = interp_scalar(p[U1][igrid], c, del);
+    gV_u[2] = interp_scalar(p[U2][igrid], c, del);
+    gV_u[3] = interp_scalar(p[U3][igrid], c, del);
 
     double gamma_dd[4][4];
     for (int i = 1; i < 4; i++) {
@@ -934,24 +940,19 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         shift[j] = g_uu[0][j] / (-g_uu[0][0]);
     }
     double alpha = 1 / sqrt(-g_uu[0][0]);
-    VdotV = 0.;
+    gVdotgV = 0.;
     (*modvar).U_u[0] = 0.;
     for (int i = 1; i < NDIM; i++) {
         for (int j = 1; j < NDIM; j++) {
-            VdotV += gamma_dd[i][j] * V_u[i] * V_u[j];
+            gVdotgV += gamma_dd[i][j] * gV_u[i] * gV_u[j];
         }
     }
 
-    if (VdotV > 1.) {
-        fprintf(stderr,
-                "VdotV too large %e %d %d %e %e %e %e %e %e %e %e %e %e\n",
-                VdotV, igrid, c, X[1], X[2], X[3], r, V_u[1], V_u[2], V_u[3],
-                p[U1][igrid][c][0], p[U2][igrid][c][0], p[U3][igrid][c][0]);
+    double lfac = sqrt(gVdotgV * gVdotgV + 1.);
 
-        return 0;
-    }
-
-    double lfac = 1 / sqrt(1 - VdotV);
+    V_u[1] = gV_u[1] / lfac;
+    V_u[2] = gV_u[2] / lfac;
+    V_u[3] = gV_u[3] / lfac;
 
     (*modvar).U_u[0] = lfac / alpha;
 
