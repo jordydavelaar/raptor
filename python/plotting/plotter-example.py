@@ -39,7 +39,7 @@ fig, axs = plt.subplots(1,1,figsize=(6,5))
 
 stokes_ind=0 #we want stokes I
 
-rapplot.plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange,mas,label="Stokes I",cmap="afmhot")
+rapplot.plot_data_stokes(image,min,max,stokes_ind,data_id,fig,axs,halfrange,mas,label="Stokes I",cmap="afmhot")
 
 fig.suptitle('t=%.01lf [days]'%(ind*10.*Tunit),fontsize=20)
 

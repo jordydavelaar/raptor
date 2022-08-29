@@ -7,18 +7,18 @@ import matplotlib.pyplot as plt
 import h5py
 
 G = 6.674e-8
-M = 1.989e33
+MSUN = 1.989e33
 SPEED_OF_LIGHT = 2.998e10
 
 KPC = 3.086e21
 SEC_IN_DAY = 86400.
-AS_IN_DEG = 206264.806*1000.
+MAS_IN_DEG = 206264.806*1000.
 
 def read_data_id(folder,ind):
     file_name = folder+'/img_data_%d.h5'%ind
     print("Reading keys from: ", file_name)
     images = h5py.File(file_name,'r')
-    keys = images.keys()
+    keys = [key for key in images.keys()]
     print(keys)
     images.close()
     return keys
@@ -34,7 +34,7 @@ def read_data(folder,ind,data_id):
     min = [-100.,-100.,-100.,-100.]
     max = [100.,100.,100,100.]
 
-    for j in range(0,len(data_id)):
+    for j in range(0,len(data_id)-2):
         for i in range(0,len(images[data_id[j]])):
             current=np.max(images[data_id[j]][i])
             max[j]=np.maximum(max[j],np.max(images[data_id[j]][i]))
