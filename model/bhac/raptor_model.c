@@ -386,12 +386,12 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     }
 
     if (isnan(gammaf)) {
-        fprintf(stderr, "VdotV %e lfac %e lor %e\n", VdotV, conserved[LFAC][c],
-                gammaf);
+        fprintf(stderr, "gVdotgV %e lfac %e lor %e\n", gVdotgV,
+                conserved[LFAC][c], gammaf);
         fprintf(stderr, "\n");
 
-        fprintf(stderr, "lor %e vdotv %e lfac %e XI %e Bsq %e BS %e\n", gammaf,
-                VdotV, conserved[LFAC][c], conserved[XI][c], Bsq, BS);
+        fprintf(stderr, "lor %e gVdotgV %e lfac %e XI %e Bsq %e BS %e\n",
+                gammaf, gVdotgV, conserved[LFAC][c], conserved[XI][c], Bsq, BS);
         fprintf(stderr, "xi? %e %e\n",
                 conserved[LFAC][c] * conserved[LFAC][c] * prim[KRHO] *
                     (1 + neqpar[0] * prim[UU] / prim[KRHO]),
@@ -852,7 +852,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     int i, c;
     double del[NDIM];
     double rho, uu;
-    double Bp[NDIM], V_u[NDIM], VdotV;
+    double Bp[NDIM], V_u[NDIM];
     double gV_u[NDIM], gVdotgV;
 
 #if (metric == MKSBHAC || metric == MKSN)
@@ -1002,7 +1002,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                 (*modvar).U_u[2], (*modvar).U_u[3]);
         fprintf(stderr, "B isnan Bp %e %e %e\n", Bp[1], Bp[2], Bp[3]);
         fprintf(stderr, "B isnan V_u %e %e %e\n", V_u[1], V_u[2], V_u[3]);
-        fprintf(stderr, "B isnan VdotV %e\n", VdotV);
+        fprintf(stderr, "B isnan gVdotgV %e\n", gVdotgV);
         fprintf(stderr, "B isnan lapse %e\n", sqrt(-g_uu[0][0]));
         fprintf(stderr, "B isnan shift %e %e %e\n", g_uu[0][1], g_uu[0][2],
                 g_uu[0][3]);
