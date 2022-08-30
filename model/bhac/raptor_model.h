@@ -90,10 +90,6 @@ long int offset;
 
 int levmaxini, ndimini, ndirini, nwini, nws, neqparini, it, t;
 
-#include "functions.h"
-#include "parameters.h"
-#include <stdio.h>
-
 double Ladv, dMact;
 
 double **Xcoord;
