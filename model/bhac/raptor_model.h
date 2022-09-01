@@ -26,6 +26,8 @@ struct GRMHD {
     int igrid_c;
 };
 
+#define SFC 1
+
 #define KRHO 0
 #define UU 1
 #define U1 2

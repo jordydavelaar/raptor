@@ -407,6 +407,74 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 #endif
 }
 
+uint64_t mortonEncode(unsigned int ig1, unsigned int ig2, unsigned int ig3) {
+    uint64_t answer = 0;
+    for (uint64_t i = 0; i < (sizeof(uint64_t) * 64) / ndim; ++i) {
+        answer = answer | ((ig1 & ((uint64_t)1 << i)) << 2 * i) |
+                 ((ig2 & ((uint64_t)1 << i)) << (2 * i + 1)) |
+                 ((ig3 & ((uint64_t)1 << i)) << (2 * i + 2));
+    }
+    return answer;
+}
+
+int level_one_Morton_ordered(int ***iglevel1_sfc, int ***sfc_iglevel1) {
+    // first compute how large the block should be assuming its squared
+    int ngsq1 = pow(2, ceil(log10(ng1) / log10(2.0)));
+    int ngsq2 = pow(2, ceil(log10(ng2) / log10(2.0)));
+    int ngsq3 = pow(2, ceil(log10(ng3) / log10(2.0)));
+
+    int ngsqmax = fmax(ngsq1, fmax(ngsq2, ngsq3));
+    ngsq1 = ngsqmax;
+    ngsq2 = ngsqmax;
+    ngsq3 = ngsqmax;
+
+    int gsq_sfc[ngsq1][ngsq2][ngsq3];
+    // construct the sfc for the squared grid
+    for (uint32_t i = 0; i < ngsq1; i++) {
+        for (uint32_t j = 0; j < ngsq2; j++) {
+            for (uint32_t k = 0; k < ngsq3; k++) {
+                gsq_sfc[i][j][k] = mortonEncode(i, j, k);
+            }
+        }
+    }
+
+    // delete blocks outside of the real grid
+    for (int i = 0; i < ngsq1; i++) {
+        for (int j = 0; j < ngsq2; j++) {
+            for (int k = 0; k < ngsq3; k++) {
+                // check which block runs out of the grid
+                if (i >= ng1 || j >= ng2 || k >= ng3) {
+                    // if an index is too large, then we need to decrease all
+                    // the sfc indices by 1 if they are larger than the sfc
+                    // index of that particular block.
+                    for (int ic = 0; ic < ngsq1; ic++) {
+                        for (int jc = 0; jc < ngsq2; jc++) {
+                            for (int kc = 0; kc < ngsq3; kc++) {
+                                if (gsq_sfc[ic][jc][kc] > gsq_sfc[i][j][k])
+                                    gsq_sfc[ic][jc][kc]--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // create maps to go from sfc to normal grid indices
+    for (int i = 0; i < ng1; i++) {
+        for (int j = 0; j < ng2; j++) {
+            for (int k = 0; k < ng3; k++) {
+                iglevel1_sfc[i][j][k] = gsq_sfc[i][j][k];
+                sfc_iglevel1[gsq_sfc[i][j][k]][0] = i;
+                sfc_iglevel1[gsq_sfc[i][j][k]][1] = j;
+                sfc_iglevel1[gsq_sfc[i][j][k]][2] = k;
+                fprintf(stderr, "%d\n", gsq_sfc[i][j][k]);
+            }
+        }
+    }
+    return 0;
+}
+
 void init_grmhd_data(char *fname) {
 
     double buffer[1];
@@ -572,6 +640,34 @@ void init_grmhd_data(char *fname) {
     fprintf(stderr, ".");
 
     int level = 1;
+#if (SFC)
+    int ***iglevel1_sfc;
+    int **sfc_iglevel1;
+
+    iglevel1_sfc = (int ***)malloc(ng[0] * sizeof(int **));
+    for (int i = 0; i < ng[0]; i++) {
+        iglevel1_sfc[i] = (int **)malloc(ng[1] * sizeof(int *));
+        for (int i = 0; i < ng[0]; i++) {
+            iglevel1_sfc[i][j] = (int *)malloc(ng[2] * sizeof(int));
+        }
+    }
+
+    sfc_iglevel1 = (int **)malloc(ng[0] * ng[1] * ng[2] * sizeof(int *));
+    for (int i = 0; i < ng[0] * ng[1] * ng[2]; i++) {
+        sfc_iglevel1[i] = (int *)malloc(3 * sizeof(int));
+    }
+
+    level_one_Morton_ordered(iglevel1_sfc, sfc_iglevel1);
+
+    for (int sfc_i = 0; sfc_i < ng[2] * ng[1] * ng[0]; sfc_i++) {
+        i = sfc_iglevel1[sfc_i][0];
+        j = sfc_iglevel1[sfc_i][1];
+        k = sfc_iglevel1[sfc_i][2];
+
+        read_node(file_id, &igrid, &refine, ndimini, level, i, j, k);
+    }
+
+#else
     for (int k = 0; k < ng[2]; k++) {
         for (int j = 0; j < ng[1]; j++) {
             for (int i = 0; i < ng[0]; i++) {
@@ -580,6 +676,7 @@ void init_grmhd_data(char *fname) {
             }
         }
     }
+#endif
     if (nleafs != igrid) {
         fprintf(stderr, "something wrong with grid dimensions\n");
         exit(1);
