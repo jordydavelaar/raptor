@@ -4,10 +4,19 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka
  *
  */
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <math.h>
-#include <stdio.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// GLOBAL VARS
+///////////////
+
+int num_blocks, tot_blocks;
+double BLOCK_SIZE_X, BLOCK_SIZE_Y;
+int max_level;
 
 // Initializes the camera
 void init_camera(struct Camera **intensityfield) {
@@ -43,8 +52,8 @@ void get_impact_params(struct Camera **intensityfield, int block) {
     BLOCK_SIZE_Y = CAM_SIZE_Y / (pow(2, (*intensityfield)[block].level - 1) *
                                  (double)(num_blocks));
 
-    d_x = BLOCK_SIZE_X * R_GRAV / source_dist; // angular size of block in cm
-    d_y = BLOCK_SIZE_Y * R_GRAV / source_dist; // angular size of block in cm
+    d_x = BLOCK_SIZE_X * R_GRAV / SOURCE_DIST; // angular size of block in cm
+    d_y = BLOCK_SIZE_Y * R_GRAV / SOURCE_DIST; // angular size of block in cm
 
     (*intensityfield)[block].lcorner[0] =
         -CAM_SIZE_X * 0.5 + (*intensityfield)[block].ind[0] * BLOCK_SIZE_X;
@@ -216,8 +225,8 @@ int find_block(double x[2], struct Camera *intensityfield) {
     double dx[2];
 
     for (int block = 0; block < tot_blocks; block++) {
-        dx[0] = intensityfield[block].dx[0] * source_dist / R_GRAV;
-        dx[1] = intensityfield[block].dx[1] * source_dist / R_GRAV;
+        dx[0] = intensityfield[block].dx[0] * SOURCE_DIST / R_GRAV;
+        dx[1] = intensityfield[block].dx[1] * SOURCE_DIST / R_GRAV;
         // fprintf(stderr,"x  = %lf, %lf \n", x[0],x[1]);
         // fprintf(stderr,"dx = %lf, %lf \n", dx[0], dx[1]);
         // fprintf(stderr,"nulpunt2 = %lf \n",
@@ -238,8 +247,8 @@ int find_block(double x[2], struct Camera *intensityfield) {
 // Given a impact parameter, finds the pixels it is closest to
 int find_pixel(double x[2], struct Camera *intensityfield, int block) {
     double dx[2];
-    dx[0] = intensityfield[block].dx[0] * source_dist / R_GRAV;
-    dx[1] = intensityfield[block].dx[1] * source_dist / R_GRAV;
+    dx[0] = intensityfield[block].dx[0] * SOURCE_DIST / R_GRAV;
+    dx[1] = intensityfield[block].dx[1] * SOURCE_DIST / R_GRAV;
 
     int i = (int)((x[0] - intensityfield[block].lcorner[0]) / dx[0] - 0.5);
     int j = (int)((x[1] - intensityfield[block].lcorner[1]) / dx[1] - 0.5);

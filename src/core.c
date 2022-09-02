@@ -4,16 +4,33 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// GLOBAL VARS
+///////////////
+
+char GRMHD_FILE[256];
+
+double MBH, M_UNIT, TIME_INIT, INCLINATION;
+double R_HIGH, R_LOW;
+double FREQS_PER_DEC, FREQ_MIN, FREQ_MAX;
+
+double SOURCE_DIST; // Distance to M87 (cm); for Sgr A* use (2.47e22)
+
+int IMG_WIDTH, IMG_HEIGHT;
+double CAM_SIZE_X, CAM_SIZE_Y;
+double STEPSIZE;
 
 // Read model parameters from model.in
 void read_model(char *argv[]) {
     char temp[100], temp2[100];
     FILE *input;
+    char inputfile[100];
 
     sscanf(argv[1], "%s", inputfile);
     fprintf(stdout, "\nUsing model parameter file %s\n", inputfile);
@@ -26,7 +43,7 @@ void read_model(char *argv[]) {
 
     // Model parameters
     fscanf(input, "%s %s %lf", temp, temp2, &MBH);
-    fscanf(input, "%s %s %lf", temp, temp2, &source_dist);
+    fscanf(input, "%s %s %lf", temp, temp2, &SOURCE_DIST);
     fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT);
     fscanf(input, "%s %s %lf", temp, temp2, &R_LOW);
     fscanf(input, "%s %s %lf", temp, temp2, &R_HIGH);
@@ -49,7 +66,7 @@ void read_model(char *argv[]) {
 
     fprintf(stderr, "\nModel parameters:\n\n");
     fprintf(stderr, "MBH \t\t= %g Msun\n", MBH);
-    fprintf(stderr, "DISTANCE \t= %g kpc\n", source_dist);
+    fprintf(stderr, "DISTANCE \t= %g kpc\n", SOURCE_DIST);
     fprintf(stderr, "M_UNIT \t\t= %g grams\n", M_UNIT);
     fprintf(stderr, "R_LOW \t\t= %g \n", R_LOW);
     fprintf(stderr, "R_HIGH \t\t= %g \n", R_HIGH);
@@ -75,7 +92,7 @@ void read_model(char *argv[]) {
 
     // to cgs units
     MBH *= MSUN;
-    source_dist *= KPCTOCM;
+    SOURCE_DIST *= KPCTOCM;
 
     fclose(input);
 }

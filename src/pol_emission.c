@@ -5,12 +5,15 @@
  *
  */
 
+#include "definitions.h"
 #include "functions.h"
+#include "global_vars.h"
 #include "gsl/gsl_sf_hyperg.h"
-#include "parameters.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 #include <gsl/gsl_sf_bessel.h>
-#include <math.h>
-#include <stdio.h>
+
 ////////////////////////////////////////////////////////////////////?/////////////////////////////////////////////////////rho
 // B.15:
 double f_m(double X) {

@@ -9,9 +9,6 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include "parameters.h"
-#include "raptor_model.h"
-#include <stdio.h>
 // CORE.C
 /////////
 

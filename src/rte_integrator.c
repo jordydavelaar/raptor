@@ -5,11 +5,12 @@
  *
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <complex.h>
-#include <math.h>
-#include <stdlib.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,

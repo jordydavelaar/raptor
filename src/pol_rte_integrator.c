@@ -5,11 +5,12 @@
  *
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <complex.h>
-#include <math.h>
-#include <stdlib.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
 // y contains the 4-position and the 4-velocity for one lightray/particle.
 void f_parallel(double y[], double complex f_u[], double fvector[],
@@ -214,7 +215,7 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
 
     double aI_kappa, aV_kappa, aQ_kappa;
     double aI_thermal, aV_thermal, aQ_thermal;
-  
+
     double rV_kappa, rQ_kappa;
     double rV_thermal, rQ_thermal;
 
@@ -241,12 +242,16 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     aI_kappa = a_I_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     aV_kappa = a_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     aQ_kappa = a_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-  
-    rV_kappa = rho_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    rQ_kappa = rho_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    rV_thermal = rho_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    rQ_thermal = rho_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-  
+
+    rV_kappa =
+        rho_V_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    rQ_kappa =
+        rho_Q_kappa(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    rV_thermal =
+        rho_V_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+    rQ_thermal =
+        rho_Q_thermal(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
+
     // to invariant forms...
     jI_thermal /= (nu_p * nu_p);
     jV_thermal /= (nu_p * nu_p);
@@ -263,7 +268,7 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     aI_kappa *= nu_p;
     aV_kappa *= nu_p;
     aQ_kappa *= nu_p;
-  
+
     rQ_kappa *= nu_p;
     rV_kappa *= nu_p;
     rQ_thermal *= nu_p;
@@ -283,17 +288,19 @@ void evaluate_coeffs_user(double *jI, double *jQ, double *jU, double *jV,
     *aQ = (1. - eps) * aQ_thermal + eps * aQ_kappa;
     *aU = 0.0;
     *aI = (1. - eps) * aI_thermal + eps * aI_kappa;
-    
+
     *rV = (1. - eps) * rV_thermal + eps * rV_kappa;
-    *rQ = (1. - eps) * rQ_thermal + eps * rQ_kappa;  
+    *rQ = (1. - eps) * rQ_thermal + eps * rQ_kappa;
 
     if ((*jI != *jI || isnan(*jI))) {
-	fprintf(stderr,"issue in user emis:\n");
-        fprintf(stderr,"jI %e jkappa %e jth %e\n",*jI, jI_kappa, jI_thermal);
-	fprintf(stderr," eps %e beta %e sigma %e sigma min %e\n",eps, modvar.beta, modvar.sigma, modvar.sigma_min);
-	fprintf(stderr, "te %e ne %e nu_p %e B %e pitch %e\n", modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-	exit(1);
-   }
+        fprintf(stderr, "issue in user emis:\n");
+        fprintf(stderr, "jI %e jkappa %e jth %e\n", *jI, jI_kappa, jI_thermal);
+        fprintf(stderr, " eps %e beta %e sigma %e sigma min %e\n", eps,
+                modvar.beta, modvar.sigma, modvar.sigma_min);
+        fprintf(stderr, "te %e ne %e nu_p %e B %e pitch %e\n", modvar.theta_e,
+                modvar.n_e, nu_p, modvar.B, pitch_ang);
+        exit(1);
+    }
 }
 
 void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
@@ -326,24 +333,24 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
     *rQ *= nu_p;
     *rV *= nu_p;
 
+    // somtimes in very specific cells issue with Ipol>S_I, numerical round off
+    // issues
+    //  and/or scheme handling pure polarizaiton states poorly. renormalizing to
+    //  ensure pol_frac<1.0.
 
-//somtimes in very specific cells issue with Ipol>S_I, numerical round off issues
-// and/or scheme handling pure polarizaiton states poorly. renormalizing to ensure pol_frac<1.0.    
-  
-    double pol_frac = sqrt((*jQ)*(*jQ)+(*jV)*(*jV))/(*jI);
-    if(pol_frac > 1.){
-       *jQ *= (pol_frac - 0.005);
-       *jU *= (pol_frac - 0.005);
-       *jV *= (pol_frac - 0.005);
+    double pol_frac = sqrt((*jQ) * (*jQ) + (*jV) * (*jV)) / (*jI);
+    if (pol_frac > 1.) {
+        *jQ *= (pol_frac - 0.005);
+        *jU *= (pol_frac - 0.005);
+        *jV *= (pol_frac - 0.005);
     }
 
-    pol_frac = sqrt((*aQ)*(*aQ)+(*aV)*(*aV))/(*aI);
-    if(pol_frac	> 1.){
-       *aQ *= (pol_frac - 0.005);
-       *aU *= (pol_frac - 0.005);
-       *aV *= (pol_frac - 0.005);
+    pol_frac = sqrt((*aQ) * (*aQ) + (*aV) * (*aV)) / (*aI);
+    if (pol_frac > 1.) {
+        *aQ *= (pol_frac - 0.005);
+        *aU *= (pol_frac - 0.005);
+        *aV *= (pol_frac - 0.005);
     }
-
 }
 int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
                     double rU, double rV, double aI, double aQ, double aU,
@@ -626,23 +633,25 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // FROM STOKES TO F VECTOR
     ///////////////////////////
-//somtimes in very specific cells issue with Ipol>S_I, numerical round off issues? renormalizing.
-    double pol_frac = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3])/sqrt(S_A[0]*S_A[0]);
+    // somtimes in very specific cells issue with Ipol>S_I, numerical round off
+    // issues? renormalizing.
+    double pol_frac =
+        sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]) /
+        sqrt(S_A[0] * S_A[0]);
 
-    if(pol_frac>1.){
-//	fprintf(stderr,"unphysical in pol step, skipping step. %e %e \n", sqrt(S_A[0]*S_A[0]), sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]));
-        S_A[1]/=(pol_frac+0.005);
-        S_A[2]/=(pol_frac+0.005);
-        S_A[3]/=(pol_frac+0.005);
+    if (pol_frac > 1.) {
+        //	fprintf(stderr,"unphysical in pol step, skipping step. %e %e
+        //\n", sqrt(S_A[0]*S_A[0]), sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] +
+        // S_A[3] * S_A[3]));
+        S_A[1] /= (pol_frac + 0.005);
+        S_A[2] /= (pol_frac + 0.005);
+        S_A[3] /= (pol_frac + 0.005);
 
-//	return;
+        //	return;
     }
-
 
     *Iinv = S_A[0];
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
-
-    
 
     //        fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
     //        fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);

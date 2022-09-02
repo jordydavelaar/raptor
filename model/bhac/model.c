@@ -4,9 +4,34 @@
  * author: Jordy Davelaar
  */
 
-#include "raptor_model.h"
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// GLOBAL VARS
+///////////////
+
+double ****p;
+
+double L_unit, T_unit;
+double RHO_unit, U_unit, B_unit;
+double Ne_unit, Thetae_unit;
+
+double R0, a, Q, hslope;
+double *neqpar;
+
+double stopx[4], startx[4], dx[4];
+double xprobmin[3], xprobmax[3];
+double **Xcoord, ***Xgrid, ***Xbar;
+
+int block_size, forest_size, cells, ndimini;
+int ng[3], *forest, *nx;
+int N1, N2, N3;
+
+struct block *block_info;
 
 void init_model() {
     // Set physical units
@@ -479,7 +504,14 @@ void init_grmhd_data(char *fname) {
 
     double buffer[1];
     unsigned int buffer_i[1];
+
     FILE *file_id;
+
+    long int offset;
+
+    int levmaxini, ndirini, nwini, nws, neqparini, it;
+    double t;
+    int nxlone[3], nleafs;
 
     file_id = fopen(fname, "rb"); // r for read, b for binary
 
@@ -491,12 +523,10 @@ void init_grmhd_data(char *fname) {
         fprintf(stderr, "\nSuccessfully opened %s. \n\nReading", fname);
     }
 
-    long int offset;
-
-    int levmaxini, ndirini, nwini, nws, neqparini, it;
-    double t;
     fseek(file_id, 0, SEEK_END);
-    offset = -36 - 4; // -4; // 7 int, 1 double = 7 * 4 + 1*8 = 56?
+
+    offset = -40;
+
     fseek(file_id, offset, SEEK_CUR);
 
     fread(buffer_i, sizeof(int), 1, file_id);
@@ -602,7 +632,7 @@ void init_grmhd_data(char *fname) {
     stopx[2] = xprobmax[1];
     stopx[3] = xprobmax[2];
 
-    int cells = 1;
+    cells = 1;
     for (int k = 0; k < ndimini; k++) {
         cells *= nx[k];
     }

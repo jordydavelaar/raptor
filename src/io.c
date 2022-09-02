@@ -4,12 +4,12 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <hdf5.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
 void output_files(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies][4],
@@ -44,7 +44,7 @@ void output_files(struct Camera *intensityfield,
         fprintf(stderr, "Frequency %.5e Hz Bol Luminosity = %.5e ergs/s\n",
                 frequencies[f],
                 frequencies[f] * energy_spectrum[f][0] * JANSKY_FACTOR * 4 *
-                    M_PI * source_dist * source_dist / 1e23);
+                    M_PI * SOURCE_DIST * SOURCE_DIST / 1e23);
 
 #if (SPECFILE)
 #if (POL)
@@ -275,8 +275,8 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
     FILE *uniformfile = fopen(uniform_filename, "w");
 
     double UNIT_FACTOR = JANSKY_FACTOR * uniform_dx * uniform_dx * R_GRAV *
-                         R_GRAV / source_dist / source_dist;
-    double arcsec_factor = 206265.0 * R_GRAV / source_dist;
+                         R_GRAV / SOURCE_DIST / SOURCE_DIST;
+    double arcsec_factor = 206265.0 * R_GRAV / SOURCE_DIST;
 
     for (int i = 0; i < uniform_size; i++) {
         for (int j = 0; j < uniform_size; j++) {

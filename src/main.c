@@ -39,8 +39,12 @@
  * Indices 0, 1, 2, 3 correspond to t, r, theta, phi (Schwarzschild/Kerr).
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
 int main(int argc, char *argv[]) {
 
@@ -101,7 +105,6 @@ int main(int argc, char *argv[]) {
         for (int s = 0; s < 4; s++)
             energy_spectrum[f][s] = 0.;
     }
-
 
 #if (FREQS == FREQLOG)
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
