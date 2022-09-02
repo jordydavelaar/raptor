@@ -28,7 +28,7 @@ double xprobmin[3], xprobmax[3];
 double **Xcoord, ***Xgrid, ***Xbar;
 
 int block_size, forest_size, cells, ndimini;
-int ng[3], *forest, *nx;
+int ng[3], *forest, *nx, nleafs;
 int N1, N2, N3;
 
 struct block *block_info;
@@ -434,7 +434,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 
 uint64_t mortonEncode(unsigned int ig1, unsigned int ig2, unsigned int ig3) {
     uint64_t answer = 0;
-    for (uint64_t i = 0; i < (sizeof(uint64_t) * 64) / ndim; ++i) {
+    for (uint64_t i = 0; i < (sizeof(uint64_t) * 64) / ndimini; ++i) {
         answer = answer | ((ig1 & ((uint64_t)1 << i)) << 2 * i) |
                  ((ig2 & ((uint64_t)1 << i)) << (2 * i + 1)) |
                  ((ig3 & ((uint64_t)1 << i)) << (2 * i + 2));
@@ -442,11 +442,11 @@ uint64_t mortonEncode(unsigned int ig1, unsigned int ig2, unsigned int ig3) {
     return answer;
 }
 
-int level_one_Morton_ordered(int ***iglevel1_sfc, int ***sfc_iglevel1) {
+int level_one_Morton_ordered(int ***iglevel1_sfc, int **sfc_iglevel1) {
     // first compute how large the block should be assuming its squared
-    int ngsq1 = pow(2, ceil(log10(ng1) / log10(2.0)));
-    int ngsq2 = pow(2, ceil(log10(ng2) / log10(2.0)));
-    int ngsq3 = pow(2, ceil(log10(ng3) / log10(2.0)));
+    int ngsq1 = pow(2, ceil(log10(ng[0]) / log10(2.0)));
+    int ngsq2 = pow(2, ceil(log10(ng[1]) / log10(2.0)));
+    int ngsq3 = pow(2, ceil(log10(ng[2]) / log10(2.0)));
 
     int ngsqmax = fmax(ngsq1, fmax(ngsq2, ngsq3));
     ngsq1 = ngsqmax;
@@ -468,7 +468,7 @@ int level_one_Morton_ordered(int ***iglevel1_sfc, int ***sfc_iglevel1) {
         for (int j = 0; j < ngsq2; j++) {
             for (int k = 0; k < ngsq3; k++) {
                 // check which block runs out of the grid
-                if (i >= ng1 || j >= ng2 || k >= ng3) {
+                if (i >= ng[0] || j >= ng[1] || k >= ng[2]) {
                     // if an index is too large, then we need to decrease all
                     // the sfc indices by 1 if they are larger than the sfc
                     // index of that particular block.
@@ -486,9 +486,9 @@ int level_one_Morton_ordered(int ***iglevel1_sfc, int ***sfc_iglevel1) {
     }
 
     // create maps to go from sfc to normal grid indices
-    for (int i = 0; i < ng1; i++) {
-        for (int j = 0; j < ng2; j++) {
-            for (int k = 0; k < ng3; k++) {
+    for (int i = 0; i < ng[0]; i++) {
+        for (int j = 0; j < ng[1]; j++) {
+            for (int k = 0; k < ng[2]; k++) {
                 iglevel1_sfc[i][j][k] = gsq_sfc[i][j][k];
                 sfc_iglevel1[gsq_sfc[i][j][k]][0] = i;
                 sfc_iglevel1[gsq_sfc[i][j][k]][1] = j;
@@ -511,7 +511,7 @@ void init_grmhd_data(char *fname) {
 
     int levmaxini, ndirini, nwini, nws, neqparini, it;
     double t;
-    int nxlone[3], nleafs;
+    int nxlone[3];
 
     file_id = fopen(fname, "rb"); // r for read, b for binary
 
@@ -677,7 +677,7 @@ void init_grmhd_data(char *fname) {
     iglevel1_sfc = (int ***)malloc(ng[0] * sizeof(int **));
     for (int i = 0; i < ng[0]; i++) {
         iglevel1_sfc[i] = (int **)malloc(ng[1] * sizeof(int *));
-        for (int i = 0; i < ng[0]; i++) {
+        for (int j = 0; j < ng[0]; j++) {
             iglevel1_sfc[i][j] = (int *)malloc(ng[2] * sizeof(int));
         }
     }
@@ -688,7 +688,7 @@ void init_grmhd_data(char *fname) {
     }
 
     level_one_Morton_ordered(iglevel1_sfc, sfc_iglevel1);
-
+    int i, j, k;
     for (int sfc_i = 0; sfc_i < ng[2] * ng[1] * ng[0]; sfc_i++) {
         i = sfc_iglevel1[sfc_i][0];
         j = sfc_iglevel1[sfc_i][1];
@@ -836,11 +836,6 @@ void init_storage() {
                 p[i][j][k] = (double *)malloc((N3) * sizeof(double));
             }
         }
-    }
-
-    values = (double **)malloc(nwini * sizeof(double *));
-    for (int j = 0; j < nwini; j++) {
-        values[j] = (double *)malloc(cells * sizeof(double));
     }
 
     return;

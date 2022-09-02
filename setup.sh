@@ -31,7 +31,7 @@ do
 	-r=*|--rad=*)
         RAD="${arg#*=}"
         shift # Remove --cache= from processing
-        ;;	
+        ;;
 
     esac
 done
@@ -47,18 +47,18 @@ else
 	echo " "
 fi
 
-cp $RAPTOR/run/* .
+rsync -u -v $RAPTOR/run/* .
 
 echo "Copying files"
 if [ "$CODE" == "bhac" ] ;
 then
-	cp -v -u -n $RAPTOR/model/bhac/* .
+        rsync -v -u $RAPTOR/model/bhac/* .
 
-	echo "done copying"
+	       echo "done copying"
 
 elif  [ "$CODE" == "harm3d" ] ;
 then
-        cp -v -u -n $RAPTOR/model/harm3d/* .
+        rsync -v -u $RAPTOR/model/harm3d/* .
 else
  echo "no grmhd model picked. Aborting."
  exit
@@ -68,64 +68,64 @@ if [ "$CODE" == "bhac" ] ;
 then
 	if [ "$METRIC" == "mks" ] ;
 	then
-		sed -i '/#define metric (/s/.*/#define metric (MKSBHAC)/' parameters.h
+		sed -i '' '/#define metric (/s/.*/#define metric (MKSBHAC)/' definitions.h
 	fi
     	if [ "$METRIC" == "cks" ] ;
     	then
-	    	sed -i '/#define metric (/s/.*/#define metric (CKS)/' parameters.h
-        fi	
+	    	sed -i '' '/#define metric (/s/.*/#define metric (CKS)/' definitions.h
+        fi
 fi
 
 if [ "$CODE" == "harm3d" ] ;
 then
     	if [ "$METRIC" == "mks" ] ;
     	then
-	    	sed -i '/#define metric (/s/.*/#define metric (MKSHARM)/' parameters.h
+	    	sed -i '' '/#define metric (/s/.*/#define metric (MKSHARM)/' definitions.h
         fi
 fi
 
 if [ "$INT" == "ver" ] ;
 then
-      	sed -i '/#define int_method (/s/.*/#define int_method (VER)/' parameters.h
+      	sed -i '' '/#define int_method (/s/.*/#define int_method (VER)/' definitions.h
 fi
 
 
 if [ "$INT" == "rk2" ] ;
 then
-      	sed -i '/#define int_method (/s/.*/#define int_method (RK2)/' parameters.h
+      	sed -i '' '/#define int_method (/s/.*/#define int_method (RK2)/' definitions.h
 fi
 
 if [ "$INT" == "rk4" ] ;
 then
-      	sed -i '/#define int_method (/s/.*/#define int_method (RK4)/' parameters.h
+      	sed -i '' '/#define int_method (/s/.*/#define int_method (RK4)/' definitions.h
 fi
 
 if [ "$INT" == "rk45" ] ;
 then
-      	sed -i '/#define int_method (/s/.*/#define int_method (RK45)/' parameters.h
+      	sed -i '' '/#define int_method (/s/.*/#define int_method (RK45)/' definitions.h
 fi
 
 if [ "$GRID" == "SMR" ] ;
 then
 
-      	sed -i '/#define AMR /s/.*/#define AMR 0/' parameters.h
-      	sed -i '/#define SMR /s/.*/#define SMR 1/' parameters.h
+      	sed -i '' '/#define AMR /s/.*/#define AMR 0/' definitions.h
+      	sed -i '' '/#define SMR /s/.*/#define SMR 1/' definitions.h
 fi
 
 if [ "$GRID" == "AMR" ] ;
 then
-    	sed -i '/#define AMR /s/.*/#define AMR 1/' parameters.h
-        sed -i '/#define SMR /s/.*/#define SMR 0/' parameters.h
+    	sed -i '' '/#define AMR /s/.*/#define AMR 1/' definitions.h
+        sed -i '' '/#define SMR /s/.*/#define SMR 0/' definitions.h
 fi
 
 if [ "$RAD" == "pol" ] ;
 then
-      	sed -i '/#define POL (/s/.*/#define POL (1)/' parameters.h
+      	sed -i '' '/#define POL (/s/.*/#define POL (1)/' definitions.h
 fi
 
 if [ "$RAD" == "unpol" ] ;
 then
-    	sed -i '/#define POL (/s/.*/#define POL (0)/' parameters.h
+    	sed -i '' '/#define POL (/s/.*/#define POL (0)/' definitions.h
 fi
 
 echo " "
@@ -137,12 +137,12 @@ echo " "
 
 make clean && make all
 
-if [ $? -ne 0 ]; 
-then 
-    echo "Compilations unsuccesful" 
+if [ $? -ne 0 ];
+then
+    echo "Compilations unsuccesful"
     exit
-else 
-    echo "Compilations succesful" 
+else
+    echo "Compilations succesful"
 fi
 
 echo " "

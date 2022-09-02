@@ -144,29 +144,30 @@ void calculate_image_block(struct Camera *intensityfield,
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies][4]) {
-    double dA, I, Q, U, V, I_lin, I_v, p, x, y, r;
+    double dA, S_I, S_Q, S_U, S_V, I_lin, I_v, p, x, y, r;
+
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
         for (int pixel = 0; pixel < tot_pixels; pixel++) {
             for (int freq = 0; freq < num_frequencies; freq++) {
 #if (POL)
 
-                I = (intensityfield)[block].IQUV[pixel][freq][0];
-                Q = (intensityfield)[block].IQUV[pixel][freq][1];
-                U = (intensityfield)[block].IQUV[pixel][freq][2];
-                V = (intensityfield)[block].IQUV[pixel][freq][3];
+                S_I = (intensityfield)[block].IQUV[pixel][freq][0];
+                S_Q = (intensityfield)[block].IQUV[pixel][freq][1];
+                S_U = (intensityfield)[block].IQUV[pixel][freq][2];
+                S_V = (intensityfield)[block].IQUV[pixel][freq][3];
 
                 // Stokes I
-                energy_spectrum[freq][0] += I * dA;
+                energy_spectrum[freq][0] += S_I * dA;
 
                 // Stokes Q
-                energy_spectrum[freq][1] += Q * dA;
+                energy_spectrum[freq][1] += S_Q * dA;
 
                 // Stokes U
-                energy_spectrum[freq][2] += U * dA;
+                energy_spectrum[freq][2] += S_U * dA;
 
                 // stokes V
-                energy_spectrum[freq][3] += V * dA;
+                energy_spectrum[freq][3] += S_V * dA;
 
 #else
                 energy_spectrum[freq][0] +=

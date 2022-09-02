@@ -11,6 +11,15 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// GLOBAL VARS
+///////////////
+
+double R_GRAV;        // Gravitational radius
+double C_CONST;       // A constant frequently used in RTE integration
+double R_ISCO;        // Innermost stable circular orbit
+double CUTOFF_INNER;  // Inner integration boundary
+double JANSKY_FACTOR; // Factor to scale image output
+
 void set_constants() {
     // Horizon radius for integration cutoff
     double Rh = (1. + sqrt(1. - a * a));

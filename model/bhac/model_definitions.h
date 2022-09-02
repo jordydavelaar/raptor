@@ -43,11 +43,11 @@ typedef struct GRMHD {
     double dx_local;
     double beta;
     int igrid_c;
-};
+} GRMHD;
 
 typedef struct block {
     int ind[3], level, size[3];
     double lb[3], dxc_block[3];
-};
+} block;
 
 #endif

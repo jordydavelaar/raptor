@@ -6,6 +6,9 @@
  * A list of all RAPTOR functions.
  */
 
+#include "definitions.h"
+#include "model_definitions.h"
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
@@ -336,4 +339,9 @@ int refine_block();
 void prerun_refine(struct Camera **intensityfield);
 
 void get_impact_params(struct Camera **intensityfield, int block);
+
+int find_block(double x[2], struct Camera *intensityfield);
+
+int find_pixel(double x[2], struct Camera *intensityfield, int block);
+
 #endif // FUNCTIONS_H

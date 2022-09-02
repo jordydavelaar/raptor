@@ -61,7 +61,7 @@ typedef struct Camera {
     double dx[2];                                // pixel spacing of block
     int level;
     int ind[2];
-};
+} Camera;
 
 #define sign(x) (((x) < 0) ? -1 : ((x) > 0))
 
