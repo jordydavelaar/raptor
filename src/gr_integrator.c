@@ -12,6 +12,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 // Updates y with a recursive RKF method. Combines a 4th and 5th order RK step
 // Uses error estimate to perform an updated step if error too large.
 void rk45_step(double *y, void (*f)(double *, double *), double *dt, int bl) {

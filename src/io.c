@@ -11,6 +11,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 void output_files(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies][4],
                   double frequencies[num_frequencies]) {

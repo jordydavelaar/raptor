@@ -12,11 +12,14 @@
 #include "model_global_vars.h"
 
 // GLOBAL VARS
-///////////////
+//////////////
 
 int num_blocks, tot_blocks;
 double BLOCK_SIZE_X, BLOCK_SIZE_Y;
 int max_level;
+
+// FUNCTIONS
+////////////
 
 // Initializes the camera
 void init_camera(struct Camera **intensityfield) {

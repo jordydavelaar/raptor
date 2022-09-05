@@ -12,6 +12,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 // Recursively calculates the determinant of a matrix.
 // Source: http://ideone.com/fork/92JF0O
 double determ(double matrix[][4], int n) {
