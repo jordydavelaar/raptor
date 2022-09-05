@@ -1,23 +1,36 @@
 /*
- * raptor_harm_model.c
+ * model.c
  *
- * Please note that most of the code in this file was adapted
+ * Please note that most of the code for the harm3d model was adapted
  * from GRMONTY (Dolence et al., 2009).
  *
  * GRMONTY is released under the GNU GENERAL PUBLIC LICENSE.
  * Modifications were made in August 2016 by T. Bronzwaer and
  * J. Davelaar.
+ * Modifications were made in August 2022 by J. Davelaar
  */
 
-#include "raptor_model.h"
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
-/* HDF5 v1.8 API */
+// GLOBAL VARS
+///////////////
+double ****p;
+
+int N1, N2, N3;
+
+double R_HIGH, R_LOW, gam;
+
+double R0, Rin, Rout, a, hslope;
+double startx[NDIM], stopx[NDIM], dx[NDIM];
+
+double L_unit, T_unit;
+double RHO_unit, U_unit, B_unit;
+double Ne_unit, Thetae_unit;
 
 void init_model() {
     /* find dimensional quantities from black hole
