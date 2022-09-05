@@ -1,5 +1,5 @@
 /*
- * model.c
+ * model file for HARM3D data
  *
  * Please note that most of the code for the harm3d model was adapted
  * from GRMONTY (Dolence et al., 2009).
@@ -18,7 +18,7 @@
 #include "model_global_vars.h"
 
 // GLOBAL VARS
-///////////////
+//////////////
 double ****p;
 
 int N1, N2, N3;
@@ -31,6 +31,9 @@ double startx[NDIM], stopx[NDIM], dx[NDIM];
 double L_unit, T_unit;
 double RHO_unit, U_unit, B_unit;
 double Ne_unit, Thetae_unit;
+
+// FUNCTIONS
+////////////
 
 void init_model() {
 
