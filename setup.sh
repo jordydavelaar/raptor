@@ -68,11 +68,11 @@ if [ "$CODE" == "bhac" ] ;
 then
 	if [ "$METRIC" == "mks" ] ;
 	then
-		sed -i '' '/#define metric (/s/.*/#define metric (MKSBHAC)/' definitions.h
+		sed -i '/#define metric (/s/.*/#define metric (MKSBHAC)/' definitions.h
 	fi
     	if [ "$METRIC" == "cks" ] ;
     	then
-	    	sed -i '' '/#define metric (/s/.*/#define metric (CKS)/' definitions.h
+	    	sed -i  '/#define metric (/s/.*/#define metric (CKS)/' definitions.h
         fi
 fi
 
@@ -80,52 +80,52 @@ if [ "$CODE" == "harm3d" ] ;
 then
     	if [ "$METRIC" == "mks" ] ;
     	then
-	    	sed -i '' '/#define metric (/s/.*/#define metric (MKSHARM)/' definitions.h
+	    	sed -i  '/#define metric (/s/.*/#define metric (MKSHARM)/' definitions.h
         fi
 fi
 
 if [ "$INT" == "ver" ] ;
 then
-      	sed -i '' '/#define int_method (/s/.*/#define int_method (VER)/' definitions.h
+      	sed -i '/#define int_method (/s/.*/#define int_method (VER)/' definitions.h
 fi
 
 
 if [ "$INT" == "rk2" ] ;
 then
-      	sed -i '' '/#define int_method (/s/.*/#define int_method (RK2)/' definitions.h
+      	sed -i '/#define int_method (/s/.*/#define int_method (RK2)/' definitions.h
 fi
 
 if [ "$INT" == "rk4" ] ;
 then
-      	sed -i '' '/#define int_method (/s/.*/#define int_method (RK4)/' definitions.h
+      	sed -i  '/#define int_method (/s/.*/#define int_method (RK4)/' definitions.h
 fi
 
 if [ "$INT" == "rk45" ] ;
 then
-      	sed -i '' '/#define int_method (/s/.*/#define int_method (RK45)/' definitions.h
+      	sed -i  '/#define int_method (/s/.*/#define int_method (RK45)/' definitions.h
 fi
 
 if [ "$GRID" == "SMR" ] ;
 then
 
-      	sed -i '' '/#define AMR /s/.*/#define AMR 0/' definitions.h
-      	sed -i '' '/#define SMR /s/.*/#define SMR 1/' definitions.h
+      	sed -i  '/#define AMR /s/.*/#define AMR 0/' definitions.h
+      	sed -i  '/#define SMR /s/.*/#define SMR 1/' definitions.h
 fi
 
 if [ "$GRID" == "AMR" ] ;
 then
-    	sed -i '' '/#define AMR /s/.*/#define AMR 1/' definitions.h
-        sed -i '' '/#define SMR /s/.*/#define SMR 0/' definitions.h
+    	sed -i  '/#define AMR /s/.*/#define AMR 1/' definitions.h
+        sed -i  '/#define SMR /s/.*/#define SMR 0/' definitions.h
 fi
 
 if [ "$RAD" == "pol" ] ;
 then
-      	sed -i '' '/#define POL (/s/.*/#define POL (1)/' definitions.h
+      	sed -i  '/#define POL (/s/.*/#define POL (1)/' definitions.h
 fi
 
 if [ "$RAD" == "unpol" ] ;
 then
-    	sed -i '' '/#define POL (/s/.*/#define POL (0)/' definitions.h
+    	sed -i  '/#define POL (/s/.*/#define POL (0)/' definitions.h
 fi
 
 echo " "
