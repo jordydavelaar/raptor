@@ -55,7 +55,7 @@ void read_model(char *argv[]) {
     fscanf(input, "%s %s %lf", temp, temp2, &CAM_SIZE_X);
     fscanf(input, "%s %s %lf", temp, temp2, &CAM_SIZE_Y);
 
-    fscanf(input, "%s %s %d", temp, temp2, &FREQS_PER_DEC);
+    fscanf(input, "%s %s %lf", temp, temp2, &FREQS_PER_DEC);
     fscanf(input, "%s %s %lf", temp, temp2, &FREQ_MIN);
     fscanf(input, "%s %s %lf", temp, temp2, &STEPSIZE);
     fscanf(input, "%s %s %d", temp, temp2, &max_level);
@@ -86,7 +86,7 @@ void read_model(char *argv[]) {
     fprintf(stderr, "IMG_HEIGHT \t= %d \n", IMG_HEIGHT);
     fprintf(stderr, "CAM_SIZE_X \t= %g GM/c2\n", CAM_SIZE_X);
     fprintf(stderr, "CAM_SIZE_Y \t= %g GM/c2\n", CAM_SIZE_Y);
-    fprintf(stderr, "FREQS_PER_DEC \t= %d \n", FREQS_PER_DEC);
+    fprintf(stderr, "FREQS_PER_DEC \t= %lf \n", FREQS_PER_DEC);
     fprintf(stderr, "FREQ_MIN \t= %g Hz\n", FREQ_MIN);
     fprintf(stderr, "STEPSIZE \t= %g \n", STEPSIZE);
 
@@ -144,7 +144,7 @@ void calculate_image_block(struct Camera *intensityfield,
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies][4]) {
-    double dA, S_I, S_Q, S_U, S_V, I_lin, I_v, p, x, y, r;
+    double dA, S_I, S_Q, S_U, S_V;
 
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
