@@ -125,10 +125,11 @@ typedef struct Camera {
 
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
 #define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]
-#define VER (1)              //
-#define RK4 (2)              //
-#define RK45 (3)             //
-#define int_method (2)       // method of integration 2=Verlet, 4-RK4
+#define RK2 (1)              //
+#define VER (2)              //
+#define RK4 (3)              //
+#define RK45 (4)             //
+#define int_method (RK2)     // method of integration
 
 // CONSTANTS
 ////////////

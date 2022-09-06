@@ -364,13 +364,17 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
         dlambda_adaptive = stepsize(X_u, k_u);
 
         // Advance ray/particle
-#if (int_method == RK4)
+#if (int_method == RK2)
+
+        rk2_step(photon_u, &f_geodesic, dlambda_adaptive);
+
+#elif (int_method == RK4)
 
         rk4_step(photon_u, &f_geodesic, dlambda_adaptive);
 
 #elif (int_method == VER)
 
-        verlet_step(photon_u, &f_geodesic, dlambda_adaptive);
+    verlet_step(photon_u, &f_geodesic, dlambda_adaptive);
 
 #elif (int_method == RK45)
 
