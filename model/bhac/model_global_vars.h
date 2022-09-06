@@ -1,7 +1,7 @@
 /*
  * model_global_vars.h
  *
- * Written by J. Davelaar
+ * Written by J. Davelaar 2022
  *
  */
 

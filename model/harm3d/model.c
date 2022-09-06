@@ -1,27 +1,42 @@
 /*
- * raptor_harm_model.c
+ * model file for HARM3D data
  *
- * Please note that most of the code in this file was adapted
+ * Please note that most of the code for the harm3d model was adapted
  * from GRMONTY (Dolence et al., 2009).
  *
  * GRMONTY is released under the GNU GENERAL PUBLIC LICENSE.
  * Modifications were made in August 2016 by T. Bronzwaer and
  * J. Davelaar.
+ * Modifications were made in August 2022 by J. Davelaar
  */
 
-#include "raptor_model.h"
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
-/* HDF5 v1.8 API */
+// GLOBAL VARS
+//////////////
+double ****p;
+
+int N1, N2, N3;
+
+double R_HIGH, R_LOW, gam;
+
+double R0, Rin, Rout, a, hslope;
+double startx[NDIM], stopx[NDIM], dx[NDIM];
+
+double L_unit, T_unit;
+double RHO_unit, U_unit, B_unit;
+double Ne_unit, Thetae_unit;
+
+// FUNCTIONS
+////////////
 
 void init_model() {
-    /* find dimensional quantities from black hole
-     mass and its accretion rate */
+
     set_units(M_UNIT);
 
     fprintf(stderr, "\nStarting read in of HARM3D GRMHD data...\n");
@@ -80,10 +95,6 @@ void init_grmhd_data(char *fname) {
     fprintf(stderr, "Done!\n");
 }
 
-// Current metric: modified Kerr-Schild, squashed in theta
-// to give higher resolution at the equator
-
-// Get the fluid parameters - IN THE PLASMA FRAME?
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     int i, j, k;
@@ -93,7 +104,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     double g_uu[NDIM][NDIM], g_dd[NDIM][NDIM], coeff[4];
     double bsq, beta, beta_trans, b2, trat, Th_unit, two_temp_gam;
 
-    // double Rlow = 1, Rhigh = 1;
     if (X[1] < startx[1] || X[1] > stopx[1] || X[2] < startx[2] ||
         X[2] > stopx[2]) {
         (*modvar).n_e = 0.;
@@ -109,15 +119,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     coeff[2] = del[2];
     coeff[3] = del[3];
 
-    // now interpolated to geodesic location
-    // interpolate (cubiclinear interp.) like in mibothros
     rho = interp_scalar(p[KRHO], i, j, k, coeff);
     uu = interp_scalar(p[UU], i, j, k, coeff);
     (*modvar).n_e = rho * Ne_unit + 1e-40;
 
-    // here unlike in mibothros it was interpolating scalars and
-    // reconstructing velocity and magnetic field based on interpolated
-    // coefficients
     Bp[1] = interp_scalar(p[B1], i, j, k, coeff);
     Bp[2] = interp_scalar(p[B2], i, j, k, coeff);
     Bp[3] = interp_scalar(p[B3], i, j, k, coeff);
@@ -126,8 +131,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     V_u[2] = interp_scalar(p[U2], i, j, k, coeff);
     V_u[3] = interp_scalar(p[U3], i, j, k, coeff);
 
-    // reconstrueren van de 4 vectoren
-    // Get Ucov
     VdotV = 0.;
     for (i = 1; i < NDIM; i++)
         for (j = 1; j < NDIM; j++)
@@ -143,7 +146,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     for (int i = 0; i < NDIM; i++)
         Utot += (*modvar).U_u[i] * (*modvar).U_d[i];
 
-    // Get B and Bcov
     UdotBp = 0.;
     for (i = 1; i < NDIM; i++)
         UdotBp += (*modvar).U_d[i] * Bp[i];
@@ -161,19 +163,19 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).B = sqrt(bsq) * B_unit + 1e-40;
 
-    /*electron temperature depending on the plasma magnetization*/
     beta = uu * (gam - 1.) / 0.5 / bsq;
 
     beta_trans = 1.;
     b2 = pow(beta / beta_trans, 2);
 
-    trat = 3.; // Rhigh * b2/(1. + b2) + Rlow /(1. + b2);
+    trat = 3.;
     two_temp_gam = 0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
     Th_unit = (1.4444444444 - 1.) * (PROTON_MASS / ELECTRON_MASS) / (1. + trat);
 
     (*modvar).theta_e =
         (2. / 15.) * (uu / rho) * (PROTON_MASS / ELECTRON_MASS) + 1e-40;
 
+#if (DEBUG)
     if (uu < 0)
         fprintf(stderr, "U %e %e\n", uu, p[UU][i][j][k]);
     ;
@@ -184,6 +186,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         fprintf(stderr, "B %e\n", (*modvar).B);
     if ((*modvar).n_e < 0)
         fprintf(stderr, "Ne %e %e\n", (*modvar).n_e, p[KRHO][i][j][k]);
+#endif
 
     if (bsq / rho > 1. || exp(X[1]) > 50.) {
         (*modvar).n_e = 0;
@@ -194,18 +197,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 }
 
 void set_units(double M_unit_) {
-    //	double MBH;
 
-    /* set black hole mass */
-    /** could be read in from file here,
-        along with M_unit and other parameters **/
-    //	MBH = 4.e6;
-
-    /** input parameters appropriate to Sgr A* **/
-    // double BH_MASS = MBH * MSUN;
-
-    /** from this, calculate units of length, time, mass,
-        and derivative units **/
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
 
@@ -252,7 +244,7 @@ double interp_scalar(double ***var, int i, int j, int k, double coeff[4]) {
 
 void Xtoijk(double X[NDIM], int *i, int *j, int *k, double del[NDIM]) {
     double phi;
-    /* Map X[3] into sim range, assume startx[3] = 0 */
+
     phi = fmod(X[3], stopx[3]);
     if (phi < 0.)
         phi = stopx[3] + phi;
@@ -295,9 +287,6 @@ void Xtoijk(double X[NDIM], int *i, int *j, int *k, double del[NDIM]) {
 
     return;
 }
-
-// ALLOCATION STUFF BELOW HERE
-//////////////////////////////
 
 static void *malloc_rank1(int n1, int alloc_size) {
     void *A;

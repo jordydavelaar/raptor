@@ -15,6 +15,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 double get_r(double X_u[4]) {
 
 #if (metric == CKS)

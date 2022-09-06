@@ -12,6 +12,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,
                                       double IQUV[num_frequencies][4]) {

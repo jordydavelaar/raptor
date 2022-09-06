@@ -11,6 +11,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 // Returns the covariant metric g_dd at location X_u
 void metric_dd(double X_u[4], double g_dd[4][4]) {
     // Initialize: set all elements to 0

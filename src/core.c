@@ -12,7 +12,7 @@
 #include "model_global_vars.h"
 
 // GLOBAL VARS
-///////////////
+//////////////
 
 char GRMHD_FILE[256];
 
@@ -25,6 +25,9 @@ double SOURCE_DIST; // Distance to M87 (cm); for Sgr A* use (2.47e22)
 int IMG_WIDTH, IMG_HEIGHT;
 double CAM_SIZE_X, CAM_SIZE_Y;
 double STEPSIZE;
+
+// FUNCTIONS
+////////////
 
 // Read model parameters from model.in
 void read_model(char *argv[]) {

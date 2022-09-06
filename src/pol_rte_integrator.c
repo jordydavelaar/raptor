@@ -12,6 +12,9 @@
 #include "model_functions.h"
 #include "model_global_vars.h"
 
+// FUNCTIONS
+////////////
+
 // y contains the 4-position and the 4-velocity for one lightray/particle.
 void f_parallel(double y[], double complex f_u[], double fvector[],
                 double complex f_u_vector[]) {

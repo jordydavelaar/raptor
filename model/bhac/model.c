@@ -1,7 +1,9 @@
-
 /*
- * raptor_model.c for BHAC AMR data
- * author: Jordy Davelaar
+ * model file for non-uniform AMR BHAC data, not to be confused with BHAC
+ * postrad data.
+ *
+ * Written by J. Davelaar 2019
+ * Adapted by J. Davelaar August 2022
  */
 
 #include "definitions.h"
@@ -12,7 +14,7 @@
 #include "model_global_vars.h"
 
 // GLOBAL VARS
-///////////////
+//////////////
 
 double ****p;
 
@@ -32,6 +34,9 @@ int ng[3], *forest, *nx, nleafs;
 int N1, N2, N3;
 
 struct block *block_info;
+
+// FUNCTIONS
+////////////
 
 void init_model() {
     // Set physical units

@@ -1,7 +1,7 @@
 /*
  * model_definitions.h
  *
- * Written by J. Davelaar
+ * Written by J. Davelaar 2022
  *
  */
 
