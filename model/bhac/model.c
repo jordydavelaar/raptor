@@ -1164,3 +1164,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     return 1;
 }
+
+void compute_user_aux(struct Camera *intensityfield,
+                      double energy_spectrum[num_frequencies][nspec]) {
+
+    return;
+}

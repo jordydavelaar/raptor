@@ -146,7 +146,7 @@ void calculate_image_block(struct Camera *intensityfield,
 // Functions that computes a spectrum at every frequency
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies][4]) {
+                  double energy_spectrum[num_frequencies][nspec]) {
     double dA, S_I, S_Q, S_U, S_V;
 
     for (int block = 0; block < tot_blocks; block++) {

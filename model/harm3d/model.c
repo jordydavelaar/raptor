@@ -334,3 +334,9 @@ void init_storage(void) {
 
     return;
 }
+
+void compute_spec_user(struct Camera *intensityfield,
+                       double energy_spectrum[num_frequencies][nspec]) {
+
+    return;
+}
