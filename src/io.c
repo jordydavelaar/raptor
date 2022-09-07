@@ -15,7 +15,7 @@
 ////////////
 
 void output_files(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies][4],
+                  double energy_spectrum[num_frequencies][nspec],
                   double frequencies[num_frequencies]) {
     struct stat st = {0};
     char spec_folder[64] = "output";
@@ -51,11 +51,12 @@ void output_files(struct Camera *intensityfield,
 
 #if (SPECFILE)
 #if (POL)
-        fprintf(specfile, "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n",
-                frequencies[f], JANSKY_FACTOR * energy_spectrum[f][0],
-                JANSKY_FACTOR * energy_spectrum[f][1],
-                JANSKY_FACTOR * energy_spectrum[f][2],
-                JANSKY_FACTOR * energy_spectrum[f][3]);
+        fprintf(specfile, "%+.15e", frequencies[f]);
+        for (int s = 0; s < nspec; s++) {
+            fprintf(specfile, "\t%+.15e",
+                    JANSKY_FACTOR * energy_spectrum[f][s]);
+        }
+        fprintf(specfile, "\n");
 #else
         fprintf(specfile, "%+.15e\t%+.15e\n", frequencies[f],
                 JANSKY_FACTOR * energy_spectrum[f][0]);

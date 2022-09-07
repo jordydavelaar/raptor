@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
-    double energy_spectrum[num_frequencies][4];
+    double energy_spectrum[num_frequencies][nspec];
     double frequencies[num_frequencies];
 
     struct Camera *intensityfield;
@@ -153,6 +153,9 @@ int main(int argc, char *argv[]) {
 
     compute_spec(intensityfield, energy_spectrum);
 
+#if (USERSPEC)
+    compute_user_aux(intensityfield, energy_spectrum);
+#endif
     // WRITE OUTPUT FILES
     /////////////////////
 
