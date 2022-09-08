@@ -23,7 +23,7 @@ double ****p;
 
 int N1, N2, N3;
 
-double R_HIGH, R_LOW, gam;
+double gam;
 
 double R0, Rin, Rout, a, hslope;
 double startx[NDIM], stopx[NDIM], dx[NDIM];

@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     init_camera(&intensityfield);
 
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-        for (int s = 0; s < 4; s++)
+        for (int s = 0; s < nspec; s++)
             energy_spectrum[f][s] = 0.;
     }
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     compute_spec(intensityfield, energy_spectrum);
 
 #if (USERSPEC)
-    compute_user_aux(intensityfield, energy_spectrum);
+    compute_spec_user(intensityfield, energy_spectrum);
 #endif
     // WRITE OUTPUT FILES
     /////////////////////

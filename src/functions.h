@@ -320,7 +320,7 @@ void compute_spec_user(struct Camera *intensity,
 
 // Create output files (image, spectrum, etc.)
 void output_files(struct Camera *intesityfield,
-                  double spectrum[num_frequencies][4],
+                  double spectrum[num_frequencies][nspec],
                   double frequencies[num_frequencies]);
 
 void write_image_hdf5(char *hdf5_filename, struct Camera *data,

@@ -51,7 +51,7 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=20,mas=1,
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
         beta=((np.reshape(-image['beta'][i],(pixels,pixels))))*mas
 
-        figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind])**0.25,vmin=0,vmax=1,cmap=cmap,shading='auto')
+        figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=0,vmax=1,cmap=cmap,shading='auto')
 
     fig.colorbar(figure,label=label,ax=ax)
 
