@@ -498,7 +498,6 @@ int level_one_Morton_ordered(int ***iglevel1_sfc, int **sfc_iglevel1) {
                 sfc_iglevel1[gsq_sfc[i][j][k]][0] = i;
                 sfc_iglevel1[gsq_sfc[i][j][k]][1] = j;
                 sfc_iglevel1[gsq_sfc[i][j][k]][2] = k;
-                fprintf(stderr, "%d\n", gsq_sfc[i][j][k]);
             }
         }
     }
@@ -682,7 +681,7 @@ void init_grmhd_data(char *fname) {
     iglevel1_sfc = (int ***)malloc(ng[0] * sizeof(int **));
     for (int i = 0; i < ng[0]; i++) {
         iglevel1_sfc[i] = (int **)malloc(ng[1] * sizeof(int *));
-        for (int j = 0; j < ng[0]; j++) {
+        for (int j = 0; j < ng[1]; j++) {
             iglevel1_sfc[i][j] = (int *)malloc(ng[2] * sizeof(int));
         }
     }
@@ -1163,4 +1162,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     return 1;
+}
+
+void compute_spec_user(struct Camera *intensityfield,
+                       double energy_spectrum[num_frequencies][nspec]) {
+
+    return;
 }
