@@ -498,7 +498,6 @@ int level_one_Morton_ordered(int ***iglevel1_sfc, int **sfc_iglevel1) {
                 sfc_iglevel1[gsq_sfc[i][j][k]][0] = i;
                 sfc_iglevel1[gsq_sfc[i][j][k]][1] = j;
                 sfc_iglevel1[gsq_sfc[i][j][k]][2] = k;
-                fprintf(stderr, "%d\n", gsq_sfc[i][j][k]);
             }
         }
     }
@@ -1165,8 +1164,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     return 1;
 }
 
-void compute_user_aux(struct Camera *intensityfield,
-                      double energy_spectrum[num_frequencies][nspec]) {
+void compute_spec_user(struct Camera *intensityfield,
+                       double energy_spectrum[num_frequencies][nspec]) {
 
     return;
 }
