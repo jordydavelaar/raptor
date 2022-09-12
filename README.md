@@ -32,16 +32,26 @@ To setup a RAPTOR run, first create a run directory. Copy setup.sh to the run di
 
 
 ```
-./setup.sh <raptor-model>
+$RAPTOR/setup.sh <raptor-model> <OPTIONS>
 ```
 
-where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. This setup should only be used for initialization of a setup folder, it should not run when a model file is present. For recompiling the code used ```make all```.   
+where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. The script checks if model files are present and only overwrites if source model files are newer than user model files. For recompiling the code recommended to use ```make all```.   
 
-In the case of BHAC there are two coordinate systems supported either MKSBHAC or CKS. The default is currently CKS. The metric can be changed either in the paramters.h file at line 107 "#define metric (CKS)" -> "#define metric (MKSBHAC)" or by using
+The setup script takes various argument;
 
-```
-./setup.sh bhac mks
-```
+``` -c/--code ``` harm3d, bhac
+
+grmhd code to interface with, currently supported HARM3D (default) or BHAC.
+
+``` -i/--int ``` rk2, rk4, rk45, ver
+integrator for geodesic integration either RK2, RK4, RK45 or Verlet
+
+``` -g/--grid ``` mks, cks
+metric type, mks = Modified Kerr-Schild but specific for either HARM3D of BHAC, or Cartesian Kerr-Schild (BHAC only)
+ 
+``` -r/--rad ``` pol, unpol
+Perform the radiation transport either polarized or unpolarized
+
 
 # Running RAPTOR
 
