@@ -44,7 +44,7 @@ The setup script takes various argument;
 grmhd code to interface with, currently supported HARM3D or BHAC.
 
 ``` -i/--int ``` rk2, rk4, rk45, ver
-integrator for geodesic integration either RK2, RK4, RK45 or Verlet
+integrator for geodesic integration; options are Runge-Kutta (RK) integrators of varying order, RK2 and RK4, an adpative RK integrator RK45 or Verlet scheme.
 
 ``` -g/--grid ``` mks, cks
 metric type, mks = Modified Kerr-Schild but specific for either HARM3D of BHAC, or Cartesian Kerr-Schild (BHAC only)
