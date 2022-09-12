@@ -1,6 +1,6 @@
-# RAPTOR++
+# RAPTOR
 
-This is the developer branch of RAPTOR.
+This is the public version of RAPTOR.
 
 Main developers; Thomas Bronzwaer, Jordy Davelaar
 
