@@ -106,7 +106,16 @@ Camera dependent parameters
 
 # Output
 
-The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies. Python scripts are provided in the *python* directory that explain how to read in and generate figures.
+The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies, and a spectral file containing total integrated stokes parameter at every frequency.
+
+
+There is a python library ``` rapplot.py ``` with functions to handle data read-in, and plotting. Add the python directory to your python path e.g.;
+
+``` export PYTHONPATH=$RAPTOR/python/plotting:$PYTHONPATH ```
+
+to use ``` import rapplot ```. More usage explanation can be found in the README soon.
+ 
+Python script ``` plotter-example.py ``` is provided in the *python* directory that explain how to read in and generate a stokes I only figure.
 
 <p align="center">
   <img src="docs/output_example.png" width="500" title="hover text">
