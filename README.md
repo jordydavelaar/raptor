@@ -41,7 +41,7 @@ The setup script takes various argument;
 
 ``` -c/--code ``` harm3d, bhac
 
-grmhd code to interface with, currently supported HARM3D (default) or BHAC.
+grmhd code to interface with, currently supported HARM3D or BHAC.
 
 ``` -i/--int ``` rk2, rk4, rk45, ver
 integrator for geodesic integration either RK2, RK4, RK45 or Verlet
