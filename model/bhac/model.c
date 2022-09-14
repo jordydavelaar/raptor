@@ -681,7 +681,7 @@ void init_grmhd_data(char *fname) {
     iglevel1_sfc = (int ***)malloc(ng[0] * sizeof(int **));
     for (int i = 0; i < ng[0]; i++) {
         iglevel1_sfc[i] = (int **)malloc(ng[1] * sizeof(int *));
-        for (int j = 0; j < ng[1]; j++) {
+        for (int j = 0; j < ng[0]; j++) {
             iglevel1_sfc[i][j] = (int *)malloc(ng[2] * sizeof(int));
         }
     }
@@ -871,8 +871,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (i < 0) {
         del[1] = 0.;
     } else if (i > nx[0] - 2) {
-        del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
-
+        del[1] =  1. ;
     } else {
         del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
     }
@@ -880,8 +879,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (j < 0) {
         del[2] = 0.;
     } else if (j > nx[1] - 2) {
-        del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
-
+        del[2] = 1. ;
     } else {
         del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
     }
@@ -889,7 +887,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (k < 0) {
         del[3] = 0.;
     } else if (k > nx[2] - 2) {
-        del[3] = (X[3] - ((k)*block_dx[2] + block_start[2])) / block_dx[2];
+        del[3] = 1.0;
     } else {
         del[3] = (X[3] - ((k)*block_dx[2] + block_start[2])) / block_dx[2];
     }
@@ -930,17 +928,14 @@ double interp_scalar(double **var, int c, double coeff[4]) {
 
     if (c_ip >= nx[0]) {
         c_ip = c_i;
-        c_i--;
     }
 
     if (c_jp >= nx[1]) {
         c_jp = c_j;
-        c_j--;
     }
 
     if (c_kp >= nx[2]) {
         c_kp = c_k;
-        c_k--;
     }
 
     b1 = 1. - del[1];
@@ -1155,8 +1150,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-    if ((Bsq / (rho + 1e-20) > 1.) || r > 50. ||
-        (*modvar).theta_e > 100.) { // excludes all spine emmission
+
+    if ((Bsq / (rho + 1e-20) > 5.) || r > RT_OUTER_CUTOFF ||
+        (*modvar).theta_e > 100. || (*modvar).theta_e < 1e-3) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
@@ -1165,7 +1161,60 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 }
 
 void compute_spec_user(struct Camera *intensityfield,
-                       double energy_spectrum[num_frequencies][nspec]) {
+                      double energy_spectrum[num_frequencies][nspec]) {
+    double dA, S_I, S_Q, S_U, S_V,r,IV,Ipol,Ilin;
 
-    return;
+    for (int block = 0; block < tot_blocks; block++) {
+        dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            for (int freq = 0; freq < num_frequencies; freq++) {
+
+                r = sqrt((intensityfield)[block].alpha[pixel] *
+                             (intensityfield)[block].alpha[pixel] +
+                         (intensityfield)[block].beta[pixel] *
+                             (intensityfield)[block].beta[pixel]);
+
+                S_I = (intensityfield)[block].IQUV[pixel][freq][0];
+                S_Q = (intensityfield)[block].IQUV[pixel][freq][1];
+                S_U = (intensityfield)[block].IQUV[pixel][freq][2];
+                S_V = (intensityfield)[block].IQUV[pixel][freq][3];
+
+                Ipol = sqrt(S_Q * S_Q + S_U * S_U + S_V * S_V);
+                Ilin = sqrt(S_Q * S_Q + S_U * S_U);
+                IV = sqrt(S_V * S_V);
+
+                // Stokes I
+                energy_spectrum[freq][4] += Ipol * dA;
+
+                // Stokes Q
+                energy_spectrum[freq][5] += Ilin * dA;
+
+                // Stokes U
+                energy_spectrum[freq][6] += IV * dA;
+
+                // stokes V
+                if (r > 30) {
+                    // Stokes I
+                    energy_spectrum[freq][7] += S_I * dA;
+
+                    // Stokes Q
+                    energy_spectrum[freq][8] += S_Q * dA;
+
+                    // Stokes U
+                    energy_spectrum[freq][9] += S_U * dA;
+
+                    // stokes V
+                    energy_spectrum[freq][10] += S_V * dA;
+
+                    energy_spectrum[freq][11] += Ipol * dA;
+
+                    // Stokes Q
+                    energy_spectrum[freq][12] += Ilin * dA;
+
+                    // Stokes U
+                    energy_spectrum[freq][13] += IV * dA;
+                }
+            }
+        }
+    }
 }

@@ -745,7 +745,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         double r_current = get_r(X_u);
 
         // Check whether the ray is currently in the GRMHD simulation volume
-        if (get_fluid_params(X_u, &modvar) && r_current < OUTER_BOUND_POL) {
+        if (get_fluid_params(X_u, &modvar) && r_current < RT_OUTER_CUTOFF) {
             pol_integration_step(modvar, frequency, &dl_current, C_CONST, X_u,
                                  k_u, k_d, &POLARIZATION_ACTIVE, f_u,
                                  f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv,

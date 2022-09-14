@@ -96,7 +96,7 @@ typedef struct Camera {
 #define CKS (8)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 
 // Metric
-#define metric (CKS)
+#define metric (MKSBHAC)
 #if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
@@ -110,8 +110,6 @@ typedef struct Camera {
 #define LIGHT_TRANSPORT                                                        \
     (1) // Toggle light transport calculation on/off for integration debugging
 
-#define RT_OUTER_CUTOFF (40.) // Outer boundary of rad transfer computation
-
 // OBSERVER PARAMETERS
 //////////////////////
 #define rcam (1e4) //(500.)    // Camera distance from the sing.(units of Rg)
@@ -121,7 +119,7 @@ typedef struct Camera {
 // INTEGRATOR PARAMETERS
 ////////////////////////
 
-#define OUTER_BOUND_POL (1000.) // Stop polarized integration beyond this radius
+#define RT_OUTER_CUTOFF (100.) // Stop polarized integration beyond this radius
 
 #define delta_num (1.e-4) // Used for numerical derivatives
 #define max_steps (1e5)   // Maximum number of integration steps
@@ -132,7 +130,7 @@ typedef struct Camera {
 #define VER (2)              //
 #define RK4 (3)              //
 #define RK45 (4)             //
-#define int_method (RK2)     // method of integration
+#define int_method (RK4)
 
 // CONSTANTS
 ////////////
