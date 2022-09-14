@@ -871,7 +871,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (i < 0) {
         del[1] = 0.;
     } else if (i > nx[0] - 2) {
-        del[1] =  1. ;
+        del[1] = 1.;
     } else {
         del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
     }
@@ -879,7 +879,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (j < 0) {
         del[2] = 0.;
     } else if (j > nx[1] - 2) {
-        del[2] = 1. ;
+        del[2] = 1.;
     } else {
         del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
     }
@@ -1150,9 +1150,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
-
-    if ((Bsq / (rho + 1e-20) > 5.) || r > RT_OUTER_CUTOFF ||
-        (*modvar).theta_e > 100. || (*modvar).theta_e < 1e-3) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > SIGMA_CUT) || r > RT_OUTER_CUTOFF ||
+        (*modvar).theta_e > THETAE_MAX ||
+        (*modvar).theta_e < THETAE_MIN) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
@@ -1161,8 +1161,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 }
 
 void compute_spec_user(struct Camera *intensityfield,
-                      double energy_spectrum[num_frequencies][nspec]) {
-    double dA, S_I, S_Q, S_U, S_V,r,IV,Ipol,Ilin;
+                       double energy_spectrum[num_frequencies][nspec]) {
+    double dA, S_I, S_Q, S_U, S_V, r, IV, Ipol, Ilin;
 
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
