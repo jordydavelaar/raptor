@@ -107,9 +107,9 @@ typedef struct Camera {
 // MODEL PARAMETERS
 ///////////////////
 
-#define SIGMA_CUT 5;
-#define THETAE_MAX 100;
-#define THETAE_MIN 1e-3;
+#define SIGMA_CUT (5)
+#define THETAE_MAX (100)
+#define THETAE_MIN (1e-3)
 
 #define LIGHT_TRANSPORT                                                        \
     (1) // Toggle light transport calculation on/off for integration debugging

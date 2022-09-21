@@ -681,7 +681,7 @@ void init_grmhd_data(char *fname) {
     iglevel1_sfc = (int ***)malloc(ng[0] * sizeof(int **));
     for (int i = 0; i < ng[0]; i++) {
         iglevel1_sfc[i] = (int **)malloc(ng[1] * sizeof(int *));
-        for (int j = 0; j < ng[0]; j++) {
+        for (int j = 0; j < ng[1]; j++) {
             iglevel1_sfc[i][j] = (int *)malloc(ng[2] * sizeof(int));
         }
     }

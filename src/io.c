@@ -292,9 +292,13 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
                 exit(1);
             }
             int pixel = find_pixel(x, intensityfield, block);
-            fprintf(uniformfile, "%+.15e\t%+.15e\t%+.15e \n",
+            fprintf(uniformfile,
+                    "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e \n",
                     x[0] * arcsec_factor, x[1] * arcsec_factor,
-                    intensityfield[block].IQUV[pixel][freq][0] * UNIT_FACTOR);
+                    intensityfield[block].IQUV[pixel][freq][0] * UNIT_FACTOR,
+                    intensityfield[block].IQUV[pixel][freq][1] * UNIT_FACTOR,
+                    intensityfield[block].IQUV[pixel][freq][2] * UNIT_FACTOR,
+                    intensityfield[block].IQUV[pixel][freq][3] * UNIT_FACTOR);
         }
     }
     fclose(uniformfile);
