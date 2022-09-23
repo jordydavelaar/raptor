@@ -1390,15 +1390,15 @@ double NR_stepU(double Ug2_0, double Ur2, double Xg2) {
 double Xg2_approx_rand(double Xr2) {
     double Xg2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
     double Xg2_prev = 1.e-15; // Keeps track of previous estimate to converge
-    double tolerance = 1.e-9; // Maximum error
+    double tolerance = 1.e-15; // Maximum error
     int steps = 0;
     int maxsteps = 100;
 
     int count = 0;
 
     // Main loop
-    while (fabs(Xg2_current - Xg2_prev) > tolerance) {
-        Xg2_current = (double)rand() / (double)RAND_MAX;
+//    while (fabs(Xg2_current - Xg2_prev) > tolerance) {
+        Xg2_current =  Xr2;//(double)rand() / (double)RAND_MAX;
         steps = 0;
         count++;
 
@@ -1407,7 +1407,7 @@ double Xg2_approx_rand(double Xr2) {
             Xg2_current = NR_stepX(Xg2_current, Xr2);
             steps++;
         }
-    }
+ //   }
 
     // Clamp output value between 0 and 1
     return Xg2_current;
@@ -1419,15 +1419,15 @@ double Xg2_approx_rand(double Xr2) {
 double Ug2_approx_rand(double Ur2, double Xg2) {
     double Ug2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
     double Ug2_prev = 1.e-15; // Keeps track of previous estimate to converge
-    double tolerance = 1.e-9; // Maximum error
+    double tolerance = 1.e-15; // Maximum error
     int steps = 0;
     int maxsteps = 100;
 
     int count = 0;
 
     // Main loop
-    while (fabs(Ug2_current - Ug2_prev) > tolerance) {
-        Ug2_current = (double)rand() / (double)RAND_MAX;
+//    while (fabs(Ug2_current - Ug2_prev) > tolerance) {
+        Ug2_current = Ur2 ;//(double)rand() / (double)RAND_MAX;
         steps = 0;
         count++;
 
@@ -1436,7 +1436,7 @@ double Ug2_approx_rand(double Ur2, double Xg2) {
             Ug2_current = NR_stepU(Ug2_current, Ur2, Xg2);
             steps++;
         }
-    }
+ //   }
 
     return Ug2_current;
 }

@@ -1,6 +1,6 @@
 CC = h5cc -I$(RAPTOR)/src -I$(PWD)
-CFLAGS = -fopenmp  -std=c99  -lm -lgsl -Wall -Wno-unused-but-set-variable
-LDFLAGS = -fopenmp -lm -lgsl
+CFLAGS = -fopenmp  -std=c99  -O2 -lm -lgsl -Wall -Wno-unused-but-set-variable
+LDFLAGS = -fopenmp -lm -lgsl 
 
 VPATH=$(RAPTOR)/src:
 CPATH=$(RAPTOR)/src:

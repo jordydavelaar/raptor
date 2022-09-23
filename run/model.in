@@ -1,15 +1,15 @@
-MBH		(Msun)	6.2e9
-DISTANCE		(kpc) 3945
-M_UNIT		(g)	2.739e25
+MBH		(Msun)	4.14e6
+DISTANCE		(kpc) 8.127
+M_UNIT		(g)	5.5e+21
 R_LOW		(-)	1
-R_HIGH		(-)	1
+R_HIGH		(-)	40
 
-INCLINATION	(deg) 	160
-IMG_WIDTH	(pixels)	100
-IMG_HEIGHT	(pixels)	100
-CAM_SIZE_X	(Rg)		20
-CAM_SIZE_Y	(Rg)		20
+INCLINATION	(deg)           50
+IMG_WIDTH	(pixels)	200
+IMG_HEIGHT	(pixels)	200
+CAM_SIZE_X	(Rg)		40
+CAM_SIZE_Y	(Rg)		40
 FREQS_PER_DEC	(-)		1
 FREQ_MIN	(Hz)		230.e9
-STEPSIZE	(-)		0.05
+STEPSIZE	(-)		0.01
 MAX_LEVEL	(-)		1

@@ -39,6 +39,9 @@ struct block *block_info;
 ////////////
 
 void init_model() {
+   // init rand
+   srand(4242424242);
+
     // Set physical units
     set_units(M_UNIT);
 
@@ -1146,13 +1149,16 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-    Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
+    Thetae_unit = 1./3. * (MPoME) / (trat + 1);
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
+   double xc = r * sin(X[2]) * cos(X[3]);
+   double yc = r * sin(X[2]) * sin(X[3]);
+   double rc =sqrt(xc*xc + yc*yc);
 
     if ((Bsq / (rho + 1e-20) > SIGMA_CUT) || r > RT_OUTER_CUTOFF ||
         (*modvar).theta_e > THETAE_MAX ||
-        (*modvar).theta_e < THETAE_MIN) { // excludes all spine emmission
+        (*modvar).theta_e < THETAE_MIN || X[2] < 3.*M_PI/180. || X[2] > M_PI - 3. * M_PI /180.) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }

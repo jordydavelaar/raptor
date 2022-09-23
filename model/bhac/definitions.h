@@ -107,7 +107,7 @@ typedef struct Camera {
 // MODEL PARAMETERS
 ///////////////////
 
-#define SIGMA_CUT (5)
+#define SIGMA_CUT (1)
 #define THETAE_MAX (100)
 #define THETAE_MIN (1e-3)
 

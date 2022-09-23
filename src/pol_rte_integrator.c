@@ -354,6 +354,7 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
         *aU *= (pol_frac - 0.005);
         *aV *= (pol_frac - 0.005);
     }
+
 }
 int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
                     double rU, double rV, double aI, double aQ, double aU,
@@ -395,7 +396,7 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
 
     int STIFF = 0;
 
-    double STIFFTHRESH = 0.8;
+    double STIFFTHRESH = 0.99;
 
     if (res1 > STIFFTHRESH || res2 > STIFFTHRESH || res3 > STIFFTHRESH ||
         res4 > STIFFTHRESH)
