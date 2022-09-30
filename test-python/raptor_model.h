@@ -20,7 +20,9 @@ struct GRMHD {
     double B;
     double theta_e;
     double sigma;
+    double sigma_min;
     double dx_local;
+    double beta;
     int igrid_c;
 };
 
@@ -108,6 +110,8 @@ void init_bhac_amr_data(char *fname);
 void init_storage();
 double interp_scalar_2D(double ***var, int i, int j, int k, double coeff[4]);
 void Xtoij(double *X, int *i, int *j, double *del);
+
+double interp_scalar(double **var, int c, double coeff[4]);
 
 void lower(double *ucon, double Gcov[NDIM][NDIM], double *ucov);
 

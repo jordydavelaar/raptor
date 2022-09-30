@@ -35,6 +35,19 @@ char inputfile[100];
 #define POL (0)
 
 #define num_frequencies 1
+
+#define FREQFILE (0)
+#define FREQLOG (1)
+
+#define FREQS (FREQLOG)
+
+#define EMISUSER (0)
+
+#define UNIF (1)
+
+#define AMR 0
+#define SMR 1
+
 #define num_pixels_1d 10
 #define tot_pixels 100
 int num_blocks, tot_blocks, tot_blocks_alloc;
@@ -62,12 +75,12 @@ extern double B_unit;
 extern double Ne_unit;
 extern double Thetae_unit;
 
-// DISTRIBUTION CHOISES 
+// DISTRIBUTION CHOISES
 //////////////////
 #define KAPPA (0) // kappa distribution
-#define TH (1) // thermal distribution
+#define TH (1)    // thermal distribution
 #define POWER (2) // Power-law distribution
-#define DF (TH)  // Distribution function
+#define DF (TH)   // Distribution function
 #define kappa 5.0
 #define power 2.5
 #define gamma_min 1.
@@ -133,8 +146,8 @@ int FREQS_PER_DEC;
 double FREQ_MIN;
 double FREQ_MAX;
 
-#define source_dist (5.061e25) // Distance to M87 (cm); for Sgr A* use (2.47e22)
-#define rcam (1e4) //(500.)    // Camera distance from the sing.(units of Rg)
+double source_dist; // Distance to M87 (cm); for Sgr A* use (2.47e22)
+#define rcam (1e4)  //(500.)    // Camera distance from the sing.(units of Rg)
 
 int IMG_WIDTH;
 int IMG_HEIGHT;
@@ -153,11 +166,11 @@ double CAM_SIZE_Y;
 
 double STEPSIZE;
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
-#define horizon_marg (1.e-5) // Stop tracing at this distance from E.H. [BL]
+#define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]
 #define VER (1)              //
 #define RK4 (2)              //
 #define RK45 (3)             //
-#define int_method (2)       // method of integration 2=Verlet, 4-RK4
+#define int_method (RK4)
 
 // CONSTANTS
 ////////////
@@ -172,6 +185,7 @@ double STEPSIZE;
 #define MPCL2 (0.0015033)
 #define GGRAV (6.674e-8)
 #define MSUN (1.989e33)
+#define KPCTOCM (3.086e21)
 #define MPoME (PROTON_MASS / ELECTRON_MASS)
 //#define M_PI 3.14159265358979323846
 
