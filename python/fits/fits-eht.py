@@ -1,7 +1,7 @@
 
 import numpy as np
 from astropy.io import fits
-import imutils
+
 from astropy import units as u
 from astropy.wcs import WCS
 from astropy.coordinates import SkyCoord
@@ -30,7 +30,7 @@ inc  = 30
 freq = 230e9
 
 fov    = 40. #Field of view in Rg
-pixels = 70 #pixels in file
+pixels = 200 #pixels in file
 
 #computing some necessary quantities
 mas = ((G*M/c2)/d )* asindeg * 1000
@@ -41,9 +41,11 @@ PIX_SIZE = dr * mas
 ind = int(sys.argv[1])
 
 def read_image(folder,ind,freq,inc):
-    image=np.loadtxt("output/uniform_img_%.02e_%d.dat"%(freq,ind),skiprows=0,usecols=[2])
-
-    image=np.reshape(image,(-1,int(np.sqrt(len(image)))))
+    data =np.loadtxt("output/uniform_img_%.02e_%d.dat"%(freq,ind),skiprows=0,usecols=[2,3,4,5],unpack=True)
+    print(data.shape)
+    image=np.reshape(data,(4,pixels,pixels))
+    image= np.transpose(image,axes=[0,2,1])
+    image = image[:,::-1,:]
     return image
 
 def write_fits(folder,image,ind, a, R, inc, freq):
@@ -79,7 +81,7 @@ def write_fits(folder,image,ind, a, R, inc, freq):
     header['MJD']      = float(modjuldate)
     header['TELESCOP'] = 'VLBI'
     header['BUNIT']    = 'JY/PIXEL'
-    header['STOKES']   = 'I'
+    header['STOKES']   = 'IQUV'
     header['HISTORY']  = history
     hdu = fits.PrimaryHDU(image,header=header)
     hdulist = [hdu]
