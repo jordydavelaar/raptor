@@ -123,10 +123,10 @@ typedef struct Camera {
 // INTEGRATOR PARAMETERS
 ////////////////////////
 
-#define RT_OUTER_CUTOFF (100.) // Stop polarized integration beyond this radius
+#define RT_OUTER_CUTOFF (50.) // Stop polarized integration beyond this radius
 
 #define delta_num (1.e-4) // Used for numerical derivatives
-#define max_steps (1e5)   // Maximum number of integration steps
+#define max_steps (1e4)   // Maximum number of integration steps
 
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
 #define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]

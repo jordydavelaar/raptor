@@ -43,15 +43,18 @@ def read_data(folder,ind,data_id):
 
     return min,max,images
 
-def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=20,mas=1,label="Stokes",cmap="afmhot"):
+def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,label="Stokes",cmap="afmhot"):
 
     for i in range(0,len(image[data_id[stokes_ind]])):
         pixels=int(np.sqrt(len(image[data_id[stokes_ind]][i])))
         array=((np.reshape(image[data_id[stokes_ind]][i],(pixels,pixels))))
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
-        beta=((np.reshape(-image['beta'][i],(pixels,pixels))))*mas
+        beta=((np.reshape(image['beta'][i],(pixels,pixels))))*mas
 
-        figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind])**0.7,vmin=0,vmax=1,cmap=cmap,shading='auto')
+        if(stokes_ind==0):
+            figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind])**0.7,vmin=0,vmax=1,cmap=cmap,shading='auto')
+        else:
+            figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=-1,vmax=1,cmap=cmap,shading='auto')
 
     fig.colorbar(figure,label=label,ax=ax)
 

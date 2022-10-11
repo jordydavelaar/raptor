@@ -54,6 +54,17 @@ void init_model() {
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
     double small = 1e-9;
 
+#if (metric == MKSBHAC || metric == MKSN)
+    x[3] = fmod(x[3], 2 * M_PI);
+    x[2] = fmod(x[2], M_PI) - 1e-6;
+    if (x[3] < 0.)
+        x[3] = 2. * M_PI + x[3];
+    if (x[2] < 0.){
+        x[2]=-x[2];
+        x[3] = M_PI + x[3];
+    }
+#endif
+
     if (x[2] > M_PI / 2.)
         small = -small;
 
@@ -984,8 +995,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     X[2] = fmod(X[2], M_PI) - 1e-6;
     if (X[3] < 0.)
         X[3] = 2. * M_PI + X[3];
-    if (X[2] < 0.)
-        X[2] = M_PI + X[2];
+    if (X[2] < 0.){
+	X[2]=-X[2];
+        X[3] = M_PI + X[3];
+    }
 #endif
 
     double r = get_r(X);
@@ -1081,6 +1094,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     lower_index(X, (*modvar).U_u, (*modvar).U_d);
+
+//    double UdotU = four_velocity_norm(X,(*modvar).U_u);
+//   LOOP_i (*modvar).U_u[i]/=sqrt(fabs(UdotU));
 
     (*modvar).B_u[0] = 0;
     for (i = 1; i < NDIM; i++) {

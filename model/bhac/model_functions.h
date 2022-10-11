@@ -24,4 +24,6 @@ void lower(double *ucon, double Gcov[NDIM][NDIM], double *ucov);
 
 double get_detgamma(double x, double y, double z);
 
+int find_igrid(double x[4], struct block *block_info, double ***Xc);
+
 #endif

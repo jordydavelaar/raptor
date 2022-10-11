@@ -310,6 +310,8 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
                             double *rQ, double *rU, double *rV, double *aI,
                             double *aQ, double *aU, double *aV, double nu_p,
                             struct GRMHD modvar, double pitch_ang) {
+
+
     *jI = j_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *jQ = j_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *jU = 0.;
@@ -333,8 +335,8 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
     *aQ *= nu_p;
     *aV *= nu_p;
 
-    *rQ *= nu_p;
-    *rV *= nu_p;
+    *rQ *= nu_p ;
+    *rV *= nu_p ;
 
     // somtimes in very specific cells issue with Ipol>S_I, numerical round off
     // issues
@@ -343,18 +345,18 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
 
     double pol_frac = sqrt((*jQ) * (*jQ) + (*jV) * (*jV)) / (*jI);
     if (pol_frac > 1.) {
-        *jQ *= (pol_frac - 0.005);
-        *jU *= (pol_frac - 0.005);
-        *jV *= (pol_frac - 0.005);
+        *jQ /= (pol_frac + 0.005);
+        *jU /= (pol_frac + 0.005);
+        *jV /= (pol_frac + 0.005);
     }
-
+/*
     pol_frac = sqrt((*aQ) * (*aQ) + (*aV) * (*aV)) / (*aI);
     if (pol_frac > 1.) {
         *aQ *= (pol_frac - 0.005);
         *aU *= (pol_frac - 0.005);
         *aV *= (pol_frac - 0.005);
     }
-
+*/
 }
 int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
                     double rU, double rV, double aI, double aQ, double aU,
@@ -569,6 +571,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
     double pitch_ang, nu_p;
+    double k_u_old[4];
     // Unpolarized: 1) Create light path by integration. 2) For each
     // step in lightpath, perform one radiative transfer step.
     // Polarized:   1) Create light path by integration. 2) For each
@@ -581,9 +584,12 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // Obtain pitch angle: still no units (geometric)
     pitch_ang = pitch_angle(X_u, k_u, modvar.B_u, modvar.U_u);
 
+    //perfect field alignment, no emission
+    if(fmod(pitch_ang,M_PI)==0) return;
+
     // CGS UNITS USED FROM HERE ON OUT
     //////////////////////////////////
-
+    LOOP_i k_u_old[i]=k_u[i];
     // Scale the wave vector to correct energy
     LOOP_i k_u[i] *= PLANCK_CONSTANT * frequency /
                      (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
@@ -617,7 +623,6 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     if (*POLARIZATION_ACTIVE) {
         f_to_stokes(f_u, f_tetrad_u, tetrad_d, S_A, *Iinv, *Iinv_pol);
     }
-
     // Given Stokes params and plasma coeffs, compute NEW Stokes params
     // after plasma step.
 
@@ -634,7 +639,6 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         pol_rte_trapezoid_step(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV,
                                *dl_current, C, S_A);
     }
-
     // FROM STOKES TO F VECTOR
     ///////////////////////////
     // somtimes in very specific cells issue with Ipol>S_I, numerical round off
@@ -644,9 +648,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         sqrt(S_A[0] * S_A[0]);
 
     if (pol_frac > 1.) {
-        //	fprintf(stderr,"unphysical in pol step, skipping step. %e %e
-        //\n", sqrt(S_A[0]*S_A[0]), sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] +
-        // S_A[3] * S_A[3]));
+//         fprintf(stderr,"unphysical in pol step, skipping step. %e %e %e\n", sqrt(S_A[0]*S_A[0]), sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] +
+  //       S_A[3] * S_A[3]),four_velocity_norm(X_u,k_u_old));
         S_A[1] /= (pol_frac + 0.005);
         S_A[2] /= (pol_frac + 0.005);
         S_A[3] /= (pol_frac + 0.005);
@@ -656,9 +659,19 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     *Iinv = S_A[0];
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
+/*
+        fprintf(stderr,"r %e te %e th %e nu %e\n",exp(X_u[1]),modvar.theta_e,pitch_ang,nu_p);
+        fprintf(stderr,"B %e %e %e %e\n",modvar.B_u[0],modvar.B_u[1],modvar.B_u[2],modvar.B_u[3]);
+        fprintf(stderr,"U %e %e %e %e\n",modvar.U_u[0],modvar.U_u[1],modvar.U_u[2],modvar.U_u[3]);
+           fprintf(stderr,"k %e %e %e %e\n",k_u[0],k_u[1],k_u[2],k_u[3]);
+           fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
+           fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);
+           fprintf(stderr,"aI %e aQ %e aU %e aV %e\n",aI,aQ,aU,aV);
+           fprintf(stderr,"rQ %e rU %e rV %e\n",rQ,rU,rV);
 
-    //        fprintf(stderr,"Iinv %e Iinv_pol %e\n",*Iinv,*Iinv_pol);
-    //        fprintf(stderr,"jI %e jQ %e jU %e jV %e\n",jI,jQ,jU,jV);
+        if(isnan(sqrt(S_A[0]*S_A[0])))
+                exit(1);
+*/
     //        check_tetrad_identities(X_u, tetrad_u);
     //        check_tetrad_compact(X_u, tetrad_u);
 
@@ -740,6 +753,10 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         }
         dl_current = fabs(lightpath[(path_counter - 1) * 9 + 8]);
 
+        //check normalization of k vectors.
+        if(fabs(four_velocity_norm(X_u,k_u))>1e-6 && exp(X_u[1])>2.)
+             normalize_null(X_u, k_u);
+
         // PLASMA INTEGRATION STEP
         //////////////////////////
 
@@ -786,7 +803,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
 
     double complex f_obs_tetrad_u[4] = {0., 0., 0., 0.};
     construct_f_obs_tetrad_u(X_u, k_u, f_u, f_obs_tetrad_u);
-
+    
     LOOP_i IQUV[i] = 0.;
 
     if (POLARIZATION_ACTIVE) {

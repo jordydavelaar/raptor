@@ -249,7 +249,7 @@ void verlet_step(double *y, void (*f)(double *, double *), double dl) {
 // Returns an appropriate stepsize dlambda, which depends on position &
 // velocity Ref. DOLENCE & MOSCIBRODZKA 2009
 double stepsize(double X_u[4], double U_u[4]) {
-    double SMALL = 1.e-40;
+    double SMALL = 1.e-80;
 #if (metric == CKS)
     double dlx1 = STEPSIZE / (fabs(U_u[1]) + SMALL * SMALL);
     double dlx2 = STEPSIZE / (fabs(U_u[2]) + SMALL * SMALL);
@@ -273,7 +273,31 @@ double stepsize(double X_u[4], double U_u[4]) {
     double r = get_r(X_u);
     return -(r) / (idlx1 + idlx2 + idlx3);
 #else
+
+#if(metric==MKSBHAC)
+
+       double step_grid =1e100;
+       if(exp(X_u[1])<RT_OUTER_CUTOFF){
+           int igrid = find_igrid(X_u, block_info, Xgrid);
+	   double step1 = block_info[igrid].dxc_block[0]/(fabs(U_u[1]) + SMALL * SMALL);
+           double step2 = block_info[igrid].dxc_block[1]/(fabs(U_u[2]) + SMALL * SMALL);
+           double step3 = block_info[igrid].dxc_block[2]/(fabs(U_u[3]) + SMALL * SMALL);
+           double istep1 = 1. / (fabs(step1) + SMALL * SMALL);
+           double istep2 = 1. / (fabs(step2) + SMALL * SMALL);
+           double istep3 = 1. / (fabs(step3) + SMALL * SMALL);
+           double minstep = 1/(istep1+istep2+istep3);
+
+           step_grid =  minstep;
+        }
+        double step = fmin(1/ (idlx1 + idlx2 + idlx3), step_grid);
+        return -step;
+
+#else
     return -1. / (idlx1 + idlx2 + idlx3);
+#endif
+
+    return -1. / (idlx1 + idlx2 + idlx3);
+
 #endif
 }
 
@@ -319,6 +343,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     // Create initial ray conditions
     initialize_photon(alpha, beta, photon_u, t_init);
     LOOP_i X_u[i] = photon_u[i];
+    LOOP_i k_u[i] = photon_u[i+4];
     // Current r-coordinate
     double r_current = get_r(X_u);
 
@@ -348,6 +373,10 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
         LOOP_i {
             X_u[i] = photon_u[i];
             k_u[i] = photon_u[i + 4];
+        }
+
+        LOOP_i {
+            photon_u[i+4] = k_u[i];
         }
 
         // Enter current position/velocity/dlambda into lightpath
@@ -383,6 +412,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
     rk45_step(photon_u, &f_geodesic, &dlambda_adaptive, 1);
 #endif
+
 
         lightpath[*steps * 9 + 8] = fabs(dlambda_adaptive);
 
