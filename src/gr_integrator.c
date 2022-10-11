@@ -314,7 +314,7 @@ void f_geodesic(double *y, double *fvector) {
     double A_u[4] = {0., 0., 0., 0.};         // d^2X/dLambda^2
 
     // Obtain the Christoffel symbols at the current location
-#if (metriic == MKSBHAC || metric == MKSHARM)
+#if (metric == MKSBHAC || metric == MKSHARM)
     connection_udd(X_u, gamma_udd);
 #else
     connection_num_udd(X_u, gamma_udd);

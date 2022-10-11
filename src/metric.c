@@ -1021,10 +1021,10 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
     double thetaprimeprime =
         -2. * M_PI * M_PI * (1. - hslope) * sin(2. * M_PI * X_u[2]);
 #else
-    double theta = X_u[2] + 0.5 * (1. - hslope) * sin(2. * X_u[2]);
-    double thetaprime = (1. + (1. - hslope) * cos(2. * X_u[2]));
+    double theta = X_u[2] + 0.5 * hslope * sin(2. * X_u[2]);
+    double thetaprime = (1. +  hslope * cos(2. * X_u[2]));
     double thetaprime2 = thetaprime * thetaprime;
-    double thetaprimeprime = -2. * (1. - hslope) * sin(2. * X_u[2]);
+    double thetaprimeprime = -2. * hslope * sin(2. * X_u[2]);
 #endif
 
     double costh = cos(theta);
