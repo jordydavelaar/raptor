@@ -1132,7 +1132,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
                        double t_init) {
 
     double mu0 = cos(INCLINATION / 180. * M_PI);
-    double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), 0.};
+    double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), 0};
     double En = 1.;
     double E2 = En * En;
     double ll = -alpha * sqrt(1. - mu0 * mu0);

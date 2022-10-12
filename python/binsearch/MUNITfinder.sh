@@ -4,9 +4,7 @@
 #SBATCH -N 1 -n 1
 #SBATCH --mem=60G
 
-module purge
-module load slurm
-module load gcc
+module load hdf5 gsl
 module load python3
 
 check_flag() {
@@ -17,36 +15,60 @@ check_flag() {
 DUMPSTART=$1
 DUMPSTOP=$2
 DUMPSTEP=$3
-INC=$4
-
-rm M.txt
-
-M1=1e+20
-M2=1e+30
-
-echo $M1 >> M.txt
-echo $M2 >> M.txt
-
-MUNIT=$(python3 binsearch.py $DUMPSTART $DUMPSTOP $DUMPSTEP $INC)
 
 NODES=1
 
-#set inclination in model.in
-sed -i '/INCLINATION (/s/.*/INCLINATION (deg) '$INC'/' model.in
+maindir=$PWD
 
-FLAG=1
+#array for variables we want to run
+inc=(20)
+Rh=(1)
 
-while (($FLAG))
-do
+#range for Munit
+M1=1e+20
+M2=1e+30
+
+
+function binsearch {
+
+
+   mkdir $maindir/i$1
+   mkdir $maindir/i$1/R$2
+   cd $maindir/i$1/R$2
+
+   INC=$1
+   RHIGH=$2
+
+   $RAPTOR/setup.sh -c=bhac -m=mks -r=unpol -s=sfc
+
+   cp $maindir/rap.sh $maindir/i$1/R$2/.
+   cp $maindir/binsearch.py $maindir/i$1/R$2/. 
+   cp $maindir/grid_mks.in $maindir/i$1/R$2/.
+
+   rm M.txt
+
+   echo $M1 >> M.txt
+   echo $M2 >> M.txt
+
+   MUNIT=$(python3 binsearch.py $DUMPSTART $DUMPSTOP $DUMPSTEP $INC)
+
+   #set inclination in model.in
+   sed -i '/INCLINATION\t(/s/.*/INCLINATION\t(deg)\t'$INC'/' model.in
+   sed -i '/R_HIGH\t\t(/s/.*/R_HIGH\t\t(-)\t'$RHIGH'/' model.in
+
+   FLAG=1
+
+   while (($FLAG))
+   do
 	echo $MUNIT
-	sed -i '/M_UNIT (/s/.*/M_UNIT (g) '$MUNIT'/' model.in	
+	sed -i '/M_UNIT\t\t(/s/.*/M_UNIT\t\t(g)\t'$MUNIT'/' model.in	
 
 	# the loop below works, but it seems the waiting does not ... weird
 	#for i in $(seq $DUMPSTART $DUMPSTEP $(expr $DUMPSTOP - $DUMPSTEP))
 	#do
 	#sbatch --wait rap_mult.sh $i $(expr $i + $DUMPSTEP) $DUMPSTEP 90 $MUNIT & 
 	#done
-	
+
 	DELTAI=$(expr $DUMPSTOP - $DUMPSTART)
 
 	let DELTAI=$DELTAI/$NODES
@@ -71,13 +93,21 @@ do
 
 	fi
 
-	wait 
-        
+	wait
+
 	MUNIT=$(python3 binsearch.py $DUMPSTART $DUMPSTOP $DUMPSTEP $INC)
-	
+
 	second_to_last=$(tail -n 2 M.txt | head -n 1)
 	last=$(tail -n 1 M.txt)
 
 	check_flag $second_to_last $last
 	echo "Will continue if not zero: " $FLAG
+   done
+}
+
+for i in ${inc[@]}; do
+  for r in  ${Rh[@]}; do
+    binsearch $i $r
+  done
 done
+

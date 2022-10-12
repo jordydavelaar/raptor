@@ -32,7 +32,10 @@ do
         RAD="${arg#*=}"
         shift # Remove --cache= from processing
         ;;
-
+       	-s=*|--sf=*)
+        SF="${arg#*=}"
+        shift # Remove --cache= from processing
+        ;;
     esac
 done
 
@@ -127,6 +130,14 @@ if [ "$RAD" == "unpol" ] ;
 then
     	sed -i  '/#define POL (/s/.*/#define POL (0)/' definitions.h
 fi
+
+if [ "$SF" == "sfc" ] ;
+then
+    	sed -i  '/#define SFC /s/.*/#define SFC 1/' model_definitions.h
+else
+    	sed -i  '/#define SFC /s/.*/#define SFC 0/' model_definitions.h
+fi
+
 
 echo " "
 echo "Succesfully initialized."
