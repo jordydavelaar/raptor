@@ -1174,7 +1174,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     if ((Bsq / (rho + 1e-20) > SIGMA_CUT) || r > RT_OUTER_CUTOFF ||
         (*modvar).theta_e > THETAE_MAX ||
-        (*modvar).theta_e < THETAE_MIN || X[2] < 3.*M_PI/180. || X[2] > M_PI - 3. * M_PI /180.) { // excludes all spine emmission
+        (*modvar).theta_e < THETAE_MIN ) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
