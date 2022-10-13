@@ -8,6 +8,7 @@ INT="rk4"
 CODE="bhac"
 GRID="smr"
 RAD="pol"
+SF="nosfc"
 
 for arg in "$@"
 do
@@ -159,4 +160,4 @@ fi
 echo " "
 echo "Done initialization, use make all to recompile."
 
-echo "Setup used code $CODE (-c/--code) metric $METRIC (-m/--metric) int $INT (-i/--int) grid $GRID (-g/--grid) rad $RAD (-r/--rad)"
+echo "Setup used code $CODE (-c/--code) metric $METRIC (-m/--metric) int $INT (-i/--int) grid $GRID (-g/--grid) rad $RAD (-r/--rad) sfc $SF (-s/--sf)"
