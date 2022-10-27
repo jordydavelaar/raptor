@@ -368,7 +368,6 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
            *steps < max_steps && !TERMINATE) {
 
 #endif
-
         // Current photon position/wave vector
         LOOP_i {
             X_u[i] = photon_u[i];

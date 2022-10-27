@@ -96,6 +96,10 @@ int find_cell(double x[4], struct block *block_info, int igrid, double ***Xc) {
     int k = (int)((x[3] - block_info[igrid].lb[2]) /
                   block_info[igrid].dxc_block[2]);
 
+   if(i>=nx[0]) i = nx[0]-1;
+   if(j>=nx[1]) j = nx[1]-1;
+   if(k>=nx[2]) k = nx[2]-1;
+
     int cell = i + j * block_info[igrid].size[0] +
                k * block_info[igrid].size[0] * block_info[igrid].size[1];
 
