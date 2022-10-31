@@ -107,7 +107,7 @@ void calculate_image_block(struct Camera *intensityfield,
 
 #pragma omp parallel for shared(frequencies, intensityfield, p)                \
     schedule(static, 1)
-    for (int pixel =0; pixel < tot_pixels; pixel++) {
+    for (int pixel = 0; pixel < tot_pixels; pixel++) {
         int steps = 0;
 
         double *lightpath2 = malloc(9 * max_steps * sizeof(double));
@@ -127,12 +127,15 @@ void calculate_image_block(struct Camera *intensityfield,
 
             radiative_transfer_polarized(lightpath2, steps, frequencies[f],
                                          &f_x, &f_y, &p, 0,
-                                         (*intensityfield).IQUV[pixel][f]);
+                                         (*intensityfield).IQUV[pixel][f],
+                                         (*intensityfield).tau[pixel][f],
+                                         (*intensityfield).tauF[pixel][f]);
         }
 
 #else
         radiative_transfer_unpolarized(lightpath2, steps, frequencies,
-                                       (*intensityfield).IQUV[pixel]);
+                                       (*intensityfield).IQUV[pixel],
+                                       (*intensityfield).tau[pixel][f]);
         for (int f = 0; f < num_frequencies; f++) {
             (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
         }

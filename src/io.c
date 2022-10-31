@@ -108,6 +108,30 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         status = H5Sclose(dataspace_id);
     }
 
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                buffer[block][pixel] = data[block].tau[pixel][freq];
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "tau%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
 #if (POL)
     for (int freq = 0; freq < num_frequencies; freq++) {
         char dataset[200];
@@ -175,6 +199,30 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         dataspace_id = H5Screate_simple(2, dims, NULL);
 
         sprintf(dataset, "V%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                buffer[block][pixel] = data[block].tauF[pixel][freq];
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "tauF%e", frequencies[freq]);
         dataset_id =
             H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
