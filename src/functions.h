@@ -105,11 +105,13 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
-                                  double *p, int PRINT_POLAR, double *IQUV);
+                                  double *p, int PRINT_POLAR, double *IQUV,
+                                  double tau, double tauF);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,
-                                      double IQUV[num_frequencies][4]);
+                                      double IQUV[num_frequencies][4],
+                                      double tau);
 // METRIC.C
 ///////////
 
