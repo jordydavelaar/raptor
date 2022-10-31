@@ -58,7 +58,7 @@
 typedef struct Camera {
     double IQUV[tot_pixels][num_frequencies][4]; // intensity
     double tau[tot_pixels][num_frequencies];     // intensity
-    double tauF[tot_pixels][num_frequencies];     // intensity
+    double tauF[tot_pixels][num_frequencies];    // intensity
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
     double lcorner[2];                           // lower left corner of a block
