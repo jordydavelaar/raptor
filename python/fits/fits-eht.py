@@ -41,11 +41,11 @@ PIX_SIZE = dr * mas
 ind = int(sys.argv[1])
 
 def read_image(folder,ind,freq,inc):
-    data =np.loadtxt("output/uniform_img_%.02e_%d.dat"%(freq,ind),skiprows=0,usecols=[2,3,4,5],unpack=True)
+    data =np.loadtxt("output/uniform_img_%.02e_%d.dat"%(freq,ind),skiprows=0,usecols=[2,3,4,5,6,7],unpack=True)
     print(data.shape)
-    image=np.reshape(data,(4,pixels,pixels))
+    image=np.reshape(data,(6,pixels,pixels))
     image= np.transpose(image,axes=[0,2,1])
-    image = image[:,::-1,:]
+#    image = image[:,::-1,:]
     return image
 
 def write_fits(folder,image,ind, a, R, inc, freq):
@@ -81,7 +81,7 @@ def write_fits(folder,image,ind, a, R, inc, freq):
     header['MJD']      = float(modjuldate)
     header['TELESCOP'] = 'VLBI'
     header['BUNIT']    = 'JY/PIXEL'
-    header['STOKES']   = 'IQUV'
+    header['STOKES']   = 'IQUVtautauf'
     header['HISTORY']  = history
     hdu = fits.PrimaryHDU(image,header=header)
     hdulist = [hdu]

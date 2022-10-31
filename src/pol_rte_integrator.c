@@ -597,7 +597,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // Convert distance dlambda accordingly
     *dl_current *= (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
                    (PLANCK_CONSTANT * frequency);
-    double C = Rg * PLANCK_CONSTANT /
+    double scale = L_unit * PLANCK_CONSTANT /
                (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     // lower the index of the wavevector
     lower_index(X_u, k_u, k_d);
@@ -685,8 +685,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // not, POLARIZATION_ACTIVE is set to FALSE and we reset S_A[i] = 0
     if (*Iinv_pol > 1.e-100) {
         stokes_to_f(f_u, f_tetrad_u, tetrad_u, S_A, Iinv, Iinv_pol);
-        *tau += aI * (*dl_current) * C;
-        *tauF += fabs(rhoV) * (*dl_current) * C;
+        *tau += aI * (*dl_current) * scale;
+        *tauF += fabs(rV) * (*dl_current) * scale;
 
         // Set POLARIZATION_ACTIVE to true; we are, after all,
         // in_volume.
@@ -775,7 +775,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
             pol_integration_step(modvar, frequency, &dl_current, C_CONST, X_u,
                                  k_u, k_d, &POLARIZATION_ACTIVE, f_u,
                                  f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv,
-                                 &Iinv_pol, *tau, *tauF);
+                                 &Iinv_pol, tau, tauF);
         } // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP

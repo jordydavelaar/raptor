@@ -25,10 +25,12 @@
 #define S3 3
 #define TAU 4
 #define DS 8
-#define LFAC 10
-#define XI 11
+#define LFAC 11
+#define XI 12
 
-#define NP 8;
+#define NP 8
+
+#define NSPIN 5
 
 typedef struct GRMHD {
     double U_u[4];

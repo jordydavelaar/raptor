@@ -594,8 +594,7 @@ void init_grmhd_data(char *fname) {
         neqpar[k] = buffer[0];
     }
 
-    a = neqpar[3];
-
+    a = neqpar[NSPIN];
     if (metric != MKSN)
         Q = 0.0;
     Q = 0.0;
