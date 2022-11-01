@@ -143,11 +143,11 @@ else
     	sed -i  '/#define SFC /s/.*/#define SFC 0/' model_definitions.h
 fi
 
-if [ "$BFLIP" == "plus" ] ;
+if [ "$BFLIP" == "minus" ] ;
 then
-       	sed -i  '/#define BPOL /s/.*/#define BPOL (PLUS)/' model_definitions.h
+       	sed -i  '/#define BPOL /s/.*/#define BPOL (MINUS)/' model_definitions.h
 else
-    	sed -i  '/#define BPOL /s/.*/#define BPOL (MINUS)/' model_definitions.h
+    	sed -i  '/#define BPOL /s/.*/#define BPOL (PLUS)/' model_definitions.h
 fi
 
 
