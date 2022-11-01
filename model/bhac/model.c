@@ -571,7 +571,7 @@ void init_grmhd_data(char *fname) {
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nws = buffer_i[0];
-
+    fprintf(stderr,"%d %d\n",nws,nwini);
     fread(buffer_i, sizeof(int), 1, file_id);
     neqparini = buffer_i[0];
 

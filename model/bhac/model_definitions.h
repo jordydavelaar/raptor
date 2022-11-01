@@ -25,16 +25,16 @@
 #define S3 3
 #define TAU 4
 #define DS 8
-#define LFAC 11
-#define XI 12
+extern int LFAC;
+extern int XI;
 
 #define NP 8
 
 #define NSPIN 5
 
 #define PLUS 1
-#define NEGATIVE -1
-#define BPOL (PLUS)
+#define MINUS -1
+#define BPOL (MINUS)
 
 typedef struct GRMHD {
     double U_u[4];
