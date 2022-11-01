@@ -399,9 +399,9 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     prim[U2] *= conserved[LFAC][c];
     prim[U3] *= conserved[LFAC][c];
 
-    prim[B1] = conserved[B1][c];
-    prim[B2] = conserved[B2][c];
-    prim[B3] = conserved[B3][c];
+    prim[B1] = BPOL * conserved[B1][c];
+    prim[B2] = BPOL * conserved[B2][c];
+    prim[B3] = BPOL * conserved[B3][c];
 
     // con2prim can fail for internal energy, we have a backup with entropy.
     if (prim[UU] < 0) {

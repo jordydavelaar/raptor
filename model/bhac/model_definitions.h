@@ -32,6 +32,10 @@
 
 #define NSPIN 5
 
+#define PLUS 1
+#define NEGATIVE -1
+#define BPOL (PLUS)
+
 typedef struct GRMHD {
     double U_u[4];
     double B_u[4];
