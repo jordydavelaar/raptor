@@ -39,11 +39,7 @@ void init_model() {
 
     set_units(M_UNIT);
 
-<<<<<<< HEAD
     fprintf(stderr, "\nStarting read in of HAMR GRMHD data...\n");
-=======
-    fprintf(stderr, "\nStarting read in of HARM3D GRMHD data...\n");
->>>>>>> fc59f665fdaff6c74cc439825b0c49bfa82b8898
 
     init_grmhd_data(GRMHD_FILE);
 }
@@ -214,9 +210,31 @@ void init_grmhd_data(char *fname) {
                 if (i >= 20 && i < 40)
                     Ladv +=
                         gdet * p[UU][i][j][z] * p[U1][i][j][z] * Ucon0 * Ucov0;
+
+                fprintf(stderr, "Mdot is %e\n", dMact);
             }
         }
     }
+}
+
+/* return boyer-lindquist coordinate of point */
+void bl_coord(double *X, double *r, double *th) {
+
+    *r = exp(X[1]) + R0;
+    *th = M_PI * X[2] + ((1. - hslope) / 2.) * sin(2. * M_PI * X[2]);
+
+    return;
+}
+
+void coord(int i, int j, int k, double *X) {
+
+    /* returns zone-centered values for coordinates */
+    X[0] = startx[0];
+    X[1] = startx[1] + (i + 0.5) * dx[1];
+    X[2] = startx[2] + (j + 0.5) * dx[2];
+    X[3] = startx[3] + (k + 0.5) * dx[3];
+
+    return;
 }
 
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {

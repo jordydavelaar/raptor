@@ -14,5 +14,6 @@
 #define MODEL_FUNCTIONS_H
 
 double interp_scalar(double ***var, int i, int j, int k, double coeff[4]);
-
+void bl_coord(double *X, double *r, double *th);
+void coord(int i, int j, int k, double *X);
 #endif // RAPTOR_HARM_MODEL_H
