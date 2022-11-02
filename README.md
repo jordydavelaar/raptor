@@ -57,6 +57,13 @@ camera grid type, amr = adaptive grid, smr= static grid. Adaptive, adds resoluti
 ``` -r/--rad ``` pol, unpol
 Perform the radiation transport either polarized or unpolarized
 
+For BHAC simulations there are two additional flags
+
+``` -s/--sfc ``` sfc
+If this flag is used, data is read based on Morton ordered Z curve
+
+``` -b/--bflip ``` plus. minus
+Sets the polarity of the used B field.
 
 # Running RAPTOR
 
