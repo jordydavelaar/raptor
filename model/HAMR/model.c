@@ -48,30 +48,43 @@ void readattr(hid_t file_id, const char *attr_name, hid_t mem_type_id,
               void *buf) {
     hid_t attr_id; /* attribute identifier */
     herr_t ret;    /* Return value */
-    ​attr_id = H5Aopen(file_id, attr_name, H5P_DEFAULT);
+    attr_id = H5Aopen(file_id, attr_name, H5P_DEFAULT);
     ret = H5Aread(attr_id, mem_type_id, buf);
     ret = H5Aclose(attr_id);
 }
 
+void readdata(hid_t file_id, const char *attr_name, hid_t mem_type_id,
+              hid_t memspace, void *buf) {
+    hid_t ds_id;     /* dataset identifier */
+    herr_t ret;      /* Return value */
+    hid_t dataspace; /* data space identifier */
+
+    ds_id = H5Dopen(file_id, attr_name, H5P_DEFAULT);
+    dataspace = H5Dget_space(ds_id); /* dataspace handle */
+    ret = H5Dread(ds_id, mem_type_id, memspace, dataspace, H5P_DEFAULT, buf);
+    ret = H5Dclose(ds_id);
+}
+
 void init_grmhd_data(char *fname) {
     FILE *fp;
-    const char *fname = NULL;
-    double dV, V;
-    hid_t file_id;       /* File identifier */
-    hid_t memspace;      /* memory space identifier */
-    hsize_t dimsm[1];    /* memory space dimensions */
-    herr_t ret;          /* Return value */
-    ​int RANK_OUT = 1; /* dimension of data array for HDF5 dataset */
-    int gridIndex, gridIndex2D;
-    ​double *x1_in, *x2_in, *x3_in, *r_in, *h_in, *ph_in, *RHO_in, *UU_in,
-        U0_in, *U1_in, *U2_in, *U3_in, *B1_in, *B2_in, *B3_in, *gdet_in,
-        *Ucov0_in, *Ucon0_in;
 
-    ​int i, j, z, ieh;
+    hid_t file_id;    /* File identifier */
+    hid_t memspace;   /* memory space identifier */
+    hsize_t dimsm[1]; /* memory space dimensions */
+    herr_t ret;       /* Return value */
+    int RANK_OUT = 1; /* dimension of data array for HDF5 dataset */
+    int gridIndex, gridIndex2D;
+    double *x1_in, *x2_in, *x3_in, *r_in, *h_in, *ph_in, *RHO_in, *UU_in, U0_in,
+        *U1_in, *U2_in, *U3_in, *B1_in, *B2_in, *B3_in, *gdet_in, *Ucov0_in,
+        *Ucon0_in;
+
+    int i, j, z, ieh = 0;
     double x[4], xp[4];
     double rin, hin, phin, gdet, Ucov0, Ucon0, dscale;
     double rp, hp, x2temp;
-    file_id = hdf5_open((char *)fname);
+    double dMact = 0, Ladv = 0, t;
+
+    file_id = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id == NULL) {
         fprintf(stderr, "\nCan't open sim data file... Abort!\n");
         exit(1);
@@ -92,13 +105,15 @@ void init_grmhd_data(char *fname) {
     readattr(file_id, "Rout", H5T_NATIVE_DOUBLE, &Rout);
     readattr(file_id, "hslope", H5T_NATIVE_DOUBLE, &hslope);
     readattr(file_id, "R0", H5T_NATIVE_DOUBLE, &R0);
-    ​stopx[0] = 1.;
+    stopx[0] = 1.;
     stopx[1] = startx[1] + N1 * dx[1];
     stopx[2] = startx[2] + N2 * dx[2];
     stopx[3] = startx[3] + N3 * dx[3];
 
+    double Rh = (1. + sqrt(1. - a * a));
+
     init_storage();
-    fprintf(stderr, "NVAR N1 N2 N3 = %i %i %i %i\n", NVAR, N1, N2, N3);
+    fprintf(stderr, "NPRIM N1 N2 N3 = %i %i %i %i\n", NPRIM, N1, N2, N3);
 
     /* allocate the memory for dataset */
     x1_in = (double *)malloc(N1 * N2 * N3 * sizeof(double));
@@ -144,13 +159,33 @@ void init_grmhd_data(char *fname) {
     readdata(file_id, "Ucon0", H5T_NATIVE_DOUBLE, memspace, &Ucon0_in[0]);
     fprintf(stderr, "Done!\n");
 
+    /* the memory space of "gdet" is 2D */
+    dimsm[0] = N1 * N2;
+    memspace = H5Screate_simple(RANK_OUT, dimsm, NULL);
+
+    readdata(file_id, "gdet", H5T_NATIVE_DOUBLE, memspace, &gdet_in[0]);
+
+    /* close HDF5 file */
+    ret = H5Fclose(file_id);
+
+    /* find the index for event horizon ridius */
+    for (i = 0; i < N1; i++) {
+        if (r_in[i * N2 * N3] >= Rh) {
+            ieh = i;
+            break;
+        }
+    }
+    fprintf(stderr,
+            "the radius of event horizon is %g and the index of X1 is %i \n",
+            Rh, ieh);
+
     /* pass the 1D dataset to pointers */
     for (i = 0; i < N1; i++) {
         for (j = 0; j < N2; j++) {
             for (z = 0; z < N3; z++) {
                 gridIndex = i * N2 * N3 + j * N3 + z;
                 gridIndex2D = i * N2 + j;
-                ​x[1] = x1_in[gridIndex];
+                x[1] = x1_in[gridIndex];
                 x[2] = x2_in[gridIndex];
                 x[3] = x3_in[gridIndex];
                 rin = r_in[gridIndex];
@@ -199,10 +234,9 @@ void init_grmhd_data(char *fname) {
                 p[B1][i][j][z] = B1_in[gridIndex];
                 p[B2][i][j][z] = B2_in[gridIndex] / 2.;
                 p[B3][i][j][z] = B3_in[gridIndex];
-                ​gdet = gdet_in[gridIndex2D];
+                gdet = gdet_in[gridIndex2D];
                 Ucov0 = Ucov0_in[gridIndex];
                 Ucon0 = Ucon0_in[gridIndex];
-                ​V += dV * gdet;
 
                 /* check accretion rate */
                 if (i == ieh)
@@ -210,11 +244,39 @@ void init_grmhd_data(char *fname) {
                 if (i >= 20 && i < 40)
                     Ladv +=
                         gdet * p[UU][i][j][z] * p[U1][i][j][z] * Ucon0 * Ucov0;
-
-                fprintf(stderr, "Mdot is %e\n", dMact);
             }
         }
     }
+
+    /* deallocate memories */
+    free(x1_in);
+    free(x2_in);
+    free(x3_in);
+    free(r_in);
+    free(h_in);
+    free(ph_in);
+    free(RHO_in);
+    free(UU_in);
+    // free(U0_in);
+    free(U1_in);
+    free(U2_in);
+    free(U3_in);
+    free(B1_in);
+    free(B2_in);
+    free(B3_in);
+    free(gdet_in);
+    free(Ucov0_in);
+    free(Ucon0_in);
+
+    // bias_norm /= V;
+    // dMact *= dx[3] * dx[2];
+    /* since dx[2] was rearranged by dx[2] = dx[2]/2 while using gdet from the
+      data, the accretion rate should be multiplied by 2 */
+    dMact *= dx[3] * dx[2] * 2;
+    // dMact /= 21.;
+    Ladv *= dx[3] * dx[2];
+    Ladv /= 21.;
+    fprintf(stderr, "dMact: %g, Ladv: %g\n", dMact, Ladv);
 }
 
 /* return boyer-lindquist coordinate of point */
