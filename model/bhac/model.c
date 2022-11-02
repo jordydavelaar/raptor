@@ -33,14 +33,16 @@ int block_size, forest_size, cells, ndimini;
 int ng[3], *forest, *nx, nleafs;
 int N1, N2, N3;
 
+int LFAC, XI;
+
 struct block *block_info;
 
 // FUNCTIONS
 ////////////
 
 void init_model() {
-   // init rand
-   srand(4242424242);
+    // init rand
+    srand(4242424242);
 
     // Set physical units
     set_units(M_UNIT);
@@ -59,8 +61,8 @@ int find_igrid(double x[4], struct block *block_info, double ***Xc) {
     x[2] = fmod(x[2], M_PI) - 1e-6;
     if (x[3] < 0.)
         x[3] = 2. * M_PI + x[3];
-    if (x[2] < 0.){
-        x[2]=-x[2];
+    if (x[2] < 0.) {
+        x[2] = -x[2];
         x[3] = M_PI + x[3];
     }
 #endif
@@ -96,9 +98,12 @@ int find_cell(double x[4], struct block *block_info, int igrid, double ***Xc) {
     int k = (int)((x[3] - block_info[igrid].lb[2]) /
                   block_info[igrid].dxc_block[2]);
 
-   if(i>=nx[0]) i = nx[0]-1;
-   if(j>=nx[1]) j = nx[1]-1;
-   if(k>=nx[2]) k = nx[2]-1;
+    if (i >= nx[0])
+        i = nx[0] - 1;
+    if (j >= nx[1])
+        j = nx[1] - 1;
+    if (k >= nx[2])
+        k = nx[2] - 1;
 
     int cell = i + j * block_info[igrid].size[0] +
                k * block_info[igrid].size[0] * block_info[igrid].size[1];
@@ -396,9 +401,9 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     prim[U2] *= conserved[LFAC][c];
     prim[U3] *= conserved[LFAC][c];
 
-    prim[B1] = conserved[B1][c];
-    prim[B2] = conserved[B2][c];
-    prim[B3] = conserved[B3][c];
+    prim[B1] = BPOL * conserved[B1][c];
+    prim[B2] = BPOL * conserved[B2][c];
+    prim[B3] = BPOL * conserved[B3][c];
 
     // con2prim can fail for internal energy, we have a backup with entropy.
     if (prim[UU] < 0) {
@@ -578,6 +583,9 @@ void init_grmhd_data(char *fname) {
     fread(buffer, sizeof(double), 1, file_id);
     t = buffer[0];
 
+    LFAC = nwini-2;
+    XI = nwini-1;
+
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
 
@@ -594,8 +602,7 @@ void init_grmhd_data(char *fname) {
         neqpar[k] = buffer[0];
     }
 
-    a = neqpar[3];
-
+    a = neqpar[NSPIN];
     if (metric != MKSN)
         Q = 0.0;
     Q = 0.0;
@@ -999,8 +1006,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     X[2] = fmod(X[2], M_PI) - 1e-6;
     if (X[3] < 0.)
         X[3] = 2. * M_PI + X[3];
-    if (X[2] < 0.){
-	X[2]=-X[2];
+    if (X[2] < 0.) {
+        X[2] = -X[2];
         X[3] = M_PI + X[3];
     }
 #endif
@@ -1099,8 +1106,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     lower_index(X, (*modvar).U_u, (*modvar).U_d);
 
-//    double UdotU = four_velocity_norm(X,(*modvar).U_u);
-//   LOOP_i (*modvar).U_u[i]/=sqrt(fabs(UdotU));
+    //    double UdotU = four_velocity_norm(X,(*modvar).U_u);
+    //   LOOP_i (*modvar).U_u[i]/=sqrt(fabs(UdotU));
 
     (*modvar).B_u[0] = 0;
     for (i = 1; i < NDIM; i++) {
@@ -1169,16 +1176,16 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-    Thetae_unit = 1./3. * (MPoME) / (trat + 1);
+    Thetae_unit = 1. / 3. * (MPoME) / (trat + 1);
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
-   double xc = r * sin(X[2]) * cos(X[3]);
-   double yc = r * sin(X[2]) * sin(X[3]);
-   double rc =sqrt(xc*xc + yc*yc);
+    double xc = r * sin(X[2]) * cos(X[3]);
+    double yc = r * sin(X[2]) * sin(X[3]);
+    double rc = sqrt(xc * xc + yc * yc);
 
     if ((Bsq / (rho + 1e-20) > SIGMA_CUT) || r > RT_OUTER_CUTOFF ||
         (*modvar).theta_e > THETAE_MAX ||
-        (*modvar).theta_e < THETAE_MIN ) { // excludes all spine emmission
+        (*modvar).theta_e < THETAE_MIN) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }

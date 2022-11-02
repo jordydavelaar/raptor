@@ -37,6 +37,10 @@ do
         SF="${arg#*=}"
         shift # Remove --cache= from processing
         ;;
+        -b=*|--bflip=*)
+        BFLIP="${arg#*=}"
+        shift # Remove --cache= from processing
+        ;;
     esac
 done
 
@@ -137,6 +141,13 @@ then
     	sed -i  '/#define SFC /s/.*/#define SFC 1/' model_definitions.h
 else
     	sed -i  '/#define SFC /s/.*/#define SFC 0/' model_definitions.h
+fi
+
+if [ "$BFLIP" == "minus" ] ;
+then
+       	sed -i  '/#define BPOL /s/.*/#define BPOL (MINUS)/' model_definitions.h
+else
+    	sed -i  '/#define BPOL /s/.*/#define BPOL (PLUS)/' model_definitions.h
 fi
 
 

@@ -287,7 +287,7 @@ double stepsize(double X_u[4], double U_u[4]) {
            double istep3 = 1. / (fabs(step3) + SMALL * SMALL);
            double minstep = 1/(istep1+istep2+istep3);
 
-           step_grid =  minstep/2.;
+           step_grid =  minstep/4.;
         }
         double step = fmin(1/ (idlx1 + idlx2 + idlx3), step_grid);
         return -step;

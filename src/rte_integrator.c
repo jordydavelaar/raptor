@@ -17,7 +17,8 @@
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,
-                                      double IQUV[num_frequencies][4]) {
+                                      double IQUV[num_frequencies][4],
+                                      double tau[num_frequencies]) {
 
     int path_counter;
     double pitch_ang, nu_p;
@@ -102,6 +103,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 double K_inv = aI;
                 double j_inv = jI;
 
+                tau[f] += dtau;
 #if (DEBUG)
                 if ((j_inv != j_inv || isnan(Icurrent))) {
                     fprintf(stderr, "NaN emissivity! I = %+.15e\n", Icurrent);
