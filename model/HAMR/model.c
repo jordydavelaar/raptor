@@ -39,7 +39,11 @@ void init_model() {
 
     set_units(M_UNIT);
 
+<<<<<<< HEAD
     fprintf(stderr, "\nStarting read in of HAMR GRMHD data...\n");
+=======
+    fprintf(stderr, "\nStarting read in of HARM3D GRMHD data...\n");
+>>>>>>> fc59f665fdaff6c74cc439825b0c49bfa82b8898
 
     init_grmhd_data(GRMHD_FILE);
 }
