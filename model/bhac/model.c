@@ -33,6 +33,8 @@ int block_size, forest_size, cells, ndimini;
 int ng[3], *forest, *nx, nleafs;
 int N1, N2, N3;
 
+int LFAC, XI;
+
 struct block *block_info;
 
 // FUNCTIONS
@@ -571,7 +573,7 @@ void init_grmhd_data(char *fname) {
 
     fread(buffer_i, sizeof(int), 1, file_id);
     nws = buffer_i[0];
-    fprintf(stderr,"%d %d\n",nws,nwini);
+
     fread(buffer_i, sizeof(int), 1, file_id);
     neqparini = buffer_i[0];
 
@@ -580,6 +582,9 @@ void init_grmhd_data(char *fname) {
 
     fread(buffer, sizeof(double), 1, file_id);
     t = buffer[0];
+
+    LFAC = nwini-2;
+    XI = nwini-1;
 
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
