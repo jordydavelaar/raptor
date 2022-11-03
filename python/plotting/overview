@@ -64,7 +64,7 @@ rapplot.plot_data_stokes(image,min,max,3,data_id,fig,axs[1][1],halfrange,mas,lab
 
 rapplot.plot_data_tau(image,data_id,6,fig,axs[2][0],halfrange,mas,label=r"$\log_{10}\tau$",cmap="RdGy_r",vmin=-2,vmax=2)
 
-rapplot.plot_data_tau(image,data_id,7,fig,axs[2][1],halfrange,mas,label=r"$\log_{10}\tau_{\rm F}$",cmap="spring",vmin=1,vmax=5)
+rapplot.plot_data_tau(image,data_id,7,fig,axs[2][1],halfrange,mas,label=r"$\log_{10}\tau_{\rm F}$",cmap="spring",vmin=-1,vmax=5)
 
 fig.suptitle('t=%.01lf [s]'%(ind*10.*Tunit),fontsize=20)
 
