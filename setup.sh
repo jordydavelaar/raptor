@@ -67,6 +67,9 @@ then
 elif  [ "$CODE" == "harm3d" ] ;
 then
         rsync -v -u $RAPTOR/model/harm3d/* .
+elif  [ "$CODE" == "hamr" ] ;
+then
+        rsync -v -u $RAPTOR/model/HAMR/* .
 else
  echo "no grmhd model picked. Aborting."
  exit
