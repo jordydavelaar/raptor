@@ -105,6 +105,9 @@ void init_grmhd_data(char *fname) {
     readattr(file_id, "Rout", H5T_NATIVE_DOUBLE, &Rout);
     readattr(file_id, "hslope", H5T_NATIVE_DOUBLE, &hslope);
     readattr(file_id, "R0", H5T_NATIVE_DOUBLE, &R0);
+    startx[2]=0;
+    dx[2]/=2.;
+
     stopx[0] = 1.;
     stopx[1] = startx[1] + N1 * dx[1];
     stopx[2] = startx[2] + N2 * dx[2];
@@ -112,8 +115,8 @@ void init_grmhd_data(char *fname) {
 
     double Rh = (1. + sqrt(1. - a * a));
 
+
     init_storage();
-    fprintf(stderr, "NPRIM N1 N2 N3 = %i %i %i %i\n", NPRIM, N1, N2, N3);
 
     /* allocate the memory for dataset */
     x1_in = (double *)malloc(N1 * N2 * N3 * sizeof(double));
@@ -157,6 +160,7 @@ void init_grmhd_data(char *fname) {
     readdata(file_id, "B3", H5T_NATIVE_DOUBLE, memspace, &B3_in[0]);
     readdata(file_id, "Ucov0", H5T_NATIVE_DOUBLE, memspace, &Ucov0_in[0]);
     readdata(file_id, "Ucon0", H5T_NATIVE_DOUBLE, memspace, &Ucon0_in[0]);
+
     fprintf(stderr, "Done!\n");
 
     /* the memory space of "gdet" is 2D */
@@ -175,9 +179,6 @@ void init_grmhd_data(char *fname) {
             break;
         }
     }
-    fprintf(stderr,
-            "the radius of event horizon is %g and the index of X1 is %i \n",
-            Rh, ieh);
 
     /* pass the 1D dataset to pointers */
     for (i = 0; i < N1; i++) {
@@ -276,7 +277,6 @@ void init_grmhd_data(char *fname) {
     // dMact /= 21.;
     Ladv *= dx[3] * dx[2];
     Ladv /= 21.;
-    fprintf(stderr, "dMact: %g, Ladv: %g\n", dMact, Ladv);
 }
 
 /* return boyer-lindquist coordinate of point */
@@ -294,7 +294,7 @@ void coord(int i, int j, int k, double *X) {
     X[0] = startx[0];
     X[1] = startx[1] + (i + 0.5) * dx[1];
     X[2] = startx[2] + (j + 0.5) * dx[2];
-    X[3] = startx[3] + (k + 0.5) * dx[3];
+    X[3] = startx[3] + (k) * dx[3];
 
     return;
 }
