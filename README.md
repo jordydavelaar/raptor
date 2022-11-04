@@ -39,9 +39,9 @@ where ```raptor-model```, is the model corresponding with the folder name in *RA
 
 The setup script takes various argument;
 
-``` -c/--code ``` harm3d, bhac
+``` -c/--code ``` harm3d, bhac, HAMR
 
-grmhd code to interface with, currently supported HARM3D or BHAC.
+grmhd code to interface with, currently supported HARM3D, HAMR or BHAC.
 
 ``` -i/--int ``` rk2, rk4, rk45, ver
 integrator for geodesic integration; options are Runge-Kutta (RK) integrators of varying order, RK2 and RK4, an adpative RK integrator RK45 or Verlet scheme.
