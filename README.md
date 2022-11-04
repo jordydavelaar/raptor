@@ -129,6 +129,45 @@ to use ``` import rapplot ```. More usage explanation can be found in the README
  
 Python script ``` plotter-example.py ``` is provided in the *python* directory that explain how to read in and generate a stokes I only figure.
 
+# Tutorial
+
+In this short tutorial we will generate an image from a BHAC grmhd model.
+
+Step 1: Compile the RAPTOR code in a designated run directory by using the following command:
+
+``` $RAPTOR/setup.sh -m=mks -c=bhac -r=pol -s=sfc```
+
+This step assumes you cloned the code to your computer. And you set your enivorment variable by running
+
+``` export RAPTOR=/path/to/code ```
+
+Step 2: Download an example BHAC GRMHD snapshot to your run directory
+
+``` wget https://astro.ru.nl/~jordyd/data2000.dat ```
+
+Step 3: run RAPTOR by executing
+
+```./RAPTOR model.in data2000.dat 0 ```
+
+The code should finish with stating the amount of computed flux :
+
+``` Frequency 2.30000e+11 Hz Integrated flux density = 3.63027e+00 Jy ```
+
+Step 4: copy the plotter-example.py to the run directory, this can found in the folder ``` $RAPTOR/python/plotting```. 
+Make sure you added the python folder to your python path
+
+``` export PYTHONPATH=$RAPTOR/python/plotting:$PYTHONPATH ```
+
+and run
+
+```python3 plotter-example.py 0 ```
+
+This will generate a figure with four panels. Each panel represent a compent of the stokes vector. The figure can be found in the "figure" folder in your run directory. See below how the figure looks like for the standard model.in parameters!
+
+Challenge: changes the parameters in model.in to vary the image properties, such as inclination, black hole mass, or Munit.
+
+That's all folks! 
+
 <p align="center">
   <img src="docs/output_example.png" width="500" title="hover text">
 </p>
