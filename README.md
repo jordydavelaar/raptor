@@ -169,5 +169,5 @@ Challenge: changes the parameters in model.in to vary the image properties, such
 That's all folks! 
 
 <p align="center">
-  <img src="docs/output_example.png" width="500" title="hover text">
+  <img src="docs/output_tutorial.png" width="500" title="hover text">
 </p>
