@@ -66,21 +66,19 @@ void readdata(hid_t file_id, const char *attr_name, hid_t mem_type_id,
 }
 
 void init_grmhd_data(char *fname) {
-    FILE *fp;
-
     hid_t file_id;    /* File identifier */
     hid_t memspace;   /* memory space identifier */
     hsize_t dimsm[1]; /* memory space dimensions */
     herr_t ret;       /* Return value */
     int RANK_OUT = 1; /* dimension of data array for HDF5 dataset */
     int gridIndex, gridIndex2D;
-    double *x1_in, *x2_in, *x3_in, *r_in, *h_in, *ph_in, *RHO_in, *UU_in, U0_in,
+    double *x1_in, *x2_in, *x3_in, *r_in, *h_in, *ph_in, *RHO_in, *UU_in,
         *U1_in, *U2_in, *U3_in, *B1_in, *B2_in, *B3_in, *gdet_in, *Ucov0_in,
         *Ucon0_in;
 
     int i, j, z, ieh = 0;
     double x[4], xp[4];
-    double rin, hin, phin, gdet, Ucov0, Ucon0, dscale;
+    double rin, hin, phin, gdet, Ucov0, Ucon0;
     double rp, hp, x2temp;
     double dMact = 0, Ladv = 0, t;
 
@@ -151,7 +149,6 @@ void init_grmhd_data(char *fname) {
     readdata(file_id, "ph", H5T_NATIVE_DOUBLE, memspace, &ph_in[0]);
     readdata(file_id, "RHO", H5T_NATIVE_DOUBLE, memspace, &RHO_in[0]);
     readdata(file_id, "UU", H5T_NATIVE_DOUBLE, memspace, &UU_in[0]);
-    // readdata(file_id, "U0",    H5T_NATIVE_DOUBLE, memspace, &U0_in[0]);
     readdata(file_id, "U1", H5T_NATIVE_DOUBLE, memspace, &U1_in[0]);
     readdata(file_id, "U2", H5T_NATIVE_DOUBLE, memspace, &U2_in[0]);
     readdata(file_id, "U3", H5T_NATIVE_DOUBLE, memspace, &U3_in[0]);
