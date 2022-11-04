@@ -1,8 +1,8 @@
 MBH		(Msun)	4.14e6
 DISTANCE		(kpc) 8.127
-M_UNIT		(g)	5.5e+21
+M_UNIT		(g)	1e+18
 R_LOW		(-)	1
-R_HIGH		(-)	40
+R_HIGH		(-)	1
 
 INCLINATION	(deg)           50
 IMG_WIDTH	(pixels)	200

@@ -8,7 +8,7 @@
 #ifndef MODEL_DEFINITIONS_H
 #define MODEL_DEFINITIONS_H
 
-#define SFC 1
+#define SFC 0
 
 #define KRHO 0
 #define UU 1
@@ -30,11 +30,11 @@ extern int XI;
 
 #define NP 8
 
-#define NSPIN 5
+#define NSPIN 3
 
 #define PLUS 1
 #define MINUS -1
-#define BPOL (MINUS)
+#define BPOL (PLUS)
 
 typedef struct GRMHD {
     double U_u[4];
