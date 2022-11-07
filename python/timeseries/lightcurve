@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+
+import glob
+import re
+import numpy as np
+import pickle
+from pathlib import Path
+import matplotlib.pyplot as plt
+from itertools import cycle
+
+files=glob.glob('spectrum/img_s????_Rh*[0-9]_i*[0-9].dat')
+p = '[\d]*[.][\d]+|[\d]+'
+folder = 'plots'
+
+cadence=10 # how many M between snapshot files
+
+# Create a colour code cycler e.g. 'C0', 'C1', etc.
+colour_codes = map('C{}'.format, cycle(range(10)))
+
+indices=[]
+Rhis=[]
+inclinations=[]
+for file in files:
+    if re.search(p, file) is not None:
+        catches=[]
+        for catch in re.finditer(p, file):
+            catches.append(catch[0])
+        if catches[0] not in indices: indices.append(catches[0])
+        if catches[1] not in Rhis: Rhis.append(catches[1])
+        if catches[2] not in inclinations: inclinations.append(catches[2])
+
+#indices=indices.sort()
+indices=np.int32(np.array(indices))
+indices=np.sort(indices)
+
+lightcurves={}
+for i in inclinations:
+    lightcurves[str(i)] = {}
+    for Rh in Rhis:
+        StokesI=[];StokesU=[];StokesQ=[];StokesV=[]
+        StokesI_Bflip=[];StokesU_Bflip=[];StokesQ_Bflip=[];StokesV_Bflip=[]
+        for ind in indices:
+            file = 'spectrum/img_s'+str(ind)+'_Rh'+Rh+'_i'+i+'.dat'
+            file_Bflip = 'spectrum/img_s'+str(ind)+'_Rh'+Rh+'_i'+i+'_Bflip.dat'
+            data = np.loadtxt(file)
+            data_Bflip = np.loadtxt(file_Bflip)
+            StokesI.append(data[1]); StokesU.append(data[2]); StokesQ.append(data[3]); StokesV.append(data[4]); 
+            StokesI_Bflip.append(data_Bflip[1]); StokesU_Bflip.append(data_Bflip[2]); StokesQ_Bflip.append(data_Bflip[3]); StokesV_Bflip.append(data_Bflip[4]); 
+        lightcurves[str(i)][str(Rh)] = {'times':np.int32(np.array(indices))*10, 'I': np.float64(StokesI),
+                                        'U':np.float64(StokesU), 'Q':np.float64(StokesQ), 'V':np.float64(StokesV),
+                                        'I_Bflip': np.float64(StokesI_Bflip),
+                                        'U_Bflip':np.float64(StokesU_Bflip), 'Q_Bflip':np.float64(StokesQ_Bflip), 'V_Bflip':np.float64(StokesV_Bflip),
+                                        'color':next(colour_codes)}
+
+pickle.dump(lightcurves,open('spectrum/lightcurves.pkl','wb'))
+
+for Rh in sorted(Rhis):
+    fig, axs = plt.subplots(5,1,sharex=True,figsize=(6,8))
+
+    for i in sorted(inclinations):
+
+        axs[0].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['I'],label=r'i=%i'%int(i),color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[1].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['U'],color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[2].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['Q'],color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[3].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['V'],color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[4].plot(lightcurves[i][Rh]['times'],np.sqrt(lightcurves[i][Rh]['U']**2+lightcurves[i][Rh]['Q']**2)/lightcurves[i][Rh]['I'],color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+
+        axs[0].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['I_Bflip'],'--',color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[1].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['U_Bflip'],'--',color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[2].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['Q_Bflip'],'--',color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[3].plot(lightcurves[i][Rh]['times'],lightcurves[i][Rh]['V_Bflip'],'--',color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+        axs[4].plot(lightcurves[i][Rh]['times'],np.sqrt(lightcurves[i][Rh]['U_Bflip']**2+lightcurves[i][Rh]['Q_Bflip']**2)/lightcurves[i][Rh]['I_Bflip'],color=lightcurves[i][Rh]['color'],linewidth=0.75,alpha=0.8)
+
+
+
+    axs[0].set_ylabel(r'$I\ \rm [Jy]$')
+    axs[1].set_ylabel(r'$U\ \rm [Jy]$')
+    axs[2].set_ylabel(r'$Q\ \rm [Jy]$')
+    axs[3].set_ylabel(r'$V\ \rm [Jy]$')
+    axs[4].set_ylabel(r'$\sqrt{U^2+Q^2}/I$')
+
+    axs[4].set_xlabel(r'$t\ [GM/c^3]$')
+
+    axs[0].legend()
+
+    fig.tight_layout()
+    Path("figures/").mkdir(parents=True, exist_ok=True)
+    fig.savefig('figures/lightcurve_Rh'+Rh+'.png', transparent=False)
+
+    plt.clf()
+    plt.close()
+
+    
