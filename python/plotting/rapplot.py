@@ -33,8 +33,8 @@ def read_data(folder,ind,data_id):
 
     min = [-100.,-100.,-100.,-100.]
     max = [100.,100.,100,100.]
-
-    for j in range(0,len(data_id)-4):
+    print(len(data_id))
+    for j in range(0,len(data_id)-118):
         for i in range(0,len(images[data_id[j]])):
             current=np.max(images[data_id[j]][i])
             max[j]=np.maximum(max[j],np.max(images[data_id[j]][i]))
@@ -43,15 +43,15 @@ def read_data(folder,ind,data_id):
 
     return min,max,images
 
-def plot_data_tau(image,data_id,ind,fig,ax,halfrange=40,mas=1,label="Stokes",cmap="RdBu",vmin=-2,vmax=2):
+def plot_data_tau(image,data_id,ind,fig,ax,halfrange=40,mas=1,label="Stokes",cmap="CMRmap",vmin=-8,vmax=2):
 
     for i in range(0,len(image[data_id[ind]])):
         pixels=int(np.sqrt(len(image[data_id[ind]][i])))
         array=((np.reshape(image[data_id[ind]][i],(pixels,pixels))))
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
-        beta=((np.reshape(image['beta'][i],(pixels,pixels))))*mas
+        beta=((-np.reshape(image['beta'][i],(pixels,pixels))))*mas
 
-        figure=ax.pcolormesh(alpha,beta,np.log10(array),vmin=vmin,vmax=vmax,cmap=cmap,shading='auto')
+        figure=ax.pcolormesh(alpha,beta,np.log10(array+1e-10),vmin=vmin,vmax=vmax,cmap=cmap,shading='auto')
         ax.set_aspect('equal')
         
     fig.colorbar(figure,label=label,ax=ax)
@@ -65,7 +65,7 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,
         pixels=int(np.sqrt(len(image[data_id[stokes_ind]][i])))
         array=((np.reshape(image[data_id[stokes_ind]][i],(pixels,pixels))))
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
-        beta=((np.reshape(image['beta'][i],(pixels,pixels))))*mas
+        beta=((-np.reshape(image['beta'][i],(pixels,pixels))))*mas
         ax.set_aspect('equal')
 
         if(stokes_ind==0):
@@ -101,20 +101,20 @@ def plot_data_polfrac(image,max,data_id,fig,ax,halfrange=10,mas=1,label="|m|",cm
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)
 
-def plot_data_RM(image_1,image_2,max_1,max_2,data_id_1,data_id_2,lam1,lam2,fig,ax,halfrange=10,mas=1,label="RM",cmap="RdBu"):
+def plot_data_RM(image,min,max,ind_1,ind_2,data_id,lam1,lam2,fig,ax,halfrange=10,mas=1,label="RM",cmap="RdBu"):
 
     lam1*=1e-3
     lam2*=1e-3
-    for i in range(0,len(image_1[data_id_1[0]])):
-        pixels=int(np.sqrt(len(image_1[data_id_1[0]][i])))
+    for i in range(0,len(image[data_id[0]])):
+        pixels=int(np.sqrt(len(image[data_id[0]][i])))
 
-       	array_I_1=((np.reshape(image_1[data_id_1[0]][i],(pixels,pixels))))
-        array_Q_1=((np.reshape(image_1[data_id_1[1]][i],(pixels,pixels))))
-        array_U_1=((np.reshape(image_1[data_id_1[2]][i],(pixels,pixels))))
+       	array_I_1=((np.reshape(image[data_id[ind_1]][i],(pixels,pixels))))
+        array_Q_1=((np.reshape(image[data_id[ind_1 + 20]][i],(pixels,pixels))))
+        array_U_1=((np.reshape(image[data_id[ind_1+ 40]][i],(pixels,pixels))))
 
-        array_I_2=((np.reshape(image_2[data_id_2[0]][i],(pixels,pixels))))
-        array_Q_2=((np.reshape(image_2[data_id_2[1]][i],(pixels,pixels))))
-        array_U_2=((np.reshape(image_2[data_id_2[2]][i],(pixels,pixels))))
+        array_I_2=((np.reshape(image[data_id[ind_2]][i],(pixels,pixels))))
+        array_Q_2=((np.reshape(image[data_id[ind_2+20]][i],(pixels,pixels))))
+        array_U_2=((np.reshape(image[data_id[ind_2+40]][i],(pixels,pixels))))
 
         LP_1 = np.sqrt(array_Q_1**2. + array_U_1**2)
         LP_2 = np.sqrt(array_Q_2**2. + array_U_2**2)
@@ -132,15 +132,18 @@ def plot_data_RM(image_1,image_2,max_1,max_2,data_id_1,data_id_2,lam1,lam2,fig,a
              if(np.abs(array[j,k])>0.75*np.pi):
                  array[j,k]=array[j,k]-np.sign(array[j,k])*np.pi
 
-        RM = (array)/(lam2**2-lam1**2)
+        RM = (array) #/(lam2**2-lam1**2)
 
-        RM[array_I_1/max_1[0]<1e-6]=0
-        RM[array_I_2/max_2[0]<1e-6]=0
+        RM[array_I_1/max[0]<1e-6]=0
+        RM[array_I_2/max[0]<1e-6]=0
 
-        alpha=((np.reshape(image_1['alpha'][i],(pixels,pixels))))*mas
-        beta=((np.reshape(-image_1['beta'][i],(pixels,pixels))))*mas
+        alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
+        beta=((np.reshape(-image['beta'][i],(pixels,pixels))))*mas
 
-        figure=ax.pcolormesh(alpha,beta,np.sign(RM)*np.abs(RM/5e5)**0.25,vmin=-1,vmax=1,cmap=cmap,shading='auto')
+        figure=ax.pcolormesh(alpha,beta,np.sign(RM)*np.abs(RM)**0.25,vmin=-1,vmax=1,cmap=cmap,shading='auto')
+
+        ax.set_xlim(-halfrange*mas,halfrange*mas)
+        ax.set_ylim(-halfrange*mas,halfrange*mas)
 
 
     fig.colorbar(figure,label=label,ax=ax)

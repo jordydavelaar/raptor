@@ -161,9 +161,10 @@ int refine_block(struct Camera intensity) {
 // begins
 int refine_init_block(struct Camera intensity) {
 
-    double radius_4 = 10;
-    double radius_3 = 20;
-    double radius_2 = 30;
+    double radius_5 = 20;
+    double radius_4 = 30;
+    double radius_3 = 40;
+    double radius_2 = 60;
 
     BLOCK_SIZE_X =
         CAM_SIZE_X / (pow(2, intensity.level - 1) * (double)(num_blocks));
@@ -180,10 +181,13 @@ int refine_init_block(struct Camera intensity) {
 
     double rmin = fmin(rl, ru);
 
-    bool bool_4 = radius_4 > rmin;
+    bool bool_5 = radius_5 > rmin;
+    bool bool_4 = radius_4 > rmin && radius_5 < rmin;
     bool bool_3 = radius_3 > rmin && radius_4 < rmin;
     bool bool_2 = radius_2 > rmin && radius_3 < rmin;
 
+    if (bool_5 && intensity.level < 5 && max_level > 4)
+        return 1;
     if (bool_4 && intensity.level < 4 && max_level > 3)
         return 1;
     if (bool_3 && intensity.level < 3 && max_level > 2)
