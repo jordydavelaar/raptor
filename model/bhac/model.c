@@ -1195,7 +1195,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
 void compute_spec_user(struct Camera *intensityfield,
                        double energy_spectrum[num_frequencies][nspec]) {
-    double dA, S_I, S_Q, S_U, S_V, r, IV, Ipol, Ilin;
+/*
+double dA, S_I, S_Q, S_U, S_V, r, IV, Ipol, Ilin;
 
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
@@ -1250,4 +1251,5 @@ void compute_spec_user(struct Camera *intensityfield,
             }
         }
     }
+    */
 }
