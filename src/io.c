@@ -315,15 +315,15 @@ void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
 
 void write_ray_output(double complex S_A[], double Iinv, double Iinv_pol,
                       double X_u[], double k_u[], double dl_current,
-                      struct GRMHD modvar, double nu_p, double pitch_angle,
-                      int block, int pixel) {
+                      struct GRMHD modvar, double frequency, double nu_p,
+                      double pitch_angle, int block, int pixel) {
 
     char fname[20];
     FILE *rayfile;
     sprintf(fname, "data_ray_%d_%d.csv", block, pixel);
 
-    if (!(file = fopen(fname, "r"))) {
-        *rayfile = fopen(fname, "w");
+    if (!(rayfile = fopen(fname, "r"))) {
+        rayfile = fopen(fname, "w");
 
         fprintf(rayfile, "x_0, x_1, x_2, x_3, ");
         fprintf(rayfile, "k_0, k_1, k_2, k_3, ");
@@ -337,11 +337,13 @@ void write_ray_output(double complex S_A[], double Iinv, double Iinv_pol,
         fclose(rayfile);
     }
 
-    *rayfile = fopen(fname, "a");
+    rayfile = fopen(fname, "a");
 
     fprintf(rayfile, "%e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3]);
     fprintf(rayfile, "%e %e %e %e ", k_u[0], k_u[1], k_u[2], k_u[3]);
-    fprintf(rayfile, "%e %e %e %e ", S_A[0], S_A[1], S_A[2], S_A[3]);
+    fprintf(rayfile, "%e %e %e %e ", S_A[0] * pow(frequency, 3),
+            S_A[1] * pow(frequency, 3), S_A[2] * pow(frequency, 3),
+            S_A[3] * pow(frequency, 3));
     fprintf(rayfile, "%e %e ", Iinv, Iinv_pol);
     fprintf(rayfile, "%e %e ", nu_p, pitch_angle);
     fprintf(rayfile, "%e %e %e", modvar.theta_e, modvar.n_e, modvar.sigma);

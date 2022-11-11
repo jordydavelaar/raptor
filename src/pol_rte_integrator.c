@@ -700,8 +700,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     }
 
 #if (RAYOUT)
-    write_ray_output(S_A, *Inv, *Iinv_pol, X_u, k_u, *dl_current, modvar, nu_p,
-                     pitch_angle, block, pixel);
+    write_ray_output(S_A, *Inv, *Iinv_pol, X_u, k_u, *dl_current, modvar,
+                     frequency, nu_p, pitch_angle, block, pixel);
 #endif
 }
 
