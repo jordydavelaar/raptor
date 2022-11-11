@@ -133,11 +133,11 @@ int main(int argc, char *argv[]) {
 
     int block = 0;
 
-    while (block  < tot_blocks) { // block_total
+    while (block < tot_blocks) { // block_total
         if (block % (25) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
-        calculate_image_block(&intensityfield[block], frequencies);
+        calculate_image_block(&intensityfield[block], frequencies, block);
 #if (AMR)
         if (refine_block(intensityfield[block])) {
             add_block(&intensityfield, block);

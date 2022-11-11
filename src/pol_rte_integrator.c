@@ -566,7 +566,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
                           double complex f_u[], double complex f_tetrad_u[],
                           double tetrad_d[][4], double tetrad_u[][4],
                           double complex S_A[], double *Iinv, double *Iinv_pol,
-                          double *tau, double *tauF) {
+                          double *tau, double *tauF, int block, int pixel) {
 
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
     double pitch_ang, nu_p;
@@ -598,7 +598,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     *dl_current *= (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT) /
                    (PLANCK_CONSTANT * frequency);
     double scale = L_unit * PLANCK_CONSTANT /
-               (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+                   (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     // lower the index of the wavevector
     lower_index(X_u, k_u, k_d);
 
@@ -698,6 +698,11 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         S_A[2] = 0.;
         S_A[3] = 0.;
     }
+
+#if (RAYOUT)
+    write_ray_output(S_A, *Inv, *Iinv_pol, X_u, k_u, *dl_current, modvar, nu_p,
+                     pitch_angle, block, pixel);
+#endif
 }
 
 void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
@@ -719,9 +724,8 @@ void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
 }
 
 void radiative_transfer_polarized(double *lightpath, int steps,
-                                  double frequency, double *f_x, double *f_y,
-                                  double *p, int PRINT_POLAR, double *IQUV,
-                                  double *tau, double *tauF) {
+                                  double frequency, double *IQUV, double *tau,
+                                  double *tauF, int block, int pixel) {
     int path_counter;
     double dl_current;
 
@@ -775,7 +779,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
             pol_integration_step(modvar, frequency, &dl_current, C_CONST, X_u,
                                  k_u, k_d, &POLARIZATION_ACTIVE, f_u,
                                  f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv,
-                                 &Iinv_pol, tau, tauF);
+                                 &Iinv_pol, tau, tauF, block, pixel);
         } // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP

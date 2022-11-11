@@ -313,6 +313,44 @@ void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
     fprintf(stdout, "Integrated flux density = %.5e\n", flux);
 }
 
+void write_ray_output(double complex S_A[], double Iinv, double Iinv_pol,
+                      double X_u[], double k_u[], double dl_current,
+                      struct GRMHD modvar, double nu_p, double pitch_angle,
+                      int block, int pixel) {
+
+    char fname[20];
+    FILE *rayfile;
+    sprintf(fname, "data_ray_%d_%d.csv", block, pixel);
+
+    if (!(file = fopen(fname, "r"))) {
+        *rayfile = fopen(fname, "w");
+
+        fprintf(rayfile, "x_0, x_1, x_2, x_3, ");
+        fprintf(rayfile, "k_0, k_1, k_2, k_3, ");
+        fprintf(rayfile, "S_I, S_Q, S_U, S_V, ");
+        fprintf(rayfile, "Iinv, Iinv_pol, ");
+        fprintf(rayfile, "nu_p, pitch_angle, ");
+        fprintf(rayfile, "te, ne, sigma, ");
+        fprintf(rayfile, "U_0, U_1, U_2, U_3, ");
+        fprintf(rayfile, "B_0, B_1, B_2, B_3\n");
+
+        fclose(rayfile);
+    }
+
+    *rayfile = fopen(fname, "a");
+
+    fprintf(rayfile, "%e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3]);
+    fprintf(rayfile, "%e %e %e %e ", k_u[0], k_u[1], k_u[2], k_u[3]);
+    fprintf(rayfile, "%e %e %e %e ", S_A[0], S_A[1], S_A[2], S_A[3]);
+    fprintf(rayfile, "%e %e ", Iinv, Iinv_pol);
+    fprintf(rayfile, "%e %e ", nu_p, pitch_angle);
+    fprintf(rayfile, "%e %e %e", modvar.theta_e, modvar.n_e, modvar.sigma);
+    fprintf(rayfile, "%e %e %e %e ", modvar.U_u[0], modvar.U_u[1],
+            modvar.U_u[2], modvar.U_u[3]);
+    fprintf(rayfile, "%e %e %e %e\n", modvar.B_u[0], modvar.B_u[1],
+            modvar.B_u[2], modvar.B_u[3]);
+}
+
 // Outputs the ACG camera struct with a uniform resolution
 void write_uniform_camera(struct Camera *intensityfield, double frequency,
                           int freq) {
@@ -341,7 +379,8 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
             }
             int pixel = find_pixel(x, intensityfield, block);
             fprintf(uniformfile,
-                    "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n",
+                    "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+"
+                    ".15e\n",
                     x[0] * arcsec_factor, x[1] * arcsec_factor,
                     intensityfield[block].IQUV[pixel][freq][0] * UNIT_FACTOR,
                     intensityfield[block].IQUV[pixel][freq][1] * UNIT_FACTOR,

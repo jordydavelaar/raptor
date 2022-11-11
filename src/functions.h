@@ -104,9 +104,8 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
-                                  double frequency, double *f_x, double *f_y,
-                                  double *p, int PRINT_POLAR, double *IQUV,
-                                  double *tau, double *tauF);
+                                  double frequency, double *IQUV, double *tau,
+                                  double *tauF, int block, int pixel);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,
@@ -333,7 +332,7 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies]);
+                           double frequencies[num_frequencies], int block);
 /// CAMERA.C
 void init_camera(struct Camera **intensityfield);
 
