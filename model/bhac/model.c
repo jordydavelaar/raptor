@@ -583,8 +583,8 @@ void init_grmhd_data(char *fname) {
     fread(buffer, sizeof(double), 1, file_id);
     t = buffer[0];
 
-    LFAC = nwini-2;
-    XI = nwini-1;
+    LFAC = nwini - 2;
+    XI = nwini - 1;
 
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
@@ -843,6 +843,11 @@ void init_grmhd_data(char *fname) {
 }
 
 void set_units(double M_unit_) {
+
+    if (!M_UNIT_SLOPE)
+        M_unit = M_unit_c * exp((TIME_INIT - M_UNIT_T) / M_UNIT_SLOPE);
+    else
+        M_unit = M_unit_c;
 
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
@@ -1195,61 +1200,61 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
 void compute_spec_user(struct Camera *intensityfield,
                        double energy_spectrum[num_frequencies][nspec]) {
-/*
-double dA, S_I, S_Q, S_U, S_V, r, IV, Ipol, Ilin;
+    /*
+    double dA, S_I, S_Q, S_U, S_V, r, IV, Ipol, Ilin;
 
-    for (int block = 0; block < tot_blocks; block++) {
-        dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
-        for (int pixel = 0; pixel < tot_pixels; pixel++) {
-            for (int freq = 0; freq < num_frequencies; freq++) {
+        for (int block = 0; block < tot_blocks; block++) {
+            dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                for (int freq = 0; freq < num_frequencies; freq++) {
 
-                r = sqrt((intensityfield)[block].alpha[pixel] *
-                             (intensityfield)[block].alpha[pixel] +
-                         (intensityfield)[block].beta[pixel] *
-                             (intensityfield)[block].beta[pixel]);
+                    r = sqrt((intensityfield)[block].alpha[pixel] *
+                                 (intensityfield)[block].alpha[pixel] +
+                             (intensityfield)[block].beta[pixel] *
+                                 (intensityfield)[block].beta[pixel]);
 
-                S_I = (intensityfield)[block].IQUV[pixel][freq][0];
-                S_Q = (intensityfield)[block].IQUV[pixel][freq][1];
-                S_U = (intensityfield)[block].IQUV[pixel][freq][2];
-                S_V = (intensityfield)[block].IQUV[pixel][freq][3];
+                    S_I = (intensityfield)[block].IQUV[pixel][freq][0];
+                    S_Q = (intensityfield)[block].IQUV[pixel][freq][1];
+                    S_U = (intensityfield)[block].IQUV[pixel][freq][2];
+                    S_V = (intensityfield)[block].IQUV[pixel][freq][3];
 
-                Ipol = sqrt(S_Q * S_Q + S_U * S_U + S_V * S_V);
-                Ilin = sqrt(S_Q * S_Q + S_U * S_U);
-                IV = sqrt(S_V * S_V);
+                    Ipol = sqrt(S_Q * S_Q + S_U * S_U + S_V * S_V);
+                    Ilin = sqrt(S_Q * S_Q + S_U * S_U);
+                    IV = sqrt(S_V * S_V);
 
-                // Stokes I
-                energy_spectrum[freq][4] += Ipol * dA;
-
-                // Stokes Q
-                energy_spectrum[freq][5] += Ilin * dA;
-
-                // Stokes U
-                energy_spectrum[freq][6] += IV * dA;
-
-                // stokes V
-                if (r > 30) {
                     // Stokes I
-                    energy_spectrum[freq][7] += S_I * dA;
+                    energy_spectrum[freq][4] += Ipol * dA;
 
                     // Stokes Q
-                    energy_spectrum[freq][8] += S_Q * dA;
+                    energy_spectrum[freq][5] += Ilin * dA;
 
                     // Stokes U
-                    energy_spectrum[freq][9] += S_U * dA;
+                    energy_spectrum[freq][6] += IV * dA;
 
                     // stokes V
-                    energy_spectrum[freq][10] += S_V * dA;
+                    if (r > 30) {
+                        // Stokes I
+                        energy_spectrum[freq][7] += S_I * dA;
 
-                    energy_spectrum[freq][11] += Ipol * dA;
+                        // Stokes Q
+                        energy_spectrum[freq][8] += S_Q * dA;
 
-                    // Stokes Q
-                    energy_spectrum[freq][12] += Ilin * dA;
+                        // Stokes U
+                        energy_spectrum[freq][9] += S_U * dA;
 
-                    // Stokes U
-                    energy_spectrum[freq][13] += IV * dA;
+                        // stokes V
+                        energy_spectrum[freq][10] += S_V * dA;
+
+                        energy_spectrum[freq][11] += Ipol * dA;
+
+                        // Stokes Q
+                        energy_spectrum[freq][12] += Ilin * dA;
+
+                        // Stokes U
+                        energy_spectrum[freq][13] += IV * dA;
+                    }
                 }
             }
         }
-    }
-    */
+        */
 }
