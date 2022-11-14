@@ -16,7 +16,8 @@
 
 char GRMHD_FILE[256];
 
-double MBH, M_UNIT, TIME_INIT, INCLINATION;
+double MBH, TIME_INIT, INCLINATION;
+double M_UNIT, M_UNIT_SLOPE, M_UNIT_T, M_UNIT_DT;
 double R_HIGH, R_LOW;
 double FREQS_PER_DEC, FREQ_MIN, FREQ_MAX;
 
@@ -48,6 +49,11 @@ void read_model(char *argv[]) {
     fscanf(input, "%s %s %lf", temp, temp2, &MBH);
     fscanf(input, "%s %s %lf", temp, temp2, &SOURCE_DIST);
     fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT);
+
+    fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT_SLOPE);
+    fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT_T);
+    fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT_DT);
+
     fscanf(input, "%s %s %lf", temp, temp2, &R_LOW);
     fscanf(input, "%s %s %lf", temp, temp2, &R_HIGH);
     fscanf(input, "%s %s %lf", temp, temp2, &INCLINATION);

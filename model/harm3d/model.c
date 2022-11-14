@@ -196,12 +196,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     return 1;
 }
 
-void set_units(double M_unit_) {
+void set_units(double M_unit_c) {
 
+    M_unit = M_unit_c * exp(M_UNIT_SLOPE * (TIME_INIT - M_UNIT_T) * M_UNIT_DT);
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
 
-    RHO_unit = M_unit_ / pow(L_unit, 3);
+    RHO_unit = M_unit / pow(L_unit, 3);
     U_unit = RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
     B_unit = SPEED_OF_LIGHT * sqrt(4. * M_PI * RHO_unit);
 
