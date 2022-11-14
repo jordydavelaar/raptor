@@ -313,16 +313,23 @@ void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
     fprintf(stdout, "Integrated flux density = %.5e\n", flux);
 }
 
-void write_ray_output(double complex S_A[], double Iinv, double Iinv_pol,
-                      double X_u[], double k_u[], double dl_current,
+void write_ray_output(double complex S_A[4], double Iinv, double Iinv_pol,
+                      double X_u[4], double k_u[4], double dl_current,
                       struct GRMHD modvar, double frequency, double nu_p,
                       double pitch_angle, int block, int pixel) {
 
     char fname[20];
     FILE *rayfile;
-    sprintf(fname, "data_ray_%d_%d.csv", block, pixel);
+    char ray_folder[64] = "output-ray";
+    struct stat st = {0};
 
-    if (!(rayfile = fopen(fname, "r"))) {
+    if (stat(ray_folder, &st) == -1) {
+        mkdir(ray_folder, 0700);
+    }
+
+    sprintf(fname, "%s/data_ray_%d_%d.csv",ray_folder, block, pixel);
+
+    if (stat(fname, &st) == -1) {
         rayfile = fopen(fname, "w");
 
         fprintf(rayfile, "x_0, x_1, x_2, x_3, ");
@@ -339,18 +346,24 @@ void write_ray_output(double complex S_A[], double Iinv, double Iinv_pol,
 
     rayfile = fopen(fname, "a");
 
+   double S_I = S_A[0] * pow(frequency, 3);
+   double S_Q = S_A[1] * pow(frequency, 3);
+   double S_U = S_A[2] * pow(frequency, 3);
+   double S_V = S_A[3] * pow(frequency, 3);
+
+
     fprintf(rayfile, "%e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3]);
     fprintf(rayfile, "%e %e %e %e ", k_u[0], k_u[1], k_u[2], k_u[3]);
-    fprintf(rayfile, "%e %e %e %e ", S_A[0] * pow(frequency, 3),
-            S_A[1] * pow(frequency, 3), S_A[2] * pow(frequency, 3),
-            S_A[3] * pow(frequency, 3));
+    fprintf(rayfile, "%e %e %e %e ", S_I, S_Q, S_U, S_V);
     fprintf(rayfile, "%e %e ", Iinv, Iinv_pol);
     fprintf(rayfile, "%e %e ", nu_p, pitch_angle);
-    fprintf(rayfile, "%e %e %e", modvar.theta_e, modvar.n_e, modvar.sigma);
+    fprintf(rayfile, "%e %e %e ", modvar.theta_e, modvar.n_e, modvar.sigma);
     fprintf(rayfile, "%e %e %e %e ", modvar.U_u[0], modvar.U_u[1],
             modvar.U_u[2], modvar.U_u[3]);
     fprintf(rayfile, "%e %e %e %e\n", modvar.B_u[0], modvar.B_u[1],
             modvar.B_u[2], modvar.B_u[3]);
+
+    fclose(rayfile);
 }
 
 // Outputs the ACG camera struct with a uniform resolution

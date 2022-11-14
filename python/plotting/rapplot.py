@@ -69,11 +69,11 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,
         ax.set_aspect('equal')
 
         if(stokes_ind==0):
-            figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind])**0.5,vmin=0,vmax=1,cmap=cmap,shading='auto')
+            figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind])**0.25,vmin=0,vmax=1,cmap=cmap,shading='auto')
         else:
             figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=-1,vmax=1,cmap=cmap,shading='auto')
 
-    fig.colorbar(figure,label=label,ax=ax)
+    fig.colorbar(figure,label=label,ax=ax,fraction=0.047/0.85)
 
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)
@@ -84,11 +84,11 @@ def plot_data_polfrac(image,max,data_id,fig,ax,halfrange=10,mas=1,label="|m|",cm
         pixels=int(np.sqrt(len(image[data_id[0]][i])))
 
         array_I=((np.reshape(image[data_id[0]][i],(pixels,pixels))))
-        array_Q=((np.reshape(image[data_id[1]][i],(pixels,pixels))))
-        array_U=((np.reshape(image[data_id[2]][i],(pixels,pixels))))
+        array_Q=((np.reshape(image[data_id[20]][i],(pixels,pixels))))
+        array_U=((np.reshape(image[data_id[40]][i],(pixels,pixels))))
 
         array = np.sqrt(array_Q**2.+array_U**2)/array_I
-        array[array_I/max[0]<1e-7]=0
+        array[array_I/max[0]<1e-5]=0
 
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
         beta=((np.reshape(-image['beta'][i],(pixels,pixels))))*mas
@@ -96,7 +96,7 @@ def plot_data_polfrac(image,max,data_id,fig,ax,halfrange=10,mas=1,label="|m|",cm
         figure=ax.pcolormesh(alpha,beta,(array),vmin=0,vmax=1,cmap=cmap,shading='auto')
 
 
-    fig.colorbar(figure,label=label,ax=ax)
+    fig.colorbar(figure,label=label,ax=ax,fraction=0.047/0.85)
 
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)
@@ -146,7 +146,7 @@ def plot_data_RM(image,min,max,ind_1,ind_2,data_id,lam1,lam2,fig,ax,halfrange=10
         ax.set_ylim(-halfrange*mas,halfrange*mas)
 
 
-    fig.colorbar(figure,label=label,ax=ax)
+    fig.colorbar(figure,label=label,ax=ax,fraction=0.047/0.85)
 
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)

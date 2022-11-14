@@ -329,6 +329,12 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
 void write_uniform_camera(struct Camera *intensityfield, double frequency,
                           int freq);
+
+void write_ray_output(double complex S_A[], double Iinv, double Iinv_pol,
+                      double X_u[], double k_u[], double dl_current,
+                      struct GRMHD modvar, double frequency, double nu_p,
+                      double pitch_angle, int block, int pixel);
+
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
