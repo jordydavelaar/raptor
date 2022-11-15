@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "RAPTOR setup script"
-<<<<<<< HEAD
 
 
 METRIC="cks"
@@ -36,18 +35,6 @@ do
 
     esac
 done
-=======
-echo "seting up code for" $1
-
-echo " "
-
-if test -f "raptor_model.c"; then
-    echo "raptor_model.c exists. and would be overwritten."
-    echo "Only use this script in empty directories."
-    echo "Aborting..."
-    exit
-fi
->>>>>>> c427bcca7e35ae8c365b572e0bce03f433112ccb
 
 if [ "$RAPTOR" == "" ] ;
 then
@@ -63,7 +50,6 @@ fi
 cp $RAPTOR/run/* .
 
 echo "Copying files"
-<<<<<<< HEAD
 if [ "$CODE" == "bhac" ] ;
 then
 	cp -v -u -n $RAPTOR/model/bhac/* .
@@ -73,23 +59,11 @@ then
 elif  [ "$CODE" == "harm3d" ] ;
 then
         cp -v -u -n $RAPTOR/model/harm3d/* .
-=======
-if [ "$1" == "bhac" ] ;
-then
-	cp -v -n $RAPTOR/model/bhac/* .
-elif [ "$1" == "bhac-cks" ] ;
-then
-       	cp -v -n $RAPTOR/model/bhac-cks/* .
-elif  [ "$1" == "harm3d" ] ;
-then
-        cp -v -n $RAPTOR/model/harm3d/* .
->>>>>>> c427bcca7e35ae8c365b572e0bce03f433112ccb
 else
  echo "no grmhd model picked. Aborting."
  exit
 fi
 
-<<<<<<< HEAD
 if [ "$CODE" == "bhac" ] ;
 then
 	if [ "$METRIC" == "mks" ] ;
@@ -154,8 +128,6 @@ then
     	sed -i '/#define POL (/s/.*/#define POL (0)/' parameters.h
 fi
 
-=======
->>>>>>> c427bcca7e35ae8c365b572e0bce03f433112ccb
 echo " "
 echo "Succesfully initialized."
 echo " "
@@ -163,11 +135,7 @@ echo " "
 echo "Start compilation"
 echo " "
 
-<<<<<<< HEAD
 make clean && make all
-=======
-make all
->>>>>>> c427bcca7e35ae8c365b572e0bce03f433112ccb
 
 if [ $? -ne 0 ]; 
 then 
@@ -178,13 +146,6 @@ else
 fi
 
 echo " "
-<<<<<<< HEAD
 echo "Done initialization, use make all to recompile."
 
 echo "Setup used code $CODE (-c/--code) metric $METRIC (-m/--metric) int $INT (-i/--int) grid $GRID (-g/--grid) rad $RAD (-r/--rad)"
-=======
-echo "Deleting setup.sh to ensure you dont overwrite model files from src"
-
-echo " "
-echo "Done initialization, use make all to recompile."
->>>>>>> c427bcca7e35ae8c365b572e0bce03f433112ccb
