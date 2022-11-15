@@ -728,7 +728,8 @@ void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *IQUV, double *tau,
-                                  double *tauF, int block, int pixel) {
+                                  double *tauF, double *pdf, double *avg,
+                                  int block, int pixel) {
     int path_counter;
     double dl_current;
 
@@ -782,7 +783,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
             pol_integration_step(modvar, frequency, &dl_current, C_CONST, X_u,
                                  k_u, k_d, &POLARIZATION_ACTIVE, f_u,
                                  f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv,
-                                 &Iinv_pol, tau, tauF, block, pixel);
+                                 &Iinv_pol, tau, tauF, pdf, avg, block, pixel);
         } // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP
