@@ -129,13 +129,14 @@ int main(int argc, char *argv[]) {
 #endif
 
     int block = 0;
-    float perc;
+    float totalblocks = (float)tot_blocks;
 
     while (block < tot_blocks) { // block_total
-        
-	perc = (((float)tot_blocks - (float)block)/(float)tot_blocks)*100;
+       
+        float perc = 100*((float) (tot_blocks-block)/totalblocks); 
+       
 	if ((int)perc % (10) == 0)
-            fprintf(stderr, "%i %Done\n", perc);
+            fprintf(stderr, "%d Done\n", (int)perc);
 
         calculate_image_block(&intensityfield[block], frequencies);
 #if (AMR)
