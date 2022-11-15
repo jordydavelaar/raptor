@@ -52,7 +52,7 @@
 #define num_pixels_1d 10
 #define tot_pixels 100
 
-#define USERSPEC (1)
+#define USERSPEC (0)
 #define nspec 4
 
 typedef struct Camera {
