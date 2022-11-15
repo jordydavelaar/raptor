@@ -39,8 +39,12 @@
  * Indices 0, 1, 2, 3 correspond to t, r, theta, phi (Schwarzschild/Kerr).
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 
 int main(int argc, char *argv[]) {
 
@@ -90,7 +94,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
-    double energy_spectrum[num_frequencies][4];
+    double energy_spectrum[num_frequencies][nspec];
     double frequencies[num_frequencies];
 
     struct Camera *intensityfield;
@@ -98,10 +102,9 @@ int main(int argc, char *argv[]) {
     init_camera(&intensityfield);
 
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-        for (int s = 0; s < 4; s++)
+        for (int s = 0; s < nspec; s++)
             energy_spectrum[f][s] = 0.;
     }
-
 
 #if (FREQS == FREQLOG)
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
@@ -131,12 +134,18 @@ int main(int argc, char *argv[]) {
     int block = 0;
     float totalblocks = (float)tot_blocks;
 
+<<<<<<< HEAD
     while (block < tot_blocks) { // block_total
        
         float perc = 100*((float) (tot_blocks-block)/totalblocks); 
        
 	if ((int)perc % (10) == 0)
             fprintf(stderr, "%d Done\n", (int)perc);
+=======
+    while (block  < tot_blocks) { // block_total
+        if (block % (25) == 0)
+            fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
+>>>>>>> 3fa0d15d2d278b6afda2a59fb6c2ecfa7946ad0c
 
         calculate_image_block(&intensityfield[block], frequencies);
 #if (AMR)
@@ -154,6 +163,9 @@ int main(int argc, char *argv[]) {
 
     compute_spec(intensityfield, energy_spectrum);
 
+#if (USERSPEC)
+    compute_spec_user(intensityfield, energy_spectrum);
+#endif
     // WRITE OUTPUT FILES
     /////////////////////
 

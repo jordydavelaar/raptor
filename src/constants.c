@@ -4,10 +4,24 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <math.h>
-#include <stdio.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// GLOBAL VARS
+//////////////
+
+double R_GRAV;        // Gravitational radius
+double C_CONST;       // A constant frequently used in RTE integration
+double R_ISCO;        // Innermost stable circular orbit
+double CUTOFF_INNER;  // Inner integration boundary
+double JANSKY_FACTOR; // Factor to scale image output
+
+// FUNCTIONS
+////////////
 
 void set_constants() {
     // Horizon radius for integration cutoff

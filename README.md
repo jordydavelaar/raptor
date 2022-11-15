@@ -1,6 +1,6 @@
-# RAPTOR++
+# RAPTOR
 
-This is the developer branch of RAPTOR.
+This is the public version of RAPTOR.
 
 Main developers; Thomas Bronzwaer, Jordy Davelaar
 
@@ -32,16 +32,38 @@ To setup a RAPTOR run, first create a run directory. Copy setup.sh to the run di
 
 
 ```
-./setup.sh <raptor-model>
+$RAPTOR/setup.sh <OPTIONS>
 ```
 
-where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. This setup should only be used for initialization of a setup folder, it should not run when a model file is present. For recompiling the code used ```make all```.   
+where ```raptor-model```, is the model corresponding with the folder name in *RAPTOR/model*. The script checks if model files are present and only overwrites if source model files are newer than user model files. For recompiling the code recommended to use ```make all```.   
 
-In the case of BHAC there are two coordinate systems supported either MKSBHAC or CKS. The default is currently CKS. The metric can be changed either in the paramters.h file at line 107 "#define metric (CKS)" -> "#define metric (MKSBHAC)" or by using
+The setup script takes various argument;
 
-```
-./setup.sh bhac mks
-```
+``` -c/--code ``` harm3d, bhac, HAMR
+
+grmhd code to interface with, currently supported HARM3D, HAMR or BHAC.
+
+``` -i/--int ``` rk2, rk4, rk45, ver
+integrator for geodesic integration; options are Runge-Kutta (RK) integrators of varying order, RK2 and RK4, an adpative RK integrator RK45 or Verlet scheme.
+
+``` -m/--metric ``` mks, cks
+metric type, mks = Modified Kerr-Schild but specific for either HARM3D of BHAC, or Cartesian Kerr-Schild (BHAC only)
+ 
+
+``` -g/--grid ``` amr, smr
+camera grid type, amr = adaptive grid, smr= static grid. Adaptive, adds resolution during run time, static refines before computing emission and stays fixed during runtime.
+ 
+ 
+``` -r/--rad ``` pol, unpol
+Perform the radiation transport either polarized or unpolarized
+
+For BHAC simulations there are two additional flags
+
+``` -s/--sfc ``` sfc
+If this flag is used, data is read based on Morton ordered Z curve
+
+``` -b/--bflip ``` plus. minus
+Sets the polarity of the used B field.
 
 # Running RAPTOR
 
@@ -96,8 +118,56 @@ Camera dependent parameters
 
 # Output
 
-The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies. Python scripts are provided in the *python* directory that explain how to read in and generate figures.
+The output consist of an hdf5 file containing the images at all stokes parameters at all frequencies, and a spectral file containing total integrated stokes parameter at every frequency.
+
+
+There is a python library ``` rapplot.py ``` with functions to handle data read-in, and plotting. Add the python directory to your python path e.g.;
+
+``` export PYTHONPATH=$RAPTOR/python/plotting:$PYTHONPATH ```
+
+to use ``` import rapplot ```. More usage explanation can be found in the README soon.
+ 
+Python script ``` plotter-example.py ``` is provided in the *python* directory that explain how to read in and generate a stokes I only figure.
+
+# Tutorial
+
+In this short tutorial we will generate an image from a BHAC grmhd model.
+
+Step 1: Compile the RAPTOR code in a designated run directory by using the following command:
+
+``` $RAPTOR/setup.sh -m=mks -c=bhac -r=pol -s=sfc```
+
+This step assumes you cloned the code to your computer. And you set your enivorment variable by running
+
+``` export RAPTOR=/path/to/code ```
+
+Step 2: Download an example BHAC GRMHD snapshot to your run directory
+
+``` wget https://astro.ru.nl/~jordyd/data2000.dat ```
+
+Step 3: run RAPTOR by executing
+
+```./RAPTOR model.in data2000.dat 0 ```
+
+The code should finish with stating the amount of computed flux :
+
+``` Frequency 2.30000e+11 Hz Integrated flux density = 3.63027e+00 Jy ```
+
+Step 4: copy the plotter-example.py to the run directory, this can found in the folder ``` $RAPTOR/python/plotting```. 
+Make sure you added the python folder to your python path
+
+``` export PYTHONPATH=$RAPTOR/python/plotting:$PYTHONPATH ```
+
+and run
+
+```python3 plotter-example.py 0 ```
+
+This will generate a figure with four panels. Each panel represent a compent of the stokes vector. The figure can be found in the "figure" folder in your run directory. See below how the figure looks like for the standard model.in parameters!
+
+Challenge: changes the parameters in model.in to vary the image properties, such as inclination, black hole mass, or Munit.
+
+That's all folks! 
 
 <p align="center">
-  <img src="docs/output_example.png" width="500" title="hover text">
+  <img src="docs/output_tutorial.png" width="500" title="hover text">
 </p>

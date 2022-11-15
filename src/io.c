@@ -4,15 +4,18 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <hdf5.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// FUNCTIONS
+////////////
 
 void output_files(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies][4],
+                  double energy_spectrum[num_frequencies][nspec],
                   double frequencies[num_frequencies]) {
     struct stat st = {0};
     char spec_folder[64] = "output";
@@ -44,15 +47,16 @@ void output_files(struct Camera *intensityfield,
         fprintf(stderr, "Frequency %.5e Hz Bol Luminosity = %.5e ergs/s\n",
                 frequencies[f],
                 frequencies[f] * energy_spectrum[f][0] * JANSKY_FACTOR * 4 *
-                    M_PI * source_dist * source_dist / 1e23);
+                    M_PI * SOURCE_DIST * SOURCE_DIST / 1e23);
 
 #if (SPECFILE)
 #if (POL)
-        fprintf(specfile, "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n",
-                frequencies[f], JANSKY_FACTOR * energy_spectrum[f][0],
-                JANSKY_FACTOR * energy_spectrum[f][1],
-                JANSKY_FACTOR * energy_spectrum[f][2],
-                JANSKY_FACTOR * energy_spectrum[f][3]);
+        fprintf(specfile, "%+.15e", frequencies[f]);
+        for (int s = 0; s < nspec; s++) {
+            fprintf(specfile, "\t%+.15e",
+                    JANSKY_FACTOR * energy_spectrum[f][s]);
+        }
+        fprintf(specfile, "\n");
 #else
         fprintf(specfile, "%+.15e\t%+.15e\n", frequencies[f],
                 JANSKY_FACTOR * energy_spectrum[f][0]);
@@ -92,6 +96,30 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         dataspace_id = H5Screate_simple(2, dims, NULL);
 
         sprintf(dataset, "I%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                buffer[block][pixel] = data[block].tau[pixel][freq];
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "tau%e", frequencies[freq]);
         dataset_id =
             H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -171,6 +199,30 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         dataspace_id = H5Screate_simple(2, dims, NULL);
 
         sprintf(dataset, "V%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                buffer[block][pixel] = data[block].tauF[pixel][freq];
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "tauF%e", frequencies[freq]);
         dataset_id =
             H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -275,8 +327,8 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
     FILE *uniformfile = fopen(uniform_filename, "w");
 
     double UNIT_FACTOR = JANSKY_FACTOR * uniform_dx * uniform_dx * R_GRAV *
-                         R_GRAV / source_dist / source_dist;
-    double arcsec_factor = 206265.0 * R_GRAV / source_dist;
+                         R_GRAV / SOURCE_DIST / SOURCE_DIST;
+    double arcsec_factor = 206265.0 * R_GRAV / SOURCE_DIST;
 
     for (int i = 0; i < uniform_size; i++) {
         for (int j = 0; j < uniform_size; j++) {
@@ -288,9 +340,15 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
                 exit(1);
             }
             int pixel = find_pixel(x, intensityfield, block);
-            fprintf(uniformfile, "%+.15e\t%+.15e\t%+.15e \n",
+            fprintf(uniformfile,
+                    "%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\t%+.15e\n",
                     x[0] * arcsec_factor, x[1] * arcsec_factor,
-                    intensityfield[block].IQUV[pixel][freq][0] * UNIT_FACTOR);
+                    intensityfield[block].IQUV[pixel][freq][0] * UNIT_FACTOR,
+                    intensityfield[block].IQUV[pixel][freq][1] * UNIT_FACTOR,
+                    intensityfield[block].IQUV[pixel][freq][2] * UNIT_FACTOR,
+                    intensityfield[block].IQUV[pixel][freq][3] * UNIT_FACTOR,
+                    intensityfield[block].tau[pixel][freq],
+                    intensityfield[block].tauF[pixel][freq]);
         }
     }
     fclose(uniformfile);

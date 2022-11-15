@@ -1,0 +1,41 @@
+===========================================================
+RAPTOR tool
+
+binary search alogrithm for flux fitting by varying M_UNIT
+
+Written by J. Vos and J. Davelaar
+
+===========================================================
+USAGE
+===========================================================
+
+sbatch MUNITfinder.sh START STOP CADENCE INCLINATION
+
+START = first grmhd slice index
+STOP  = last grmhd slice index
+CADENCE = cadence between slices
+INCLINATION = viewing angle of observer
+
+
+===========================================================
+OPTIONS
+===========================================================
+in MUNITfinder.sh
+
+NODES sets the amount of nodes to split the work on
+
+in binsearch.py
+
+F_desire = the amount of flux to aim for.
+
+===========================================================
+folders needed
+===========================================================
+
+output and slurm
+
+output contains the spectra and images
+
+slurm contains the slurm files of the runs used by the binary search alogorithm to compute M_UNIT, this is to keep the folder clean since they are with many.
+
+

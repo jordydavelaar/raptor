@@ -1,14 +1,49 @@
-
 /*
- * raptor_model.c for BHAC AMR data
- * author: Jordy Davelaar
+ * model file for non-uniform AMR BHAC data, not to be confused with BHAC
+ * postrad data.
+ *
+ * Written by J. Davelaar 2019
+ * Adapted by J. Davelaar August 2022
  */
 
-#include "raptor_model.h"
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// GLOBAL VARS
+//////////////
+
+double ****p;
+
+double L_unit, T_unit;
+double RHO_unit, U_unit, B_unit;
+double Ne_unit, Thetae_unit;
+
+double R0, a, Q, hslope;
+double *neqpar;
+
+double stopx[4], startx[4], dx[4];
+double xprobmin[3], xprobmax[3];
+double **Xcoord, ***Xgrid, ***Xbar;
+
+int block_size, forest_size, cells, ndimini;
+int ng[3], *forest, *nx, nleafs;
+int N1, N2, N3;
+
+int LFAC, XI;
+
+struct block *block_info;
+
+// FUNCTIONS
+////////////
 
 void init_model() {
+    // init rand
+    srand(4242424242);
+
     // Set physical units
     set_units(M_UNIT);
 
@@ -20,6 +55,17 @@ void init_model() {
 
 int find_igrid(double x[4], struct block *block_info, double ***Xc) {
     double small = 1e-9;
+
+#if (metric == MKSBHAC || metric == MKSN)
+    x[3] = fmod(x[3], 2 * M_PI);
+    x[2] = fmod(x[2], M_PI) - 1e-6;
+    if (x[3] < 0.)
+        x[3] = 2. * M_PI + x[3];
+    if (x[2] < 0.) {
+        x[2] = -x[2];
+        x[3] = M_PI + x[3];
+    }
+#endif
 
     if (x[2] > M_PI / 2.)
         small = -small;
@@ -51,6 +97,13 @@ int find_cell(double x[4], struct block *block_info, int igrid, double ***Xc) {
                   block_info[igrid].dxc_block[1]);
     int k = (int)((x[3] - block_info[igrid].lb[2]) /
                   block_info[igrid].dxc_block[2]);
+
+    if (i >= nx[0])
+        i = nx[0] - 1;
+    if (j >= nx[1])
+        j = nx[1] - 1;
+    if (k >= nx[2])
+        k = nx[2] - 1;
 
     int cell = i + j * block_info[igrid].size[0] +
                k * block_info[igrid].size[0] * block_info[igrid].size[1];
@@ -348,9 +401,9 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     prim[U2] *= conserved[LFAC][c];
     prim[U3] *= conserved[LFAC][c];
 
-    prim[B1] = conserved[B1][c];
-    prim[B2] = conserved[B2][c];
-    prim[B3] = conserved[B3][c];
+    prim[B1] = BPOL * conserved[B1][c];
+    prim[B2] = BPOL * conserved[B2][c];
+    prim[B3] = BPOL * conserved[B3][c];
 
     // con2prim can fail for internal energy, we have a backup with entropy.
     if (prim[UU] < 0) {
@@ -407,11 +460,85 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
 #endif
 }
 
+uint64_t mortonEncode(unsigned int ig1, unsigned int ig2, unsigned int ig3) {
+    uint64_t answer = 0;
+    for (uint64_t i = 0; i < (sizeof(uint64_t) * 64) / ndimini; ++i) {
+        answer = answer | ((ig1 & ((uint64_t)1 << i)) << 2 * i) |
+                 ((ig2 & ((uint64_t)1 << i)) << (2 * i + 1)) |
+                 ((ig3 & ((uint64_t)1 << i)) << (2 * i + 2));
+    }
+    return answer;
+}
+
+int level_one_Morton_ordered(int ***iglevel1_sfc, int **sfc_iglevel1) {
+    // first compute how large the block should be assuming its squared
+    int ngsq1 = pow(2, ceil(log10(ng[0]) / log10(2.0)));
+    int ngsq2 = pow(2, ceil(log10(ng[1]) / log10(2.0)));
+    int ngsq3 = pow(2, ceil(log10(ng[2]) / log10(2.0)));
+
+    int ngsqmax = fmax(ngsq1, fmax(ngsq2, ngsq3));
+    ngsq1 = ngsqmax;
+    ngsq2 = ngsqmax;
+    ngsq3 = ngsqmax;
+
+    int gsq_sfc[ngsq1][ngsq2][ngsq3];
+    // construct the sfc for the squared grid
+    for (uint32_t i = 0; i < ngsq1; i++) {
+        for (uint32_t j = 0; j < ngsq2; j++) {
+            for (uint32_t k = 0; k < ngsq3; k++) {
+                gsq_sfc[i][j][k] = mortonEncode(i, j, k);
+            }
+        }
+    }
+
+    // delete blocks outside of the real grid
+    for (int i = 0; i < ngsq1; i++) {
+        for (int j = 0; j < ngsq2; j++) {
+            for (int k = 0; k < ngsq3; k++) {
+                // check which block runs out of the grid
+                if (i >= ng[0] || j >= ng[1] || k >= ng[2]) {
+                    // if an index is too large, then we need to decrease all
+                    // the sfc indices by 1 if they are larger than the sfc
+                    // index of that particular block.
+                    for (int ic = 0; ic < ngsq1; ic++) {
+                        for (int jc = 0; jc < ngsq2; jc++) {
+                            for (int kc = 0; kc < ngsq3; kc++) {
+                                if (gsq_sfc[ic][jc][kc] > gsq_sfc[i][j][k])
+                                    gsq_sfc[ic][jc][kc]--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // create maps to go from sfc to normal grid indices
+    for (int i = 0; i < ng[0]; i++) {
+        for (int j = 0; j < ng[1]; j++) {
+            for (int k = 0; k < ng[2]; k++) {
+                iglevel1_sfc[i][j][k] = gsq_sfc[i][j][k];
+                sfc_iglevel1[gsq_sfc[i][j][k]][0] = i;
+                sfc_iglevel1[gsq_sfc[i][j][k]][1] = j;
+                sfc_iglevel1[gsq_sfc[i][j][k]][2] = k;
+            }
+        }
+    }
+    return 0;
+}
+
 void init_grmhd_data(char *fname) {
 
     double buffer[1];
     unsigned int buffer_i[1];
+
     FILE *file_id;
+
+    long int offset;
+
+    int levmaxini, ndirini, nwini, nws, neqparini, it;
+    double t;
+    int nxlone[3];
 
     file_id = fopen(fname, "rb"); // r for read, b for binary
 
@@ -423,12 +550,10 @@ void init_grmhd_data(char *fname) {
         fprintf(stderr, "\nSuccessfully opened %s. \n\nReading", fname);
     }
 
-    long int offset;
-
-    int levmaxini, ndirini, nwini, nws, neqparini, it;
-    double t;
     fseek(file_id, 0, SEEK_END);
-    offset = -36 - 4; // -4; // 7 int, 1 double = 7 * 4 + 1*8 = 56?
+
+    offset = -40;
+
     fseek(file_id, offset, SEEK_CUR);
 
     fread(buffer_i, sizeof(int), 1, file_id);
@@ -458,6 +583,9 @@ void init_grmhd_data(char *fname) {
     fread(buffer, sizeof(double), 1, file_id);
     t = buffer[0];
 
+    LFAC = nwini-2;
+    XI = nwini-1;
+
     offset = offset - (ndimini * 4 + neqparini * 8);
     fseek(file_id, offset, SEEK_CUR);
 
@@ -474,8 +602,7 @@ void init_grmhd_data(char *fname) {
         neqpar[k] = buffer[0];
     }
 
-    a = neqpar[3];
-
+    a = neqpar[NSPIN];
     if (metric != MKSN)
         Q = 0.0;
     Q = 0.0;
@@ -534,7 +661,7 @@ void init_grmhd_data(char *fname) {
     stopx[2] = xprobmax[1];
     stopx[3] = xprobmax[2];
 
-    int cells = 1;
+    cells = 1;
     for (int k = 0; k < ndimini; k++) {
         cells *= nx[k];
     }
@@ -572,6 +699,34 @@ void init_grmhd_data(char *fname) {
     fprintf(stderr, ".");
 
     int level = 1;
+#if (SFC)
+    int ***iglevel1_sfc;
+    int **sfc_iglevel1;
+
+    iglevel1_sfc = (int ***)malloc(ng[0] * sizeof(int **));
+    for (int i = 0; i < ng[0]; i++) {
+        iglevel1_sfc[i] = (int **)malloc(ng[1] * sizeof(int *));
+        for (int j = 0; j < ng[1]; j++) {
+            iglevel1_sfc[i][j] = (int *)malloc(ng[2] * sizeof(int));
+        }
+    }
+
+    sfc_iglevel1 = (int **)malloc(ng[0] * ng[1] * ng[2] * sizeof(int *));
+    for (int i = 0; i < ng[0] * ng[1] * ng[2]; i++) {
+        sfc_iglevel1[i] = (int *)malloc(3 * sizeof(int));
+    }
+
+    level_one_Morton_ordered(iglevel1_sfc, sfc_iglevel1);
+    int i, j, k;
+    for (int sfc_i = 0; sfc_i < ng[2] * ng[1] * ng[0]; sfc_i++) {
+        i = sfc_iglevel1[sfc_i][0];
+        j = sfc_iglevel1[sfc_i][1];
+        k = sfc_iglevel1[sfc_i][2];
+
+        read_node(file_id, &igrid, &refine, ndimini, level, i, j, k);
+    }
+
+#else
     for (int k = 0; k < ng[2]; k++) {
         for (int j = 0; j < ng[1]; j++) {
             for (int i = 0; i < ng[0]; i++) {
@@ -580,6 +735,7 @@ void init_grmhd_data(char *fname) {
             }
         }
     }
+#endif
     if (nleafs != igrid) {
         fprintf(stderr, "something wrong with grid dimensions\n");
         exit(1);
@@ -711,11 +867,6 @@ void init_storage() {
         }
     }
 
-    values = (double **)malloc(nwini * sizeof(double *));
-    for (int j = 0; j < nwini; j++) {
-        values[j] = (double *)malloc(cells * sizeof(double));
-    }
-
     return;
 }
 
@@ -745,8 +896,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (i < 0) {
         del[1] = 0.;
     } else if (i > nx[0] - 2) {
-        del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
-
+        del[1] = 1.;
     } else {
         del[1] = (X[1] - ((i)*block_dx[0] + block_start[0])) / block_dx[0];
     }
@@ -754,8 +904,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (j < 0) {
         del[2] = 0.;
     } else if (j > nx[1] - 2) {
-        del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
-
+        del[2] = 1.;
     } else {
         del[2] = (X[2] - ((j)*block_dx[1] + block_start[1])) / block_dx[1];
     }
@@ -763,7 +912,7 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     if (k < 0) {
         del[3] = 0.;
     } else if (k > nx[2] - 2) {
-        del[3] = (X[3] - ((k)*block_dx[2] + block_start[2])) / block_dx[2];
+        del[3] = 1.0;
     } else {
         del[3] = (X[3] - ((k)*block_dx[2] + block_start[2])) / block_dx[2];
     }
@@ -804,17 +953,14 @@ double interp_scalar(double **var, int c, double coeff[4]) {
 
     if (c_ip >= nx[0]) {
         c_ip = c_i;
-        c_i--;
     }
 
     if (c_jp >= nx[1]) {
         c_jp = c_j;
-        c_j--;
     }
 
     if (c_kp >= nx[2]) {
         c_kp = c_k;
-        c_k--;
     }
 
     b1 = 1. - del[1];
@@ -860,8 +1006,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     X[2] = fmod(X[2], M_PI) - 1e-6;
     if (X[3] < 0.)
         X[3] = 2. * M_PI + X[3];
-    if (X[2] < 0.)
-        X[2] = M_PI + X[2];
+    if (X[2] < 0.) {
+        X[2] = -X[2];
+        X[3] = M_PI + X[3];
+    }
 #endif
 
     double r = get_r(X);
@@ -958,6 +1106,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     lower_index(X, (*modvar).U_u, (*modvar).U_d);
 
+    //    double UdotU = four_velocity_norm(X,(*modvar).U_u);
+    //   LOOP_i (*modvar).U_u[i]/=sqrt(fabs(UdotU));
+
     (*modvar).B_u[0] = 0;
     for (i = 1; i < NDIM; i++) {
         for (int l = 1; l < NDIM; l++) {
@@ -1025,15 +1176,80 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-    Thetae_unit = (gam - 1.) * (MPoME) / (trat + 1);
+    Thetae_unit = 1. / 3. * (MPoME) / (trat + 1);
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
+    double xc = r * sin(X[2]) * cos(X[3]);
+    double yc = r * sin(X[2]) * sin(X[3]);
+    double rc = sqrt(xc * xc + yc * yc);
 
-    if ((Bsq / (rho + 1e-20) > 1.) || r > 50. ||
-        (*modvar).theta_e > 100.) { // excludes all spine emmission
+    if ((Bsq / (rho + 1e-20) > SIGMA_CUT) || r > RT_OUTER_CUTOFF ||
+        (*modvar).theta_e > THETAE_MAX ||
+        (*modvar).theta_e < THETAE_MIN) { // excludes all spine emmission
         (*modvar).n_e = 0;
         return 0;
     }
 
     return 1;
+}
+
+void compute_spec_user(struct Camera *intensityfield,
+                       double energy_spectrum[num_frequencies][nspec]) {
+/*
+double dA, S_I, S_Q, S_U, S_V, r, IV, Ipol, Ilin;
+
+    for (int block = 0; block < tot_blocks; block++) {
+        dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            for (int freq = 0; freq < num_frequencies; freq++) {
+
+                r = sqrt((intensityfield)[block].alpha[pixel] *
+                             (intensityfield)[block].alpha[pixel] +
+                         (intensityfield)[block].beta[pixel] *
+                             (intensityfield)[block].beta[pixel]);
+
+                S_I = (intensityfield)[block].IQUV[pixel][freq][0];
+                S_Q = (intensityfield)[block].IQUV[pixel][freq][1];
+                S_U = (intensityfield)[block].IQUV[pixel][freq][2];
+                S_V = (intensityfield)[block].IQUV[pixel][freq][3];
+
+                Ipol = sqrt(S_Q * S_Q + S_U * S_U + S_V * S_V);
+                Ilin = sqrt(S_Q * S_Q + S_U * S_U);
+                IV = sqrt(S_V * S_V);
+
+                // Stokes I
+                energy_spectrum[freq][4] += Ipol * dA;
+
+                // Stokes Q
+                energy_spectrum[freq][5] += Ilin * dA;
+
+                // Stokes U
+                energy_spectrum[freq][6] += IV * dA;
+
+                // stokes V
+                if (r > 30) {
+                    // Stokes I
+                    energy_spectrum[freq][7] += S_I * dA;
+
+                    // Stokes Q
+                    energy_spectrum[freq][8] += S_Q * dA;
+
+                    // Stokes U
+                    energy_spectrum[freq][9] += S_U * dA;
+
+                    // stokes V
+                    energy_spectrum[freq][10] += S_V * dA;
+
+                    energy_spectrum[freq][11] += Ipol * dA;
+
+                    // Stokes Q
+                    energy_spectrum[freq][12] += Ilin * dA;
+
+                    // Stokes U
+                    energy_spectrum[freq][13] += IV * dA;
+                }
+            }
+        }
+    }
+    */
 }

@@ -6,12 +6,12 @@
  * A list of all RAPTOR functions.
  */
 
+#include "definitions.h"
+#include "model_definitions.h"
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include "parameters.h"
-#include "raptor_model.h"
-#include <stdio.h>
 // CORE.C
 /////////
 
@@ -105,11 +105,13 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
-                                  double *p, int PRINT_POLAR, double *IQUV);
+                                  double *p, int PRINT_POLAR, double *IQUV,
+                                  double *tau, double *tauF);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,
-                                      double IQUV[num_frequencies][4]);
+                                      double IQUV[num_frequencies][4],
+                                      double tau[num_frequencies]);
 // METRIC.C
 ///////////
 
@@ -313,11 +315,14 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar);
 // IO
 
 void compute_spec(struct Camera *intensity,
-                  double energy_spectrum[num_frequencies][4]);
+                  double energy_spectrum[num_frequencies][nspec]);
+
+void compute_spec_user(struct Camera *intensity,
+                       double energy_spectrum[num_frequencies][nspec]);
 
 // Create output files (image, spectrum, etc.)
 void output_files(struct Camera *intesityfield,
-                  double spectrum[num_frequencies][4],
+                  double spectrum[num_frequencies][nspec],
                   double frequencies[num_frequencies]);
 
 void write_image_hdf5(char *hdf5_filename, struct Camera *data,
@@ -339,4 +344,9 @@ int refine_block();
 void prerun_refine(struct Camera **intensityfield);
 
 void get_impact_params(struct Camera **intensityfield, int block);
+
+int find_block(double x[2], struct Camera *intensityfield);
+
+int find_pixel(double x[2], struct Camera *intensityfield, int block);
+
 #endif // FUNCTIONS_H

@@ -5,13 +5,18 @@
  *
  */
 
+#include "definitions.h"
 #include "functions.h"
+#include "global_vars.h"
 #include "gsl/gsl_sf_hyperg.h"
-#include "parameters.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
 #include <gsl/gsl_sf_bessel.h>
-#include <math.h>
-#include <stdio.h>
-////////////////////////////////////////////////////////////////////?/////////////////////////////////////////////////////rho
+
+// FUNCTIONS
+////////////
+
 // B.15:
 double f_m(double X) {
     return 2.011 * exp(-pow(X, 1.035) / 4.7) -
@@ -25,7 +30,7 @@ double f_m(double X) {
 double bessel_appr(int n, double x) {
 
     // use taylor expanded version
-    if (x < 1 / 100.) {
+    if (x < 1. / 5.) {
         if (n == 0)
             return -log(x / 2.) - 0.5772;
 
@@ -37,7 +42,7 @@ double bessel_appr(int n, double x) {
     }
     // in this case all bessel functions are really small... Theta_e is small,
     // so no emission anyway.?
-    else if (x > (1 / 0.00004)) {
+    else if (x > (1 / 0.00004) && 0) {
         return 1e-100;
     } else // use full versions in between.
         return gsl_sf_bessel_Kn(n, x);

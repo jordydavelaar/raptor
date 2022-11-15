@@ -4,16 +4,36 @@
  * Authors: Thomas Bronzwaer, Jordy Davelaar, Monika Moscibrodzka, Ziri Younsi
  */
 
+#include "definitions.h"
 #include "functions.h"
-#include "parameters.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "global_vars.h"
+#include "model_definitions.h"
+#include "model_functions.h"
+#include "model_global_vars.h"
+
+// GLOBAL VARS
+//////////////
+
+char GRMHD_FILE[256];
+
+double MBH, M_UNIT, TIME_INIT, INCLINATION;
+double R_HIGH, R_LOW;
+double FREQS_PER_DEC, FREQ_MIN, FREQ_MAX;
+
+double SOURCE_DIST; // Distance to M87 (cm); for Sgr A* use (2.47e22)
+
+int IMG_WIDTH, IMG_HEIGHT;
+double CAM_SIZE_X, CAM_SIZE_Y;
+double STEPSIZE;
+
+// FUNCTIONS
+////////////
 
 // Read model parameters from model.in
 void read_model(char *argv[]) {
     char temp[100], temp2[100];
     FILE *input;
+    char inputfile[100];
 
     sscanf(argv[1], "%s", inputfile);
     fprintf(stdout, "\nUsing model parameter file %s\n", inputfile);
@@ -26,7 +46,7 @@ void read_model(char *argv[]) {
 
     // Model parameters
     fscanf(input, "%s %s %lf", temp, temp2, &MBH);
-    fscanf(input, "%s %s %lf", temp, temp2, &source_dist);
+    fscanf(input, "%s %s %lf", temp, temp2, &SOURCE_DIST);
     fscanf(input, "%s %s %lf", temp, temp2, &M_UNIT);
     fscanf(input, "%s %s %lf", temp, temp2, &R_LOW);
     fscanf(input, "%s %s %lf", temp, temp2, &R_HIGH);
@@ -38,7 +58,7 @@ void read_model(char *argv[]) {
     fscanf(input, "%s %s %lf", temp, temp2, &CAM_SIZE_X);
     fscanf(input, "%s %s %lf", temp, temp2, &CAM_SIZE_Y);
 
-    fscanf(input, "%s %s %d", temp, temp2, &FREQS_PER_DEC);
+    fscanf(input, "%s %s %lf", temp, temp2, &FREQS_PER_DEC);
     fscanf(input, "%s %s %lf", temp, temp2, &FREQ_MIN);
     fscanf(input, "%s %s %lf", temp, temp2, &STEPSIZE);
     fscanf(input, "%s %s %d", temp, temp2, &max_level);
@@ -49,7 +69,7 @@ void read_model(char *argv[]) {
 
     fprintf(stderr, "\nModel parameters:\n\n");
     fprintf(stderr, "MBH \t\t= %g Msun\n", MBH);
-    fprintf(stderr, "DISTANCE \t= %g kpc\n", source_dist);
+    fprintf(stderr, "DISTANCE \t= %g kpc\n", SOURCE_DIST);
     fprintf(stderr, "M_UNIT \t\t= %g grams\n", M_UNIT);
     fprintf(stderr, "R_LOW \t\t= %g \n", R_LOW);
     fprintf(stderr, "R_HIGH \t\t= %g \n", R_HIGH);
@@ -69,13 +89,13 @@ void read_model(char *argv[]) {
     fprintf(stderr, "IMG_HEIGHT \t= %d \n", IMG_HEIGHT);
     fprintf(stderr, "CAM_SIZE_X \t= %g GM/c2\n", CAM_SIZE_X);
     fprintf(stderr, "CAM_SIZE_Y \t= %g GM/c2\n", CAM_SIZE_Y);
-    fprintf(stderr, "FREQS_PER_DEC \t= %d \n", FREQS_PER_DEC);
+    fprintf(stderr, "FREQS_PER_DEC \t= %lf \n", FREQS_PER_DEC);
     fprintf(stderr, "FREQ_MIN \t= %g Hz\n", FREQ_MIN);
     fprintf(stderr, "STEPSIZE \t= %g \n", STEPSIZE);
 
     // to cgs units
     MBH *= MSUN;
-    source_dist *= KPCTOCM;
+    SOURCE_DIST *= KPCTOCM;
 
     fclose(input);
 }
@@ -101,19 +121,21 @@ void calculate_image_block(struct Camera *intensityfield,
         integrate_geodesic((*intensityfield).alpha[pixel],
                            (*intensityfield).beta[pixel], lightpath2, &steps,
                            CUTOFF_INNER);
-
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
 #if (POL)
         for (int f = 0; f < num_frequencies; f++) {
 
             radiative_transfer_polarized(lightpath2, steps, frequencies[f],
                                          &f_x, &f_y, &p, 0,
-                                         (*intensityfield).IQUV[pixel][f]);
+                                         (*intensityfield).IQUV[pixel][f],
+                                         &(*intensityfield).tau[pixel][f],
+                                         &(*intensityfield).tauF[pixel][f]);
         }
 
 #else
         radiative_transfer_unpolarized(lightpath2, steps, frequencies,
-                                       (*intensityfield).IQUV[pixel]);
+                                       (*intensityfield).IQUV[pixel],
+                                       &(*intensityfield).tau[pixel]);
         for (int f = 0; f < num_frequencies; f++) {
             (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
         }
@@ -126,30 +148,31 @@ void calculate_image_block(struct Camera *intensityfield,
 // Functions that computes a spectrum at every frequency
 // by integrating over the image struct
 void compute_spec(struct Camera *intensityfield,
-                  double energy_spectrum[num_frequencies][4]) {
-    double dA, I, Q, U, V, I_lin, I_v, p, x, y, r;
+                  double energy_spectrum[num_frequencies][nspec]) {
+    double dA, S_I, S_Q, S_U, S_V;
+
     for (int block = 0; block < tot_blocks; block++) {
         dA = (intensityfield)[block].dx[0] * (intensityfield)[block].dx[1];
         for (int pixel = 0; pixel < tot_pixels; pixel++) {
             for (int freq = 0; freq < num_frequencies; freq++) {
 #if (POL)
 
-                I = (intensityfield)[block].IQUV[pixel][freq][0];
-                Q = (intensityfield)[block].IQUV[pixel][freq][1];
-                U = (intensityfield)[block].IQUV[pixel][freq][2];
-                V = (intensityfield)[block].IQUV[pixel][freq][3];
+                S_I = (intensityfield)[block].IQUV[pixel][freq][0];
+                S_Q = (intensityfield)[block].IQUV[pixel][freq][1];
+                S_U = (intensityfield)[block].IQUV[pixel][freq][2];
+                S_V = (intensityfield)[block].IQUV[pixel][freq][3];
 
                 // Stokes I
-                energy_spectrum[freq][0] += I * dA;
+                energy_spectrum[freq][0] += S_I * dA;
 
                 // Stokes Q
-                energy_spectrum[freq][1] += Q * dA;
+                energy_spectrum[freq][1] += S_Q * dA;
 
                 // Stokes U
-                energy_spectrum[freq][2] += U * dA;
+                energy_spectrum[freq][2] += S_U * dA;
 
                 // stokes V
-                energy_spectrum[freq][3] += V * dA;
+                energy_spectrum[freq][3] += S_V * dA;
 
 #else
                 energy_spectrum[freq][0] +=
