@@ -234,6 +234,54 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
         status = H5Sclose(dataspace_id);
     }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                buffer[block][pixel] = data[block].pdf[pixel][freq];
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "pdf%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                buffer[block][pixel] = data[block].avg[pixel][freq];
+            }
+        }
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "avg%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
 #endif
 
     char dataset[200];
@@ -327,7 +375,7 @@ void write_ray_output(double complex S_A[4], double Iinv, double Iinv_pol,
         mkdir(ray_folder, 0700);
     }
 
-    sprintf(fname, "%s/data_ray_%d_%d.csv",ray_folder, block, pixel);
+    sprintf(fname, "%s/data_ray_%d_%d.csv", ray_folder, block, pixel);
 
     if (stat(fname, &st) == -1) {
         rayfile = fopen(fname, "w");
@@ -346,11 +394,10 @@ void write_ray_output(double complex S_A[4], double Iinv, double Iinv_pol,
 
     rayfile = fopen(fname, "a");
 
-   double S_I = S_A[0] * pow(frequency, 3);
-   double S_Q = S_A[1] * pow(frequency, 3);
-   double S_U = S_A[2] * pow(frequency, 3);
-   double S_V = S_A[3] * pow(frequency, 3);
-
+    double S_I = S_A[0] * pow(frequency, 3);
+    double S_Q = S_A[1] * pow(frequency, 3);
+    double S_U = S_A[2] * pow(frequency, 3);
+    double S_V = S_A[3] * pow(frequency, 3);
 
     fprintf(rayfile, "%e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3]);
     fprintf(rayfile, "%e %e %e %e ", k_u[0], k_u[1], k_u[2], k_u[3]);

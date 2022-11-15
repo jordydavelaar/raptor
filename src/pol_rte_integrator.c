@@ -566,7 +566,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
                           double complex f_u[], double complex f_tetrad_u[],
                           double tetrad_d[][4], double tetrad_u[][4],
                           double complex S_A[], double *Iinv, double *Iinv_pol,
-                          double *tau, double *tauF, int block, int pixel) {
+                          double *tau, double *tauF, double *pdf, double *avg,
+                          int block, int pixel) {
 
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
     double pitch_ang, nu_p;
@@ -687,6 +688,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         stokes_to_f(f_u, f_tetrad_u, tetrad_u, S_A, Iinv, Iinv_pol);
         *tau += aI * (*dl_current) * scale;
         *tauF += fabs(rV) * (*dl_current) * scale;
+        *pdf = jI * (*dl_current) * scale;
+        *avg = jI * pitch_ang * (*dl_current) * scale;
 
         // Set POLARIZATION_ACTIVE to true; we are, after all,
         // in_volume.
