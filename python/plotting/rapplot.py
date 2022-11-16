@@ -34,7 +34,7 @@ def read_data(folder,ind,data_id):
     min = [-100.,-100.,-100.,-100.]
     max = [100.,100.,100,100.]
     print(len(data_id))
-    for j in range(0,len(data_id)-118):
+    for j in range(0,len(data_id)-4):
         for i in range(0,len(images[data_id[j]])):
             current=np.max(images[data_id[j]][i])
             max[j]=np.maximum(max[j],np.max(images[data_id[j]][i]))
@@ -65,7 +65,7 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,
         pixels=int(np.sqrt(len(image[data_id[stokes_ind]][i])))
         array=((np.reshape(image[data_id[stokes_ind]][i],(pixels,pixels))))
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
-        beta=((-np.reshape(image['beta'][i],(pixels,pixels))))*mas
+        beta=((np.reshape(image['beta'][i],(pixels,pixels))))*mas
         ax.set_aspect('equal')
 
         if(stokes_ind==0):
