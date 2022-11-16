@@ -1,0 +1,15 @@
+MBH		(Msun)	5.588e+09
+DISTANCE		(kpc)	3.345e+03
+M_UNIT		(g)	2.739e+25
+R_LOW		(-)	1
+R_HIGH		(-)	1
+	
+INCLINATION	(deg)		5
+IMG_WIDTH	(pixels)	300
+IMG_HEIGHT	(pixels)	300
+CAM_SIZE_X	(Rg)		27
+CAM_SIZE_Y	(Rg)		27
+FREQS_PER_DEC	(-)		1
+FREQ_MIN	(Hz)		2.500e+11
+STEPSIZE	(-)		5.00e-02
+MAX_LEVEL	(-)		1

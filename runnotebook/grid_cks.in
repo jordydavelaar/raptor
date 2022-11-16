@@ -1,0 +1,13 @@
+nxlone1 = 96
+nxlone2 = 96
+nxlone3 = 384
+
+xprobminx1 = -500.
+xprobminx2 = -500.
+xprobminx3 = -2000.
+
+xprobmax1 = 500.
+xprobmax2 = 500.
+xprobmax3 = 2000.
+
+hslope = 1.0

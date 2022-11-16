@@ -1,0 +1,13 @@
+nxlone1 = 128
+nxlone2 = 64
+nxlone3 = 64
+
+xprobminx1 = 0.17
+xprobminx2 = 0.0
+xprobminx3 = 0.0
+
+xprobmax1 = 8.1117280833
+xprobmax2 = 0.5
+xprobmax3 = 1.0
+
+hslope = 0.25
