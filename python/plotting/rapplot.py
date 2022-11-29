@@ -34,7 +34,7 @@ def read_data(folder,ind,data_id):
     min = [-100.,-100.,-100.,-100.]
     max = [100.,100.,100,100.]
     print(len(data_id))
-    for j in range(0,len(data_id)-118):
+    for j in range(0,len(data_id)-4):
         for i in range(0,len(images[data_id[j]])):
             current=np.max(images[data_id[j]][i])
             max[j]=np.maximum(max[j],np.max(images[data_id[j]][i]))
@@ -53,7 +53,7 @@ def plot_data_tau(image,data_id,ind,fig,ax,halfrange=40,mas=1,label="Stokes",cma
 
         figure=ax.pcolormesh(alpha,beta,np.log10(array+1e-10),vmin=vmin,vmax=vmax,cmap=cmap,shading='auto')
         ax.set_aspect('equal')
-        
+
     fig.colorbar(figure,label=label,ax=ax)
 
     ax.set_xlim(-halfrange*mas,halfrange*mas)
