@@ -844,10 +844,14 @@ void init_grmhd_data(char *fname) {
 
 void set_units(double M_unit_c) {
 
-    if (!M_UNIT_SLOPE)
-        M_unit = M_unit_c * exp((TIME_INIT - M_UNIT_T) / M_UNIT_SLOPE);
+    double M_unit;
+
+    if (M_UNIT_SLOPE!=0)
+        M_unit = M_unit_c * exp((TIME_INIT - M_UNIT_T)*M_UNIT_DT / M_UNIT_SLOPE);
     else
         M_unit = M_unit_c;
+
+    fprintf(stderr,"Munit is %e\n",M_unit);
 
     L_unit = GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
     T_unit = L_unit / SPEED_OF_LIGHT;
