@@ -20,7 +20,12 @@
 //////////////
 double ****p;
 
-int N1, N2, N3;
+int N1, N2, N3, z1, z2, z3, NPR, DOKTOT, DOCYLINDRIFYCOORDS, BLL, junkint;
+
+
+double tf, tt, nstep, cour, DTd, DTl, DTi, DTr, DTr01, dump_cnt, image_cnt, rdump_cnt, rdump01_cnt, dt, lim, failed, fractheta, fracphi, rbr, npow2, cpow2, global_x10, global_x20, global_fracdisk, global_fracjet, global_r0disk, global_rdiskend, global_r0jet, global_rjetend, global_jetnu, global_rsjet, global_r0grid;  
+
+double junkf;
 
 double gam;
 
@@ -30,6 +35,8 @@ double startx[NDIM], stopx[NDIM], dx[NDIM];
 double L_unit, T_unit;
 double RHO_unit, U_unit, B_unit;
 double Ne_unit, Thetae_unit;
+
+
 
 // FUNCTIONS
 ////////////
@@ -46,7 +53,7 @@ void init_model() {
 void init_grmhd_data(char *fname) {
     FILE *fp;
 
-    fp = fopen(fname, "r");
+    fp = fopen(fname, "rb");
 
     if (fp == NULL) {
         fprintf(stderr, "\nCan't open sim data file... Abort!\n");
@@ -54,44 +61,123 @@ void init_grmhd_data(char *fname) {
     } else {
         fprintf(stderr, "\nSuccessfully opened %s. \n\nReading", fname);
     }
+    
 
     /* get standard HARM header */
-    fscanf(fp, "%d ", &N1);
-    fscanf(fp, "%d ", &N2);
-    fscanf(fp, "%d ", &N3);
-    fscanf(fp, "%lf ", &gam);
-    fscanf(fp, "%lf ", &a);
-    fscanf(fp, "%lf ", &dx[1]);
-    fscanf(fp, "%lf ", &dx[2]);
-    fscanf(fp, "%lf ", &dx[3]);
+    fscanf(fp, "%lf ", &tt); //time
+    fscanf(fp, "%d ", &N1); // nx
+    fscanf(fp, "%d ", &N2); // ny
+    fscanf(fp, "%d ", &N3); // nz
+    fscanf(fp, "%d ", &N1); //nx
+    fscanf(fp, "%d ", &N2); //ny 
+    fscanf(fp, "%d ", &N3); // nz
+    fscanf(fp, "%d ", &z1); // 0
+    fscanf(fp, "%d ", &z2); // 0
+    fscanf(fp, "%d ", &z3); // 0
     fscanf(fp, "%lf ", &startx[1]);
     fscanf(fp, "%lf ", &startx[2]);
     fscanf(fp, "%lf ", &startx[3]);
-    fscanf(fp, "%lf ", &hslope);
+    fscanf(fp, "%lf ", &dx[1]);
+    fscanf(fp, "%lf ", &dx[2]);
+    fscanf(fp, "%lf ", &dx[3]);
+    fscanf(fp, "%lf ", &tf);
+    fscanf(fp, "%lf ", &nstep);
+    fscanf(fp, "%lf ", &a);
+    fscanf(fp, "%lf ", &gam);
+    fscanf(fp, "%lf ", &cour);
+    fscanf(fp, "%lf ", &DTd);
+    fscanf(fp, "%lf ", &DTl);
+    fscanf(fp, "%lf ", &DTi);
+    fscanf(fp, "%lf ", &DTr);
+    fscanf(fp, "%lf ", &DTr01);
+    fscanf(fp, "%lf ", &dump_cnt);
+    fscanf(fp, "%lf ", &image_cnt);    
+    fscanf(fp, "%lf ", &rdump_cnt);
+    fscanf(fp, "%lf ", &rdump01_cnt);
+    fscanf(fp, "%lf ", &dt);
+    fscanf(fp, "%lf ", &lim);
+    fscanf(fp, "%lf ", &failed);
     fscanf(fp, "%lf ", &Rin);
     fscanf(fp, "%lf ", &Rout);
-
+    fscanf(fp, "%lf ", &hslope);
+    fscanf(fp, "%lf ", &R0);
+    fscanf(fp, "%d ", &NPR);
+    fscanf(fp, "%d ", &DOKTOT);
+    fscanf(fp, "%d ", &DOCYLINDRIFYCOORDS);
+    fscanf(fp, "%lf ", &fractheta);
+    fscanf(fp, "%lf ", &fracphi);
+    fscanf(fp, "%lf ", &rbr);
+    fscanf(fp, "%lf ", &npow2);    
+    fscanf(fp, "%lf ", &cpow2);
+    fscanf(fp, "%lf ", &global_x10);
+    fscanf(fp, "%lf ", &global_x20);
+    fscanf(fp, "%lf ", &global_fracdisk);
+    fscanf(fp, "%lf ", &global_fracjet);
+    fscanf(fp, "%lf ", &global_r0disk);
+    fscanf(fp, "%lf ", &global_rdiskend);
+    fscanf(fp, "%lf ", &global_r0jet);    
+    fscanf(fp, "%lf ", &global_rjetend);
+    fscanf(fp, "%lf ", &global_jetnu);
+    fscanf(fp, "%lf ", &global_rsjet);
+    fscanf(fp, "%lf ", &global_r0grid);
+    fscanf(fp, "%d ", &BLL);
+    
+    
+    fprintf(stderr,"tt: %lf\n",tt);
+    
     stopx[0] = 1.;
-    stopx[1] = startx[1] + N1 * dx[1];
+    stopx[1] = startx[1] + N1 * dx[1]; 
     stopx[2] = startx[2] + N2 * dx[2];
     stopx[3] = startx[3] + N3 * dx[3];
-
+    
+   // fclose(fp);
+    
+  //  fp = fopen(fname, "rb");
+    
     init_storage();
+    
+ //   fscanf(fp, "%*d %*d %*d %*lf %*lf %*lf %*lf %*lf %*lf");  // how to do that??? 
 
     for (int i = 0; i < N1; i++) {
         for (int j = 0; j < N2; j++) {
             for (int k = 0; k < N3; k++) {
-                fscanf(fp, "%lf %lf %lf %lf %lf %lf %lf %lf", &p[KRHO][i][j][k],
+                // skip junk
+              //  fscanf(fp, "%*d %*d %*d %*lf %*lf %*lf %*lf %*lf %*lf");
+                fread(fp, "%*d %*d %*d %*lf %*lf %*lf %*lf %*lf %*lf");
+                
+                // read 8 interesting variables
+                fread(fp, "%lf %lf %lf %lf %lf %lf %lf %lf", &p[KRHO][i][j][k],
                        &p[UU][i][j][k], &p[U1][i][j][k], &p[U2][i][j][k],
                        &p[U3][i][j][k], &p[B1][i][j][k], &p[B2][i][j][k],
                        &p[B3][i][j][k]);
+              //  fscanf(fp, "%lf %lf %lf %lf %lf %lf %lf %lf", &p[KRHO][i][j][k],
+              //         &p[UU][i][j][k], &p[U1][i][j][k], &p[U2][i][j][k],
+               //        &p[U3][i][j][k], &p[B1][i][j][k], &p[B2][i][j][k],
+              //         &p[B3][i][j][k]);
+                
+                // skip the rest of NPR and 24 more junk variables
+                for (int l = 0; l < NPR-8+24; l++) {
+                //    fscanf(fp, "%*lf");
+                    fread(fp, "%*lf");
+                }   
+                
             }
         }
-        if (i % (N1 / 3) == 0)
+        if (i % (N1 / 3) == 0)  //????
             fprintf(stderr, ".");
     }
+    
+    fprintf(stderr," test rho=: %lf\n", p[KRHO][50][64][0]);
+    fprintf(stderr," test u=: %lf\n", p[UU][50][64][0]);
+    fprintf(stderr," test u1=: %lf\n", p[U1][50][64][0]);
+    fprintf(stderr," test u2=: %lf\n", p[U2][50][64][0]);
+    fprintf(stderr," test u3=: %lf\n", p[U3][50][64][0]);
+    fprintf(stderr," test b1=: %lf\n", p[B1][50][64][0]);
+    fprintf(stderr," test b2=: %lf\n", p[B2][50][64][0]);
+    fprintf(stderr," test b3=: %lf\n", p[B3][50][64][0]);
 
     fprintf(stderr, "Done!\n");
+    fclose(fp);
 }
 
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
@@ -319,7 +405,9 @@ double ***malloc_rank3(int n1, int n2, int n3) {
 
 void init_storage(void) {
     int i, j, k;
-
+    
+    
+    
     p = (double ****)malloc(NPRIM * sizeof(double ***));
     for (i = 0; i < NPRIM; i++) {
         p[i] = (double ***)malloc(N1 * sizeof(double **));
