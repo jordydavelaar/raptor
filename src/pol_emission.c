@@ -216,10 +216,24 @@ double rho_V_thermal(double theta_e, double n_e, double nu, double B,
                                (1.e3 * omega0 / 2. / M_PI / nu));
     double Thetaer = 1. / theta_e;
 
+    double fit_factor;
+    double k2 = bessel_appr(2, Thetaer);
+    double k0 = bessel_appr(0, Thetaer);
+
+#(DEXTER)
+    fit_factor = (k0 - DeltaJ_5(Xe)) / k2;
+#else
+    double shgmfunc = 1 - 0.11*log(1 + 0.035*Xe);
+    double k_ratio = (k2 > 0) ? k0/k2 : 1;
+
+    fit_factor = k_ratio * shgmfunc;
+#endif
+
     return 2.0 * M_PI * nu / SPEED_OF_LIGHT * wp2 * omega0 /
-           pow(2. * M_PI * nu, 3.) * (bessel_appr(0, Thetaer) - DeltaJ_5(Xe)) /
-           bessel_appr(2, Thetaer) * cos(theta_B);
+           pow(2. * M_PI * nu, 3.) * fit_factor * cos(theta_B);
+
 }
+
 double rho_V_power(double theta_e, double n_e, double nu, double B,
                    double theta_B) {
     double nuc =
