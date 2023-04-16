@@ -49,7 +49,7 @@ def plot_data_tau(image,data_id,ind,fig,ax,halfrange=40,mas=1,label="Stokes",cma
         pixels=int(np.sqrt(len(image[data_id[ind]][i])))
         array=((np.reshape(image[data_id[ind]][i],(pixels,pixels))))
         alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
-        beta=((-np.reshape(image['beta'][i],(pixels,pixels))))*mas
+        beta=((np.reshape(image['beta'][i],(pixels,pixels))))*mas
 
         figure=ax.pcolormesh(alpha,beta,np.log10(array+1e-10),vmin=vmin,vmax=vmax,cmap=cmap,shading='auto')
         ax.set_aspect('equal')
