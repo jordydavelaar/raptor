@@ -762,7 +762,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         dl_current = fabs(lightpath[(path_counter - 1) * 9 + 8]);
 
         // check normalization of k vectors.
-        if (fabs(four_velocity_norm(X_u, k_u)) > 1e-6 && exp(X_u[1]) > 2.)
+        if (fabs(four_velocity_norm(X_u, k_u)) > 1e-6 && get_r(X_u) > 2.)
             normalize_null(X_u, k_u);
 
         // PLASMA INTEGRATION STEP
