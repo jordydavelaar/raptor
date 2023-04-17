@@ -80,6 +80,9 @@ typedef struct Camera {
 #define gamma_min 1.
 #define gamma_max 1000.
 
+#define DEXTER (0) // use Dexter fit for rho_V_thermal
+
+
 // METRIC PARAMETERS
 ////////////////////
 
