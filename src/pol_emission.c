@@ -220,7 +220,7 @@ double rho_V_thermal(double theta_e, double n_e, double nu, double B,
     double k2 = bessel_appr(2, Thetaer);
     double k0 = bessel_appr(0, Thetaer);
 
-#(DEXTER)
+#if(DEXTER)
     fit_factor = (k0 - DeltaJ_5(Xe)) / k2;
 #else
     double shgmfunc = 1 - 0.11*log(1 + 0.035*Xe);
