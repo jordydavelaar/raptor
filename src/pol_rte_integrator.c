@@ -607,8 +607,14 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // POLARIZED EMISSION/ABSORPTION COEFFS
     ///////////////////////////////////////
-    evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI, &aQ, &aU,
-                           &aV, nu_p, modvar, pitch_ang);
+#if (EMISUSER)
+              	evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
+                                     &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
+#else
+                evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
+                                       &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
+#endif
+
 
     // Create tetrad, needed whether POLARIZATION_ACTIVE is true or
     // false.

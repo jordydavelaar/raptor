@@ -63,8 +63,8 @@ double DeltaJ_5(double X) {
     return 0.43793091 * log(1. + 0.00185777 * pow(X, 1.50316886));
 }
 double get_w(double theta_e) {
-    //	return 	(kappa-3)*theta_e/kappa;
-    return theta_e;
+    return (kappa-3)*theta_e/kappa;
+    //return theta_e;
 }
 ////////////
 ///////////////Rho_Q
