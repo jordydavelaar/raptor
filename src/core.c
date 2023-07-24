@@ -130,7 +130,7 @@ void calculate_image_block(struct Camera *intensityfield,
                                          &(*intensityfield).tau[pixel][f],
                                          &(*intensityfield).tauF[pixel][f],
                                          &(*intensityfield).pdf[pixel][f],
-                                         &(*intensityfield).avg[pixel][f],
+                                         (*intensityfield).avg[pixel][f],
                                          block, pixel);
         }
 

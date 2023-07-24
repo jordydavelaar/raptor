@@ -566,7 +566,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
                           double complex f_u[], double complex f_tetrad_u[],
                           double tetrad_d[][4], double tetrad_u[][4],
                           double complex S_A[], double *Iinv, double *Iinv_pol,
-                          double *tau, double *tauF, double *pdf, double *avg,
+                          double *tau, double *tauF, double *pdf, double avg[3],
                           int block, int pixel) {
 
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
@@ -694,8 +694,11 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         stokes_to_f(f_u, f_tetrad_u, tetrad_u, S_A, Iinv, Iinv_pol);
         *tau += aI * (*dl_current) * scale;
         *tauF += fabs(rV) * (*dl_current) * scale;
-        *pdf = jI * (*dl_current) * scale;
-        *avg = jI * pitch_ang * (*dl_current) * scale;
+        *pdf += jI * (*dl_current) * scale;
+        avg[0] += jI * cos(pitch_ang)  * (*dl_current) * scale;
+        avg[1] += jI * modvar.n_e  * (*dl_current) * scale;
+        avg[2] += jI * modvar.theta_e  * (*dl_current) * scale;
+        avg[3] += jI *  modvar.sigma  * (*dl_current) * scale;
 
         // Set POLARIZATION_ACTIVE to true; we are, after all,
         // in_volume.
@@ -734,7 +737,7 @@ void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *IQUV, double *tau,
-                                  double *tauF, double *pdf, double *avg,
+                                  double *tauF, double *pdf, double avg[4],
                                   int block, int pixel) {
     int path_counter;
     double dl_current;

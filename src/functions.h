@@ -105,7 +105,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *IQUV, double *tau,
-                                  double *tauF, double *pdf, double *avg,
+                                  double *tauF, double *pdf, double avg[4],
                                   int block, int pixel);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,

@@ -83,7 +83,10 @@ void get_impact_params(struct Camera **intensityfield, int block) {
             (*intensityfield)[block].tau[pixel][f] = 0;
             (*intensityfield)[block].tauF[pixel][f] = 0;
             (*intensityfield)[block].pdf[pixel][f] = 0;
-            (*intensityfield)[block].avg[pixel][f] = 0;
+            (*intensityfield)[block].avg[pixel][f][0] = 0;
+            (*intensityfield)[block].avg[pixel][f][1] = 0;
+            (*intensityfield)[block].avg[pixel][f][2] = 0;
+            (*intensityfield)[block].avg[pixel][f][3] = 0;
         }
     }
 }

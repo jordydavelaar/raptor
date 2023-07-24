@@ -264,13 +264,18 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         for (int block = 0; block < tot_blocks; block++) {
             for (int pixel = 0; pixel < tot_pixels; pixel++) {
                 dA = 1;
-                buffer[block][pixel] = data[block].avg[pixel][freq];
+		if(data[block].pdf[pixel][freq]>0){
+                	buffer[block][pixel] = data[block].avg[pixel][freq][0]/data[block].pdf[pixel][freq];
+		}
+		else{
+			buffer[block][pixel] = 0;
+		}
             }
         }
 
         dataspace_id = H5Screate_simple(2, dims, NULL);
 
-        sprintf(dataset, "avg%e", frequencies[freq]);
+        sprintf(dataset, "avg1%e", frequencies[freq]);
         dataset_id =
             H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -282,6 +287,94 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
         status = H5Sclose(dataspace_id);
     }
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                if(data[block].pdf[pixel][freq]>0){
+                        buffer[block][pixel] = data[block].avg[pixel][freq][1]/data[block].pdf[pixel][freq];
+                }
+                else{
+                     	buffer[block][pixel] = 0;
+                }
+            }
+	}
+
+	dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "avg2%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                if(data[block].pdf[pixel][freq]>0){
+                        buffer[block][pixel] = data[block].avg[pixel][freq][2]/data[block].pdf[pixel][freq];
+                }
+                else{
+                     	buffer[block][pixel] = 0;
+                }
+            }
+	}
+
+	dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "avg3%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        char dataset[200];
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                dA = 1;
+                if(data[block].pdf[pixel][freq]>0){
+                        buffer[block][pixel] = data[block].avg[pixel][freq][3]/data[block].pdf[pixel][freq];
+                }
+                else{
+                     	buffer[block][pixel] = 0;
+                }
+            }
+	}
+
+	dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        sprintf(dataset, "avg4%e", frequencies[freq]);
+        dataset_id =
+            H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 buffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
+
 #endif
 
     char dataset[200];
