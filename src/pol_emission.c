@@ -128,7 +128,7 @@ double rho_Q_thermal(double theta_e, double n_e, double nu, double B,
                                (1.e3 * omega0 / 2. / M_PI / nu));
     double Thetaer = 1. / theta_e;
 
-    return 2. * M_PI * nu / 2. / SPEED_OF_LIGHT * wp2 * omega0 * omega0 /
+    return - 2. * M_PI * nu / 2. / SPEED_OF_LIGHT * wp2 * omega0 * omega0 /
            pow(2. * M_PI * nu, 4.) * f_m(Xe) *
            (bessel_appr(1, Thetaer) / bessel_appr(2, Thetaer) + 6. * theta_e) *
            sin(theta_B) * sin(theta_B);
@@ -366,7 +366,7 @@ double j_Q_thermal(double theta_e, double n_e, double nu, double B,
                   (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
                   theta_e;
     double x = nu / nu_c;
-    return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
+    return - n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
            SPEED_OF_LIGHT / theta_e / theta_e * I_Q(x);
 }
 double j_Q_power(double theta_e, double n_e, double nu, double B,
