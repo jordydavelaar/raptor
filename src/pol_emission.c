@@ -128,7 +128,7 @@ double rho_Q_thermal(double theta_e, double n_e, double nu, double B,
                                (1.e3 * omega0 / 2. / M_PI / nu));
     double Thetaer = 1. / theta_e;
 
-    return - 2. * M_PI * nu / 2. / SPEED_OF_LIGHT * wp2 * omega0 * omega0 /
+    return 2. * M_PI * nu / 2. / SPEED_OF_LIGHT * wp2 * omega0 * omega0 /
            pow(2. * M_PI * nu, 4.) * f_m(Xe) *
            (bessel_appr(1, Thetaer) / bessel_appr(2, Thetaer) + 6. * theta_e) *
            sin(theta_B) * sin(theta_B);
@@ -347,7 +347,8 @@ double j_Q_kappa(double theta_e, double n_e, double nu, double B,
                             tgamma(kappa / 4. + 4. / 3.) * J_high_factor_Q;
     double prefac =
         n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nuc / SPEED_OF_LIGHT;
-    return prefac *
+    //this needs to  change sign in our IEEE convention! 
+    return - prefac *
            pow((pow(J_Q_low_kappa, -J_x_Q) + pow(J_Q_high_kappa, -J_x_Q)),
                -1. / J_x_Q) *
            J_S_factor_Q;
@@ -366,7 +367,7 @@ double j_Q_thermal(double theta_e, double n_e, double nu, double B,
                   (4.0 * M_PI * ELECTRON_MASS * SPEED_OF_LIGHT) * theta_e *
                   theta_e;
     double x = nu / nu_c;
-    return - n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
+    return n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nu / 2. / sqrt(3.) /
            SPEED_OF_LIGHT / theta_e / theta_e * I_Q(x);
 }
 double j_Q_power(double theta_e, double n_e, double nu, double B,
@@ -376,7 +377,9 @@ double j_Q_power(double theta_e, double n_e, double nu, double B,
     double j_Q_power_factor = -(power + 1) / (power + 7. / 3.);
     double prefac =
         n_e * ELECTRON_CHARGE * ELECTRON_CHARGE * nuc / SPEED_OF_LIGHT;
-    return prefac * (pow(3, power / 2.) * (power - 1) * sin(theta_B)) /
+
+    //this needs to  change sign in our IEEE convention! 
+    return - prefac * (pow(3, power / 2.) * (power - 1) * sin(theta_B)) /
            (2 * (power + 1) *
             (pow(gamma_min, 1 - power) - pow(gamma_max, 1 - power))) *
            tgamma((3 * power - 1) / 12.) * tgamma((3 * power + 19) / 12.) *
@@ -577,7 +580,8 @@ double a_Q_kappa(double theta_e, double n_e, double nu, double B,
     double prefac = n_e * ELECTRON_CHARGE * ELECTRON_CHARGE /
                     (ELECTRON_MASS * SPEED_OF_LIGHT * nu);
 
-    return prefac *
+    //this needs to  change sign in our IEEE convention! 
+    return -prefac *
            pow((pow(A_Q_low_kappa, -A_x_Q) + pow(A_Q_high_kappa, -A_x_Q)),
                -1. / A_x_Q) *
            A_S_factor_Q;
@@ -598,7 +602,8 @@ double a_Q_power(double theta_e, double n_e, double nu, double B,
     double prefac = n_e * ELECTRON_CHARGE * ELECTRON_CHARGE /
                     (ELECTRON_MASS * SPEED_OF_LIGHT * nu);
 
-    return prefac * (pow(3, (power + 1) / 2.) * (power - 1)) /
+    //this needs to  change sign in our IEEE convention! 
+    return -prefac * (pow(3, (power + 1) / 2.) * (power - 1)) /
            (4 * (pow(gamma_min, 1 - power) - pow(gamma_max, 1 - power))) *
            tgamma((3 * power + 2) / 12.) * tgamma((3 * power + 22) / 12.) *
            pow((nu) / (nuc * sin(theta_B)), -(power + 2) / 2.) *
@@ -645,7 +650,19 @@ double a_V_kappa(double theta_e, double n_e, double nu, double B,
         (2 * tgamma(2. + kappa / 2.) / (2. + kappa) - 1.) * A_high_factor_V;
     double prefac = n_e * ELECTRON_CHARGE * ELECTRON_CHARGE /
                     (ELECTRON_MASS * SPEED_OF_LIGHT * nu);
-    return prefac *
+
+//from ipole/symphony. 
+        /*The Stokes V absorption coefficient changes sign at observer_angle
+	    equals 90deg, but this formula does not.  This discrepancy is a
+	    bug in this formula, and is patched by the term below.*/
+	  double sign_bug_patch = cos(theta_B)/fabs(cos(theta_B));
+
+	  /*NOTE: Sign corrected; the sign in Leung et al. (2011)
+	    and Pandya et al. (2016) for Stokes V transfer coefficients
+	    does not follow the convention the papers describe (IEEE/IAU);
+	    the sign has been corrected here.*/
+
+    return -sign_bug_patch * prefac *
            pow((pow(A_V_low_kappa, -A_x_V) + pow(A_V_high_kappa, -A_x_V)),
                -1. / A_x_V) *
            A_S_factor_V;
