@@ -9,6 +9,7 @@ CODE="bhac"
 GRID="smr"
 RAD="pol"
 SF="nosfc"
+NFREQ="1"
 
 for arg in "$@"
 do
@@ -39,6 +40,10 @@ do
         ;;
         -b=*|--bflip=*)
         BFLIP="${arg#*=}"
+        shift # Remove --cache= from processing
+        ;;
+        -n=*|--nfreq=*)
+        NFREQ="${arg#*=}"
         shift # Remove --cache= from processing
         ;;
     esac
@@ -151,6 +156,11 @@ then
        	sed -i  '/#define BPOL /s/.*/#define BPOL (MINUS)/' model_definitions.h
 else
     	sed -i  '/#define BPOL /s/.*/#define BPOL (PLUS)/' model_definitions.h
+fi
+
+if [ "$NFREQ" != "1" ] ;
+then
+        sed -i  "/#define num_frequencies /s/.*/#define num_frequencies $NFREQ/" definitions.h
 fi
 
 
