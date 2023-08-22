@@ -131,9 +131,9 @@ int main(int argc, char *argv[]) {
     prerun_refine(&intensityfield);
 #endif
 
-    int block = 0;
+    int block = 660;
 
-    while (block < tot_blocks) { // block_total
+    while (block < 661) { // tot_blocks
         if (block % (25) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
