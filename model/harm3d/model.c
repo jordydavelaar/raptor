@@ -26,6 +26,7 @@ int N1, N2, N3;
 double gam;
 
 double R0, Rin, Rout, a, hslope;
+double mks_smooth, poly_xt, poly_alpha, poly_norm;
 double startx[NDIM], stopx[NDIM], dx[NDIM];
 
 double L_unit, T_unit;
@@ -57,20 +58,25 @@ void init_grmhd_data(char *fname) {
     }
 
     /* get standard HARM header */
-    fscanf(fp, "%d ", &N1);
-    fscanf(fp, "%d ", &N2);
-    fscanf(fp, "%d ", &N3);
-    fscanf(fp, "%lf ", &gam);
-    fscanf(fp, "%lf ", &a);
-    fscanf(fp, "%lf ", &dx[1]);
-    fscanf(fp, "%lf ", &dx[2]);
-    fscanf(fp, "%lf ", &dx[3]);
-    fscanf(fp, "%lf ", &startx[1]);
-    fscanf(fp, "%lf ", &startx[2]);
-    fscanf(fp, "%lf ", &startx[3]);
-    fscanf(fp, "%lf ", &hslope);
-    fscanf(fp, "%lf ", &Rin);
-    fscanf(fp, "%lf ", &Rout);
+	fscanf(fp, "%d ", &N1);
+	fscanf(fp, "%d ", &N2);
+	fscanf(fp, "%d ", &N3);
+	fscanf(fp, "%lf ", &gam);
+	fscanf(fp, "%lf ", &a);
+	fscanf(fp, "%lf ", &dx[1]);
+	fscanf(fp, "%lf ", &dx[2]);
+	fscanf(fp, "%lf ", &dx[3]);
+	fscanf(fp, "%lf ", &startx[1]);
+	fscanf(fp, "%lf ", &startx[2]);
+	fscanf(fp, "%lf ", &startx[3]);
+	fscanf(fp, "%lf ", &hslope);
+	fscanf(fp, "%lf ", &mks_smooth);
+	fscanf(fp, "%lf ", &poly_xt);
+	fscanf(fp, "%lf ", &poly_alpha);
+	fscanf(fp, "%lf ", &Rin);
+	fscanf(fp, "%lf ", &Rout);
+
+    poly_norm = 0.5*M_PI*1./(1. + 1./(poly_alpha + 1.)*1./pow(poly_xt, poly_alpha));
 
     stopx[0] = 1.;
     stopx[1] = startx[1] + N1 * dx[1];
@@ -173,7 +179,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     Th_unit = (1.4444444444 - 1.) * (PROTON_MASS / ELECTRON_MASS) / (1. + trat);
 
     (*modvar).theta_e =
-        (2. / 15.) * (uu / rho) * (PROTON_MASS / ELECTRON_MASS) + 1e-40;
+        (uu/rho) * (PROTON_MASS/ELECTRON_MASS) * (2/3)/(2+R);
+        // (2. / 15.) * (uu / rho) * (PROTON_MASS / ELECTRON_MASS) + 1e-40;
+
 
 #if (DEBUG)
     if (uu < 0)

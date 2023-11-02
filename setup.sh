@@ -3,9 +3,9 @@
 echo "RAPTOR setup script"
 
 
-METRIC="cks"
+METRIC="fmks"
 INT="rk4"
-CODE="bhac"
+CODE="harm3d"
 GRID="smr"
 RAD="pol"
 SF="nosfc"

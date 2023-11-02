@@ -97,13 +97,13 @@ typedef struct Camera {
     (6) // BHAC style MKS coords          x1=log(r), x2=th/pi, and x3=phi
 #define MKSN (7) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 #define CKS (8)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
-
+#define FMKS2 (9) // HARM3D MKS with wider zones at the poles
 // Metric
 #define metric (MKSHARM)
 #if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
-       metric == MKSBHAC || metric == MKSN)
+       metric == MKSBHAC || metric == MKSN || metric == FMKS2)
 #define logscale (1) // Modified BL/KS coordinates; logarithmic radius
 #endif
 
@@ -173,5 +173,23 @@ typedef struct Camera {
         for (int j = 0; j < DIM; j++)                                          \
             for (int k = 0; k < DIM; k++)                                      \
                 for (int l = 0; l < DIM; l++)
+
+// copied from decs.h
+#define xstr(s) str(s)
+#define str(s) #s
+#define STRLEN (2048)
+
+// Dimensions
+#define NDIM	4
+#define NIMG (5) // Stokes parameters plus faraday depth
+
+// "functions"
+#define sign(x) (((x) < 0) ? -1 : ((x) > 0))
+#define delta(x, y) ((x) == (y))
+
+// MAX and MIN were here but are both unsafe & slow. Use fmax/fmin
+
+#define MULOOP for(int mu=0;mu<NDIM;mu++)
+#define MUNULOOP for(int mu=0;mu<NDIM;mu++) for(int nu=0;nu<NDIM;nu++)
 
 #endif // DEFINITIONS_H
