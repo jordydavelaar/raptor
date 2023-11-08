@@ -99,7 +99,7 @@ typedef struct Camera {
 #define CKS (8)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 #define FMKS2 (9) // HARM3D MKS with wider zones at the poles
 // Metric
-#define metric (MKSHARM)
+#define metric (FMKS2)
 #if (metric == BL || metric == KS || metric == CKS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \

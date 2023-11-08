@@ -174,12 +174,21 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     beta_trans = 1.;
     b2 = pow(beta / beta_trans, 2);
 
-    trat = 3.;
-    two_temp_gam = 0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
-    Th_unit = (1.4444444444 - 1.) * (PROTON_MASS / ELECTRON_MASS) / (1. + trat);
+    // trat = 3.;
+    // two_temp_gam = 0.5 * ((1. + 2. / 3. * (trat + 1.) / (trat + 2.)) + gam);
+    // Th_unit = (1.4444444444 - 1.) * (PROTON_MASS / ELECTRON_MASS) / (1. + trat);
+    double Rhigh = R_HIGH;
+    double Rlow = R_LOW;
 
-    (*modvar).theta_e =
-        (uu/rho) * (PROTON_MASS/ELECTRON_MASS) * (2/3)/(2+R);
+    trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
+
+    // Thetae_unit = 1. / 3. * (MPoME) / (trat + 1);
+    Thetae_unit = 2. / 3. * (MPoME) / (trat + 2);
+
+    (*modvar).theta_e = (uu / rho) * Thetae_unit;
+
+
+    // (*modvar).theta_e =
         // (2. / 15.) * (uu / rho) * (PROTON_MASS / ELECTRON_MASS) + 1e-40;
 
 
