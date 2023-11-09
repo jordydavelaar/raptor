@@ -182,8 +182,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
 
-    // Thetae_unit = 1. / 3. * (MPoME) / (trat + 1);
-    Thetae_unit = 2. / 3. * (MPoME) / (trat + 2);
+    Thetae_unit = 1. / 3. * (MPoME) / (trat + 1);
+    // Thetae_unit = 2. / 3. * (MPoME) / (trat + 2);
 
     (*modvar).theta_e = (uu / rho) * Thetae_unit;
 
