@@ -98,6 +98,10 @@ then
     	then
 	    	sed -i  '/#define metric (/s/.*/#define metric (MKSHARM)/' definitions.h
         fi
+    	if [ "$METRIC" == "fmks" ] ;
+    	then
+	    	sed -i  '/#define metric (/s/.*/#define metric (FMKS2)/' definitions.h
+        fi
 fi
 
 if [ "$INT" == "ver" ] ;
