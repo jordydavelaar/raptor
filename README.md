@@ -4,7 +4,7 @@ This is the public version of RAPTOR.
 
 Main developers; Thomas Bronzwaer, Jordy Davelaar
 
-Contributors; Ziri Younsi, Monika Moscibrodzka, Joost de Kleuver, Bram van der Berg, Renze Oosterhuis
+Contributors; Ziri Younsi, Monika Moscibrodzka, Joost de Kleuver, Bram van der Berg, Renze Oosterhuis, Jesse Vos
 
 Code-related papers;
 
