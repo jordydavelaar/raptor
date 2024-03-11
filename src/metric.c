@@ -5,6 +5,7 @@
  *
  */
 #include "definitions.h"
+#include "coordinates.h"
 #include "functions.h"
 #include "global_vars.h"
 #include "model_definitions.h"
@@ -204,6 +205,58 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
                 g_dd[i][j] = f * l[i] * l[j];
         }
     }
+#elif(metric == FMKS2) //FMKS, same as MKSHARM but wider zones near pols
+
+    gcov_func(X_u, g_dd);
+//     double x1 = X_u[1];
+//     double x2 = X_u[2];
+//     double dx1 = x1 - startx[1];
+//     double polyalpha=poly_alpha,polyxt=poly_xt,polynorm=poly_norm,mkssmooth=mks_smooth;
+//     g_dd[0][0] = -1 + (2*exp(x1))/(exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//           (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2));
+//     g_dd[0][1] = (2*exp(2*x1))/(exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//          (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2));
+//     g_dd[0][2] = 0.0;
+//     g_dd[0][3] = (-2*a*exp(x1)*pow(sin(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - 
+//            ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2))/
+//    (exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//          (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2));
+//     g_dd[1][1] = exp(2*x1)*(1 + (2*exp(x1))/
+//        (exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//              (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2))) + 
+//    (pow(mkssmooth,2)*(exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//             (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2))*
+//       pow(M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.,2))/exp(2*dx1*mkssmooth);
+//     g_dd[1][2] = -((mkssmooth*(M_PI + (1 - hslope)*M_PI*cos(2*M_PI*x2) + (-M_PI + (2*polyalpha*polynorm*(-1 + 2*x2)*pow((-1 + 2*x2)/polyxt,-1 + polyalpha))/((1 + polyalpha)*polyxt) + 
+//             2*polynorm*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - (1 - hslope)*M_PI*cos(2*M_PI*x2))/exp(dx1*mkssmooth))*
+//        (exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//              (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2))*
+//        (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.))/exp(dx1*mkssmooth));
+//     g_dd[1][3] = -(a*exp(x1)*(1 + (2*exp(x1))/
+//         (exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//               (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2)))*
+//      pow(sin(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - 
+//            ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2));
+//     g_dd[2][2] = pow(M_PI + (1 - hslope)*M_PI*cos(2*M_PI*x2) + (-M_PI + (2*polyalpha*polynorm*(-1 + 2*x2)*pow((-1 + 2*x2)/polyxt,-1 + polyalpha))/((1 + polyalpha)*polyxt) + 
+//         2*polynorm*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - (1 - hslope)*M_PI*cos(2*M_PI*x2))/exp(dx1*mkssmooth),2)*
+//    (exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//          (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2));
+//     g_dd[2][3] = 0.0;
+//     g_dd[3][3] = pow(sin(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - 
+//          ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2)*(exp(2*x1) + 
+//      pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - 
+//             ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2) + 
+//      pow(a,2)*(1 + (2*exp(x1))/
+//          (exp(2*x1) + pow(a,2)*pow(cos(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + 
+//                (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2)))*
+//       pow(sin(M_PI*x2 + ((1 - hslope)*sin(2*M_PI*x2))/2. + (M_PI/2. - M_PI*x2 + polynorm*(-1 + 2*x2)*(1 + pow((-1 + 2*x2)/polyxt,polyalpha)/(1 + polyalpha)) - 
+//             ((1 - hslope)*sin(2*M_PI*x2))/2.)/exp(dx1*mkssmooth)),2));
+
+//     for (int i=0; i<4; i++){
+//         for (int j=0;j<i;j++){
+//             g_dd[i][j] = g_dd[j][i];
+//         }
+//     }
 
 #endif
 }
@@ -292,6 +345,13 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
 
     g_uu[3][1] = g_uu[1][3];
     g_uu[3][3] = irho2 / (sin2th);
+    
+#elif(metric == FMKS2) // FMKS, similar to MKSHARM but wider zones near pole
+    double g_dd[NDIM][NDIM];
+    LOOP_ij g_dd[i][j] = 0.;
+    metric_dd(X_u,g_dd);
+    gcon_func(g_dd,g_uu);
+
 #elif (metric == MKSBHAC)
 
     double r = exp(X_u[1]);
@@ -1185,7 +1245,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
 // Convert k_u to the coordinate system that is currently used
 #if (metric == KS || metric == MKS || metric == MKSHARM || metric == MKSN ||   \
-     metric == CKS || metric == MKSBHAC)
+     metric == CKS || metric == MKSBHAC || metric == FMKS2)
 
     double KSphoton_u[8];
     BL_to_KS_u(photon_u, KSphoton_u);
@@ -1196,16 +1256,40 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
 #endif
 
-#if (metric == MKSHARM || metric == MKSBHAC)
+#if (metric == MKSHARM || metric == MKSBHAC || metric == FMKS2)
+    photon_u[2] = Xg2_approx_rand(photon_u[2], photon_u[1]); // We only transform theta - r is already exponential and R0 = 0
+    // apply transformation to photon 4velocity as given in coordinates.c, no need to root find for u^x2
+    // do this before solving for photon_x2 but after computing x2 of photon as we need x_u in FMKS
+    double dXdx[4][4];
+    LOOP_ij dXdx[i][j]=0.0;
+    double X_u[4];
+    LOOP_i X_u[i] = photon_u[i];
+    // setting k to fully KS (no log(r)) for the transformation
+    photon_u[5] *= exp(X_u[1]);
+    // printf("Before metric transformation\n");
+    // LOOP_i printf("%e %e |",X_u[i],photon_u[i+4]);
+    set_dXdx(X_u,dXdx);
+    double U_u_KS[4];
+    LOOP_i{
+        U_u_KS[i] = photon_u[i+4];
+        photon_u[i+4] = 0.0;
+    }
+    LOOP_ij{
+        photon_u[i+4]+=dXdx[i][j]*U_u_KS[j];
+    }     
 
-    photon_u[2] =
-        Xg2_approx_rand(photon_u[2]); // We only transform theta - r is
-                                      // already exponential and R0 = 0
-
-    photon_u[6] =
-        Ug2_approx_rand(photon_u[6],
-                        photon_u[2]); // We only transform theta - r is
-                                      // already exponential and R0 = 0
+    LOOP_i Xcam_u[i] = photon_u[i];
+    LOOP_i k_u[i] = photon_u[i+4];   
+    // printf("After metric transformation\n");
+    // LOOP_i printf("%e %e |",photon_u[i],photon_u[i+4]);
+    // printf("\n");
+    // if (metric != FMKS2){
+    //     LOOP_i photon_u[i+4] = U_u_KS[i];
+    //     photon_u[6] = Ug2_approx_rand(KSphoton_u[6], photon_u[5], photon_u[2], photon_u[1]); // We only transform theta - r is already exponential and R0 = 0
+    // }    
+    // printf("After root finding\n");
+    // LOOP_i printf("%e %e |",photon_u[i],photon_u[i+4]);
+    // printf("\n");
 #endif
 
 #if (metric == CKS)
@@ -1299,144 +1383,169 @@ void initialize_photon_perspective(double alpha, double beta,
 // TRANSFORMATION FUNCTIONS
 ///////////////////////////
 
-// WARNING: some of these functions are NOT listed in functions.h, and are
-// only used by other functions in this file.
+// WARNING: these are not yet listed in functions.h and are only meant for use
+// by other functions in this file.
 
 // Returns the value of f(Xg2) given some value for Xr2. For the correct Xg2,
 // we have f(Xg2) = 0.
-double f_Xg2(double Xg2, double Xr2) {
-#if (metric == MKSHARM)
-
-    return M_PI * Xg2 + 0.5 * (1. - hslope) * sin(2. * M_PI * Xg2) - Xr2;
-
-#elif (metric == MKSBHAC)
-
-    return Xg2 + 0.5 * hslope * sin(2. * Xg2) - Xr2;
-
-#endif
-
-    return -1;
+double f_Xg2(double Xg2, double Xr2, double Xg1)
+{
+	if (metric == MKSHARM)
+		return M_PI * Xg2 + 0.5 * (1. - hslope) * sin(2. * M_PI * Xg2) - Xr2;
+	else if (metric == FMKS2)
+	{
+		double th_g = M_PI * Xg2 + 0.5 * (1. - hslope) * sin(2. * M_PI * Xg2) - Xr2;
+		double th_j = poly_norm * ( 2 * Xg2 - 1) * (1 + pow((2 * Xg2 -1)/poly_xt,poly_alpha)/(1+poly_alpha)) + M_PI/2;
+		double Dx1 = Xg1 - startx[1];
+		return th_g + exp(- mks_smooth * Dx1)*(th_j - th_g);
+	}
 }
 
+
 // Returns the value of f'(Xg2).
-double f_primed_Xg2(double Xg2) {
-#if (metric == MKSHARM)
-
-    return M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
-
-#elif (metric == MKSBHAC)
-
-    return 1 + hslope * cos(2. * Xg2);
-
-#endif
-
-    return -1;
+double f_primed_Xg2(double Xg2, double Xg1)
+{
+	if (metric == MKSHARM)
+	{
+		return M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
+	}
+	else if (metric==FMKS2)
+	{
+		double th_gprime = M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
+		double th_jprime = 2 * poly_norm * (1 + pow((2*Xg2 - 1)/poly_xt,poly_alpha));
+		double Dx1 = Xg1 - startx[1];
+		return th_gprime + exp( - mks_smooth *  Dx1)*(th_jprime - th_gprime);
+	}
 }
 
 // This function does "one Newton-Raphson step", i.e. it returns the NEW,
 // "better" estimate Xg2_1 based on the input estimate Xg2_0.
-double NR_stepX(double Xg2_0, double Xr2) {
-    double fprime = f_primed_Xg2(Xg2_0);
+double NR_stepX(double Xg2_0, double Xg1_0, double Xr2)
+{
+	double fprime = f_primed_Xg2(Xg2_0,Xg1_0);
 
-    if (fabs(fprime) < 1.e-9)
-        printf("fprime = %+.15e\n", fprime);
+	if (fabs(fprime) < 1.e-9)
+		printf("fprime = %+.15e\n", fprime);
 
-    return Xg2_0 - f_Xg2(Xg2_0, Xr2) / f_primed_Xg2(Xg2_0);
+	return Xg2_0 - f_Xg2(Xg2_0, Xr2, Xg1_0) / f_primed_Xg2(Xg2_0,Xg1_0);
 }
 
 // Returns the value of f(Ug2) given some value for Ur2. For the correct Ug2,
 // we have f(Ug2) = 0.
-double f_Ug2(double Ug2, double Ur2, double Xg2) {
-#if (metric == MKSHARM)
-
-    return M_PI * Ug2 * (1. + (1. - hslope) * cos(2. * M_PI * Xg2)) - Ur2;
-
-#elif (metric == MKSBHAC)
-
-    return Ug2 * (1. + hslope * cos(2. * Xg2)) - Ur2;
-
-#endif
-
-    return -1;
+double f_Ug2(double Ug2, double Ug1, double Ur2, double Xg2, double Xg1)
+{
+	if (metric == MKSHARM)
+		return M_PI * Ug2 * (1. + (1. - hslope) * cos(2. * M_PI * Xg2)) - Ur2;
+	else if (metric == FMKS2){
+		double th_g = M_PI * Xg2 + 0.5 * (1. - hslope) * sin(2. * M_PI * Xg2);
+		double th_j = poly_norm * ( 2 * Xg2 - 1) * (1 + pow((2 * Xg2 -1)/poly_xt,poly_alpha)/(1+poly_alpha)) + M_PI/2;
+		double th_gprime = M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
+		double th_jprime = 2 * poly_norm * (1 + pow((2*Xg2 - 1)/poly_xt,poly_alpha));
+		double Dx1 = Xg1 - startx[1];
+		double dthdx2 = th_gprime + exp( - mks_smooth * Dx1)*(th_jprime - th_gprime);
+		double dthdx1 = - (mks_smooth) * exp(- mks_smooth * Dx1) * (th_j - th_g);
+		// printf("%lf %lf %lf %lf %lf %lf", Ug2, Ug1, Ur2, Xg2, Xg1, ((dthdx2*Ug2 + dthdx1*Ug1) - Ur2));
+		// exit(-1);
+		return (dthdx2*Ug2 + dthdx1*Ug1) - Ur2;
+	}
 }
 
 // Returns the value of f'(Ug2).
-double f_primed_Ug2(double Ug2, double Xg2) {
-#if (metric == MKSHARM)
-    return M_PI * (1. + (1. - hslope) * cos(2. * M_PI * Xg2));
+double f_primed_Ug2(double Ug2, double Ug1, double Xg2, double Xg1)
+{
+	if (metric == MKSHARM)
+		return M_PI * (1. + (1. - hslope) * cos(2. * M_PI * Xg2));
+	else if (metric == FMKS2){
+		double th_gprimeprime = - 2 * M_PI * M_PI * (1. - hslope) * sin(2. * M_PI * Xg2);
+		double th_jprimeprime = 4 * poly_alpha * poly_norm * pow((2*Xg2 - 1)/poly_xt,poly_alpha-1)/poly_xt;
+		double Dx1 = Xg1 - startx[1];
+		double dsq_th_dx2sq = th_gprimeprime + exp(- mks_smooth * Dx1) * (th_jprimeprime - th_gprimeprime);
+		double th_gprime = M_PI + M_PI * (1. - hslope) * cos(2. * M_PI * Xg2);
+		double th_jprime = 2 * poly_norm * (1 + pow((2*Xg2 - 1)/poly_xt,poly_alpha));
+		double dsq_th_dx1dx2 = - (mks_smooth) * exp(- mks_smooth * Dx1) * (th_jprime - th_gprime);
+		return dsq_th_dx2sq*Ug2 + dsq_th_dx1dx2*Ug1;
+	}
 
-#elif (metric == MKSBHAC)
-
-    return (1. + hslope * cos(2. * Xg2));
-
-#endif
-
-    return -1;
 }
 
 // This function does "one Newton-Raphson step", i.e. it returns the NEW,
 // "better" estimate Ug2_1 based on the input estimate Ug2_0.
-double NR_stepU(double Ug2_0, double Ur2, double Xg2) {
-    double fprime = f_primed_Ug2(Ug2_0, Xg2);
+double NR_stepU(double Ug2_0, double Ug1_0, double Ur2, double Xg2, double Xg1)
+{
+	double fprime = f_primed_Ug2(Ug2_0, Ug1_0, Xg2, Xg1);
 
-    if (fabs(fprime) < 1.e-9)
-        printf("fprime = %+.15e\n", fprime);
+	if (fabs(fprime) < 1.e-9)
+		printf("fprime = %+.15e\n", fprime);
 
-    return Ug2_0 - f_Ug2(Ug2_0, Ur2, Xg2) / f_primed_Ug2(Ug2_0, Xg2);
+	return Ug2_0 - f_Ug2(Ug2_0, Ug1_0, Ur2, Xg2, Xg1) / f_primed_Ug2(Ug2_0, Ug1_0, Xg2, Xg1);
 }
 
 // Given the X2 coordinate in RAPTOR's convention, Xr2, we compute and return
 // an estimate for the corresponding coordinate in HARM2D's convention, Xg2.
-double Xg2_approx_rand(double Xr2) {
-    double Xg2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
-    double Xg2_prev = 1.e-15; // Keeps track of previous estimate to converge
-    double tolerance = 1.e-15; // Maximum error
-    int steps = 0;
-    int maxsteps = 100;
+double Xg2_approx_rand(double Xr2, double Xg1)
+{
+	double Xg2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
+	double Xg2_prev = 1.e-15; // Keeps track of previous estimate to converge
+	double tolerance = 1.e-9; // Maximum error
+	int steps = 0;
+	int maxsteps = 100;
 
-    int count = 0;
+	int count = 0;
 
-    // Main loop
-//    while (fabs(Xg2_current - Xg2_prev) > tolerance) {
-        Xg2_current =  Xr2;//(double)rand() / (double)RAND_MAX;
-        steps = 0;
-        count++;
+	// Main loop
+	while (fabs(Xg2_current - Xg2_prev) > tolerance)
+	{
+		Xg2_current = (double)rand() / (double)RAND_MAX;
+		// Xg2_current = 1.e-16;
+		steps = 0;
+		count++;
 
-        while (steps < maxsteps && fabs(Xg2_current - Xg2_prev) > tolerance) {
-            Xg2_prev = Xg2_current;
-            Xg2_current = NR_stepX(Xg2_current, Xr2);
-            steps++;
-        }
- //   }
+		while (steps < maxsteps && fabs(Xg2_current - Xg2_prev) > tolerance)
+		{
+			Xg2_prev = Xg2_current;
+			Xg2_current = NR_stepX(Xg2_current, Xg1, Xr2);
+			steps++;
+		}
+	}
 
-    // Clamp output value between 0 and 1
-    return Xg2_current;
+	// Clamp output value between 0 and 1
+	return fmin(1., fmax(Xg2_current, 0.));
 }
 
 // Given the U2 coordinate in RAPTOR's convention, Ur2, we compute and return
-// an estimate for the corresponding vector component in HARM2D's convention,
-// Ug2.
-double Ug2_approx_rand(double Ur2, double Xg2) {
-    double Ug2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
-    double Ug2_prev = 1.e-15; // Keeps track of previous estimate to converge
-    double tolerance = 1.e-15; // Maximum error
-    int steps = 0;
-    int maxsteps = 100;
+// an estimate for the corresponding vector component in HARM2D's convention, Ug2.
+double Ug2_approx_rand(double Ur2, double Ug1, double Xg2, double Xg1)
+{
+	double Ug2_current = 0.1; // Initial guess; reasonable b/c Xg2 E [0, 1]
+	double Ug2_prev = 1.e-15; // Keeps track of previous estimate to converge
+	double tolerance = 1.e-9; // Maximum error
+	int steps = 0;
+	int maxsteps = 100;
 
-    int count = 0;
+	int count = 0;
 
-    // Main loop
-//    while (fabs(Ug2_current - Ug2_prev) > tolerance) {
-        Ug2_current = Ur2 ;//(double)rand() / (double)RAND_MAX;
-        steps = 0;
-        count++;
+	// Main loop
+	while (fabs(Ug2_current - Ug2_prev) > tolerance && count<1000)
+	{
+		Ug2_current = (double)rand() / (double)RAND_MAX;
+		steps = 0;
+		count++;
 
-        while (steps < maxsteps && fabs(Ug2_current - Ug2_prev) > tolerance) {
-            Ug2_prev = Ug2_current;
-            Ug2_current = NR_stepU(Ug2_current, Ur2, Xg2);
-            steps++;
-        }
- //   }
-
-    return Ug2_current;
+		while (steps < maxsteps && fabs(Ug2_current - Ug2_prev) > tolerance)
+		{
+			Ug2_prev = Ug2_current;
+			Ug2_current = NR_stepU(Ug2_current, Ug1, Ur2, Xg2, Xg1);
+			steps++;
+			// if (count==1){
+			// 	printf("->%lf ",Ug2_current);
+			// }
+		}
+		// printf("%e \n",Ug2_current);
+	}
+	if (count>=1000){
+		printf("\nUNABLE TO SOLVE FOR U[X2]. EXITING\n");
+		exit(-1);
+	}
+	return Ug2_current;
 }
+

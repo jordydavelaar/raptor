@@ -134,9 +134,9 @@ void connection_udd(double X_u[4], double gamma_udd[4][4][4]);
 void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
 
 // Transformation functions
-double Xg2_approx_rand(double Xr2);
+double Xg2_approx_rand(double Xr2, double Xg1);
 
-double Ug2_approx_rand(double Ur2, double Xg2);
+double Ug2_approx_rand(double Ur2, double Ug1, double Xg2, double Xg1);
 
 // TETRAD.C
 ///////////

@@ -3,9 +3,9 @@
 echo "RAPTOR setup script"
 
 
-METRIC="cks"
+METRIC="fmks"
 INT="rk4"
-CODE="bhac"
+CODE="harm3d"
 GRID="smr"
 RAD="pol"
 SF="nosfc"
@@ -97,6 +97,10 @@ then
     	if [ "$METRIC" == "mks" ] ;
     	then
 	    	sed -i  '/#define metric (/s/.*/#define metric (MKSHARM)/' definitions.h
+        fi
+    	if [ "$METRIC" == "fmks" ] ;
+    	then
+	    	sed -i  '/#define metric (/s/.*/#define metric (FMKS2)/' definitions.h
         fi
 fi
 
