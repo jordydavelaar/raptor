@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nRunning RAPTOR v1.0 in");
 
+
     if (POL)
         fprintf(stderr, " polarized mode!\n");
     else
@@ -88,6 +89,8 @@ int main(int argc, char *argv[]) {
     // Set constants such as R_ISCO, JANSKY_FACTOR
     // These depend on the black hole spin
     set_constants();
+
+    struct GRMHD modvar;
 
     // MAIN PROGRAM LOOP
     ////////////////////

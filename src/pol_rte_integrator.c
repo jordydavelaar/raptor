@@ -11,13 +11,18 @@
 #include "model_definitions.h"
 #include "model_functions.h"
 #include "model_global_vars.h"
+#include "math.h"
+
+double sqrt(double _Complex in){
+	return sqrt(creal(in));
+}
 
 // FUNCTIONS
 ////////////
 
 // y contains the 4-position and the 4-velocity for one lightray/particle.
-void f_parallel(double y[], double complex f_u[], double fvector[],
-                double complex f_u_vector[]) {
+void f_parallel(double y[], double _Complex f_u[], double fvector[],
+                double _Complex f_u_vector[]) {
     // Create variable (on the stack) for the connection
     double gamma_udd[4][4][4];
     // Einstein summation over indices v and w
@@ -28,7 +33,7 @@ void f_parallel(double y[], double complex f_u[], double fvector[],
     // on values of y
     double X_u[4] = {y[0], y[1], y[2], y[3]}; // X
     double U_u[4] = {y[4], y[5], y[6], y[7]}; // dX/dLambda
-    double complex A_u[4] = {0., 0., 0., 0.}; // d^2X/dLambda^2
+    double _Complex A_u[4] = {0., 0., 0., 0.}; // d^2X/dLambda^2
 
     // Obtain the Christoffel symbols at the current location
 #if (metric == MKSBHAC || metric == MKSHARM)
@@ -41,7 +46,7 @@ void f_parallel(double y[], double complex f_u[], double fvector[],
     LOOP_ijk A_u[i] -= gamma_udd[i][j][k] * U_u[j] * U_u[k];
     LOOP_i {
         fvector[i] = U_u[i];
-        fvector[i + 4] = A_u[i];
+        fvector[i + 4] = creal(A_u[i]);
     }
 
     // Reset A_u
@@ -52,24 +57,24 @@ void f_parallel(double y[], double complex f_u[], double fvector[],
     LOOP_i { f_u_vector[i] = A_u[i]; }
 }
 
-void rk4_step_f(double y[], double complex f_u[], double dt) {
+void rk4_step_f(double y[], double _Complex f_u[], double dt) {
     // Array containing all "update elements" (4 times Nelements because RK4)
     double dx[4 * 2 * 4];
-    double complex df[4 * 4];
+    double _Complex df[4 * 4];
 
     // Create a copy of the "y vector" that can be shifted for the
     // separate function calls made by RK4
     double yshift[4 * 2] = {y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]};
-    double complex f_u_shift[4] = {f_u[0], f_u[1], f_u[2], f_u[3]};
+    double _Complex f_u_shift[4] = {f_u[0], f_u[1], f_u[2], f_u[3]};
 
     // fvector contains f(yshift), as applied to yshift (the 'current' y
     // during RK steps). It is used to compute the 'k-coefficients' (dx)
     double fvector[4 * 2];
-    double complex f_u_vector[4];
+    double _Complex f_u_vector[4];
 
     // Compute the RK4 update coefficients ('K_n' in lit., 'dx' here)
     int i, q;
-    double complex weights[4] = {0.5, 0.5, 1.,
+    double weights[4] = {0.5, 0.5, 1.,
                                  0.}; // Weights used for updating y
     for (q = 0; q < 4; q++) {
         f_parallel(
@@ -101,7 +106,7 @@ void rk4_step_f(double y[], double complex f_u[], double dt) {
 }
 
 void f_tetrad_to_stokes(double Iinv, double Iinv_pol,
-                        double complex f_tetrad_u[], double complex S_A[]) {
+                        double _Complex f_tetrad_u[], double _Complex S_A[]) {
     S_A[0] = Iinv;
     S_A[1] = Iinv_pol * (cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) -
                          cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2]));
@@ -111,16 +116,16 @@ void f_tetrad_to_stokes(double Iinv, double Iinv_pol,
                               f_tetrad_u[1] * conj(f_tetrad_u[2])));
 }
 
-void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
-                        double complex f_tetrad_u[]) {
+void stokes_to_f_tetrad(double _Complex S_A[], double *Iinv, double *Iinv_pol,
+                        double _Complex f_tetrad_u[]) {
 
-    *Iinv = S_A[0];
+    *Iinv = creal(S_A[0]);
 
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
 
-    double Qnorm = S_A[1] / (*Iinv_pol);
-    double Unorm = S_A[2] / (*Iinv_pol);
-    double Vnorm = S_A[3] / (*Iinv_pol);
+    double Qnorm = creal(S_A[1]) / (*Iinv_pol);
+    double Unorm = creal(S_A[2]) / (*Iinv_pol);
+    double Vnorm = creal(S_A[3]) / (*Iinv_pol);
 
     // source:
     // https://physics.stackexchange.com/questions/238957/converting-stokes-parameters-to-jones-vector
@@ -194,16 +199,16 @@ void construct_U_vector(double X_u[], double U_u[]) {
 //////////////////////////
 
 // Transform f_tetrad_u to f_u
-void f_tetrad_to_f(double complex *f_u, double tetrad_u[][4],
-                   double complex *f_tetrad_u) {
+void f_tetrad_to_f(double _Complex *f_u, double tetrad_u[][4],
+                   double _Complex *f_tetrad_u) {
 
     LOOP_i f_u[i] = 0.;
     LOOP_ij f_u[i] += tetrad_u[i][j] * f_tetrad_u[j];
 }
 
 // Transform f_u to f_tetrad_u
-void f_to_f_tetrad(double complex *f_tetrad_u, double tetrad_d[][4],
-                   double complex *f_u) {
+void f_to_f_tetrad(double _Complex *f_tetrad_u, double tetrad_d[][4],
+                   double _Complex *f_u) {
 
     LOOP_i f_tetrad_u[i] = 0.;
     LOOP_ij f_tetrad_u[i] += tetrad_d[j][i] * f_u[j];
@@ -364,29 +369,29 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
     double a2 = rQ * rQ + rV * rV - aQ * aQ - aV * aV;
     double a0 = -2. * aV * aQ * rV * rQ - aQ * aQ * rQ * rQ - aV * aV * rV * rV;
 
-    complex double zplus = (-a2 + sqrt(a2 * a2 - 4. * a0)) / 2.;
-    complex double zminus = (-a2 - sqrt(a2 * a2 - 4. * a0)) / 2.;
+    _Complex double zplus = (-a2 + sqrt(a2 * a2 - 4. * a0)) / 2.;
+    _Complex double zminus = (-a2 - sqrt(a2 * a2 - 4. * a0)) / 2.;
 
-    complex double l1 = aI + sqrt(zplus);
-    complex double l2 = aI - sqrt(zplus);
-    complex double l3 = aI + sqrt(zminus);
-    complex double l4 = aI - sqrt(zminus);
+    _Complex double l1 = aI + sqrt(zplus);
+    _Complex double l2 = aI - sqrt(zplus);
+    _Complex double l3 = aI + sqrt(zminus);
+    _Complex double l4 = aI - sqrt(zminus);
 
-    complex double tau1 = dl_current * l1;
-    complex double tau2 = dl_current * l2;
-    complex double tau3 = dl_current * l3;
-    complex double tau4 = dl_current * l4;
+    _Complex double tau1 = dl_current * l1;
+    _Complex double tau2 = dl_current * l2;
+    _Complex double tau3 = dl_current * l3;
+    _Complex double tau4 = dl_current * l4;
 
-    complex double mag1 = 1. + tau1 + 0.5 * tau1 * tau1 +
+    _Complex double mag1 = 1. + tau1 + 0.5 * tau1 * tau1 +
                           1. / 6. * tau1 * tau1 * tau1 +
                           1. / 24. * tau1 * tau1 * tau1 * tau1;
-    complex double mag2 = 1. + tau2 + 0.5 * tau2 * tau2 +
+    _Complex double mag2 = 1. + tau2 + 0.5 * tau2 * tau2 +
                           1. / 6. * tau2 * tau2 * tau2 +
                           1. / 24. * tau2 * tau2 * tau2 * tau2;
-    complex double mag3 = 1. + tau3 + 0.5 * tau3 * tau3 +
+    _Complex double mag3 = 1. + tau3 + 0.5 * tau3 * tau3 +
                           1. / 6. * tau3 * tau3 * tau3 +
                           1. / 24. * tau3 * tau3 * tau3 * tau3;
-    complex double mag4 = 1. + tau4 + 0.5 * tau4 * tau4 +
+    _Complex double mag4 = 1. + tau4 + 0.5 * tau4 * tau4 +
                           1. / 6. * tau4 * tau4 * tau4 +
                           1. / 24. * tau4 * tau4 * tau4 * tau4;
 
@@ -409,77 +414,77 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
 void pol_rte_rk4_step(double jI, double jQ, double jU, double jV, double rQ,
                       double rU, double rV, double aI, double aQ, double aU,
                       double aV, double dl_current, double C,
-                      double complex S_A[]) {
-    double complex I0 = S_A[0];
-    double complex Q0 = S_A[1];
-    double complex U0 = S_A[2];
-    double complex V0 = S_A[3];
+                      double _Complex S_A[]) {
+    double _Complex I0 = S_A[0];
+    double _Complex Q0 = S_A[1];
+    double _Complex U0 = S_A[2];
+    double _Complex V0 = S_A[3];
 
     // RK4 with constant coefficients
     // k1
-    double complex Ik1 =
+    double _Complex Ik1 =
         dl_current * C * jI -
         dl_current * C * (aI * I0 + aQ * Q0 + aU * U0 + aV * V0);
-    double complex Qk1 =
+    double _Complex Qk1 =
         dl_current * C * jQ -
         dl_current * C * (aQ * I0 + aI * Q0 + rV * U0 - rU * V0);
-    double complex Uk1 =
+    double _Complex Uk1 =
         dl_current * C * jU -
         dl_current * C * (aU * I0 - rV * Q0 + aI * U0 + rQ * V0);
-    double complex Vk1 =
+    double _Complex Vk1 =
         dl_current * C * jV -
         dl_current * C * (aV * I0 + rU * Q0 - rQ * U0 + aI * V0);
 
     // k2
-    double complex Ik2 = dl_current * C * jI -
+    double _Complex Ik2 = dl_current * C * jI -
                          dl_current * C *
                              (aI * (I0 + 0.5 * Ik1) + aQ * (Q0 + 0.5 * Qk1) +
                               aU * (U0 + 0.5 * Uk1) + aV * (V0 + 0.5 * Vk1));
-    double complex Qk2 = dl_current * C * jQ -
+    double _Complex Qk2 = dl_current * C * jQ -
                          dl_current * C *
                              (aQ * (I0 + 0.5 * Ik1) + aI * (Q0 + 0.5 * Qk1) +
                               rV * (U0 + 0.5 * Uk1) - rU * (V0 + 0.5 * Vk1));
-    double complex Uk2 = dl_current * C * jU -
+    double _Complex Uk2 = dl_current * C * jU -
                          dl_current * C *
                              (aU * (I0 + 0.5 * Ik1) - rV * (Q0 + 0.5 * Qk1) +
                               aI * (U0 + 0.5 * Uk1) + rQ * (V0 + 0.5 * Vk1));
-    double complex Vk2 = dl_current * C * jV -
+    double _Complex Vk2 = dl_current * C * jV -
                          dl_current * C *
                              (aV * (I0 + 0.5 * Ik1) + rU * (Q0 + 0.5 * Qk1) -
                               rQ * (U0 + 0.5 * Uk1) + aI * (V0 + 0.5 * Vk1));
 
     // k3
-    double complex Ik3 = dl_current * C * jI -
+    double _Complex Ik3 = dl_current * C * jI -
                          dl_current * C *
                              (aI * (I0 + 0.5 * Ik2) + aQ * (Q0 + 0.5 * Qk2) +
                               aU * (U0 + 0.5 * Uk2) + aV * (V0 + 0.5 * Vk2));
-    double complex Qk3 = dl_current * C * jQ -
+    double _Complex Qk3 = dl_current * C * jQ -
                          dl_current * C *
                              (aQ * (I0 + 0.5 * Ik2) + aI * (Q0 + 0.5 * Qk2) +
                               rV * (U0 + 0.5 * Uk2) - rU * (V0 + 0.5 * Vk2));
-    double complex Uk3 = dl_current * C * jU -
+    double _Complex Uk3 = dl_current * C * jU -
                          dl_current * C *
                              (aU * (I0 + 0.5 * Ik2) - rV * (Q0 + 0.5 * Qk2) +
                               aI * (U0 + 0.5 * Uk2) + rQ * (V0 + 0.5 * Vk2));
-    double complex Vk3 = dl_current * C * jV -
+    double _Complex Vk3 = dl_current * C * jV -
                          dl_current * C *
                              (aV * (I0 + 0.5 * Ik2) + rU * (Q0 + 0.5 * Qk2) -
                               rQ * (U0 + 0.5 * Uk2) + aI * (V0 + 0.5 * Vk2));
 
     // k4
-    double complex Ik4 =
+    double _Complex Ik4 =
         dl_current * C * jI - dl_current * C *
                                   (aI * (I0 + Ik3) + aQ * (Q0 + Qk3) +
                                    aU * (U0 + Uk3) + aV * (V0 + Vk3));
-    double complex Qk4 =
+    double _Complex Qk4 =
         dl_current * C * jQ - dl_current * C *
                                   (aQ * (I0 + Ik3) + aI * (Q0 + Qk3) +
                                    rV * (U0 + Uk3) - rU * (V0 + Vk3));
-    double complex Uk4 =
+    double _Complex Uk4 =
         dl_current * C * jU - dl_current * C *
                                   (aU * (I0 + Ik3) - rV * (Q0 + Qk3) +
                                    aI * (U0 + Uk3) + rQ * (V0 + Vk3));
-    double complex Vk4 =
+    double _Complex Vk4 =
         dl_current * C * jV - dl_current * C *
                                   (aV * (I0 + Ik3) + rU * (Q0 + Qk3) -
                                    rQ * (U0 + Uk3) + aI * (V0 + Vk3));
@@ -493,11 +498,11 @@ void pol_rte_rk4_step(double jI, double jQ, double jU, double jV, double rQ,
 void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
                             double rQ, double rU, double rV, double aI,
                             double aQ, double aU, double aV, double dl_current,
-                            double C, double complex S_A[]) {
-    double complex I0 = S_A[0];
-    double complex Q0 = S_A[1];
-    double complex U0 = S_A[2];
-    double complex V0 = S_A[3];
+                            double C, double _Complex S_A[]) {
+    double _Complex I0 = S_A[0];
+    double _Complex Q0 = S_A[1];
+    double _Complex U0 = S_A[2];
+    double _Complex V0 = S_A[3];
 
     double u11 = 1. + 0.5 * dl_current * C * aI;
     double u12 = 0.5 * dl_current * C * aQ;
@@ -516,26 +521,26 @@ void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
         1. + 0.5 * dl_current * C * aI - l41 * u14 - l42 * u24 - l43 * u34;
 
     // Construct b-vector.
-    double b1 =
+    double _Complex b1 =
         I0 + dl_current * C / 2. * (2. * jI - (aI * I0 + aQ * Q0 + aV * V0));
-    double b2 =
+    double _Complex b2 =
         Q0 + dl_current * C / 2. * (2. * jQ - (aQ * I0 + aI * Q0 + rV * U0));
-    double b3 =
+    double _Complex b3 =
         U0 + dl_current * C / 2. * (2. * jU - (-rV * Q0 + aI * U0 + rQ * V0));
-    double b4 =
+    double _Complex b4 =
         V0 + dl_current * C / 2. * (2. * jV - (aV * I0 - rQ * U0 + aI * V0));
 
     // Construct y.
-    double y1 = b1;
-    double y2 = b2 - l21 * y1;
-    double y3 = b3 - l32 * y2;
-    double y4 = b4 - l41 * y1 - l42 * y2 - l43 * y3;
+    double _Complex y1 = b1;
+    double _Complex y2 = b2 - l21 * y1;
+    double _Complex y3 = b3 - l32 * y2;
+    double _Complex y4 = b4 - l41 * y1 - l42 * y2 - l43 * y3;
 
     // Construct x.
-    double x4 = y4 / u44;
-    double x3 = (y3 - u34 * x4) / u33;
-    double x2 = (y2 - u23 * x3 - u24 * x4) / u22;
-    double x1 = (y1 - u12 * x2 - u14 * x4) / u11;
+    double _Complex x4 = y4 / u44;
+    double _Complex x3 = (y3 - u34 * x4) / u33;
+    double _Complex x2 = (y2 - u23 * x3 - u24 * x4) / u22;
+    double _Complex x1 = (y1 - u12 * x2 - u14 * x4) / u11;
 
     S_A[0] = x1;
     S_A[1] = x2;
@@ -543,8 +548,8 @@ void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
     S_A[3] = x4;
 }
 
-void f_to_stokes(double complex f_u[], double complex f_tetrad_u[],
-                 double tetrad_d[][4], double complex S_A[], double Iinv,
+void f_to_stokes(double _Complex f_u[], double _Complex f_tetrad_u[],
+                 double tetrad_d[][4], double _Complex S_A[], double Iinv,
                  double Iinv_pol) {
     f_to_f_tetrad(f_tetrad_u, tetrad_d, f_u);
 
@@ -552,8 +557,8 @@ void f_to_stokes(double complex f_u[], double complex f_tetrad_u[],
     f_tetrad_to_stokes(Iinv, Iinv_pol, f_tetrad_u, S_A);
 }
 
-void stokes_to_f(double complex f_u[], double complex f_tetrad_u[],
-                 double tetrad_u[][4], double complex S_A[], double *Iinv,
+void stokes_to_f(double _Complex f_u[], double _Complex f_tetrad_u[],
+                 double tetrad_u[][4], double _Complex S_A[], double *Iinv,
                  double *Iinv_pol) {
     stokes_to_f_tetrad(S_A, Iinv, Iinv_pol, f_tetrad_u);
 
@@ -563,9 +568,9 @@ void stokes_to_f(double complex f_u[], double complex f_tetrad_u[],
 void pol_integration_step(struct GRMHD modvar, double frequency,
                           double *dl_current, double C, double X_u[],
                           double k_u[], double k_d[], int *POLARIZATION_ACTIVE,
-                          double complex f_u[], double complex f_tetrad_u[],
+                          double _Complex f_u[], double _Complex f_tetrad_u[],
                           double tetrad_d[][4], double tetrad_u[][4],
-                          double complex S_A[], double *Iinv, double *Iinv_pol,
+                          double _Complex S_A[], double *Iinv, double *Iinv_pol,
                           double *tau, double *tauF) {
 
     double jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV;
@@ -666,7 +671,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         //	return;
     }
 
-    *Iinv = S_A[0];
+    *Iinv = creal(S_A[0]);
     *Iinv_pol = sqrt(S_A[1] * S_A[1] + S_A[2] * S_A[2] + S_A[3] * S_A[3]);
     /*
             fprintf(stderr,"r %e te %e th %e nu
@@ -706,8 +711,8 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     }
 }
 
-void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
-                              double complex *f_obs_tetrad_u) {
+void construct_f_obs_tetrad_u(double *X_u, double *k_u, double _Complex *f_u,
+                              double _Complex *f_obs_tetrad_u) {
 
     double cam_up_u[4] = {0., 0., 0., -1.};
     double U_obs_u[4] = {0., 0., 0., 0.};
@@ -741,9 +746,9 @@ void radiative_transfer_polarized(double *lightpath, int steps,
     LOOP_ij tetrad_d[i][j] = 0.;
 
     double photon_u_current[8] = {0., 0., 0., 0., 0., 0., 0., 0.};
-    double complex f_tetrad_u[4] = {0., 0., 0., 0.};
-    double complex f_u[4] = {0., 0., 0., 0.};
-    double complex S_A[4] = {0., 0., 0., 0.};
+    double _Complex f_tetrad_u[4] = {0., 0., 0., 0.};
+    double _Complex f_u[4] = {0., 0., 0., 0.};
+    double _Complex S_A[4] = {0., 0., 0., 0.};
 
     struct GRMHD modvar;
     modvar.B = 0;
@@ -815,7 +820,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         k_u[i] = lightpath[4 + i];
     }
 
-    double complex f_obs_tetrad_u[4] = {0., 0., 0., 0.};
+    double _Complex f_obs_tetrad_u[4] = {0., 0., 0., 0.};
     construct_f_obs_tetrad_u(X_u, k_u, f_u, f_obs_tetrad_u);
 
     LOOP_i IQUV[i] = 0.;
@@ -824,6 +829,6 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         f_tetrad_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);
 
         // Construct final (NON-INVARIANT) Stokes params.
-        LOOP_i IQUV[i] = S_A[i] * pow(frequency, 3.);
+        LOOP_i IQUV[i] = creal(S_A[i]) * pow(frequency, 3.);
     }
 }

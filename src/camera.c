@@ -32,7 +32,7 @@ void init_camera(struct Camera **intensityfield) {
         exit(1);
     }
     tot_blocks = num_blocks * num_blocks2;
-    (*intensityfield) = malloc((tot_blocks) * sizeof(struct Camera));
+    (*intensityfield) = (struct Camera*) malloc((tot_blocks) * sizeof(struct Camera));
     for (int block = 0; block < tot_blocks; block++) {
         (*intensityfield)[block].level = 1;
 
@@ -107,7 +107,7 @@ void add_block(struct Camera **intensityfield, int current_block) {
     int ind_j = (*intensityfield)[current_block].ind[1];
     tot_blocks += 3;
 
-    (*intensityfield) =
+    (*intensityfield) = (struct Camera *)
         realloc((*intensityfield), (tot_blocks) * sizeof(struct Camera));
 
     shift_camera_array(intensityfield, current_block);

@@ -93,8 +93,17 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
                                      &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
 #else
-                evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
-                                       &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
+//                evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
+//                                       &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
+	//	aI=anu_ml(nu_p,modvar,pitch_ang)*nu_p;
+//        double jI_old= jI;
+		jI=jnu_ml(nu_p,modvar,pitch_ang);
+
+         aI =a_I_thermal(modvar.theta_e, modvar.n_e,nu_p, modvar.B,pitch_ang, jI)*nu_p;
+
+       jI/=(nu_p*nu_p);
+
+
 #endif
                 double C = Rg * PLANCK_CONSTANT /
                            (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
