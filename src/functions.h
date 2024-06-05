@@ -356,6 +356,8 @@ double jnu_ml(double nu_p,struct GRMHD  modvar, double pitch_ang);
 
 double anu_ml(double nu_p,struct GRMHD  modvar, double pitch_ang);
 
-double int_jnu_ml();
+void int_jnu_ml();
+
+void comb_ml(double nu_p,struct GRMHD  modvar, double pitch_ang, double *jI, double *aI);
 
 #endif // FUNCTIONS_H

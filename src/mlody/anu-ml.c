@@ -12,7 +12,7 @@
 using keras2cpp::Model;
 using keras2cpp::Tensor;
 
-auto anu_model = Model::load("anu_v2.model");
+auto anu_model = Model::load("anu-v5.model");
 
 
 double anu_ml(double nu_p,struct GRMHD  modvar, double pitch_ang) {
@@ -21,10 +21,10 @@ double anu_ml(double nu_p,struct GRMHD  modvar, double pitch_ang) {
     double mu=cos(pitch_ang);
     double X[3]={log10(nu_p/nuc),log10(modvar.theta_e),mu};
 
-    double xmin[3] = {-1.999851257729273, -2.867911674650402, -0.9999212242187681};
-    double xmax[3] = { 7.9991789524747094, 3.8678791020477927 , 1.9999618458857806};
-    double ymin = -298.9991337995395;
-    double ymax =  301.41329981736914;
+    double xmin[3] = {2.7369195028346725e-05, -1.9999985011285943, -0.9999998523544762};
+    double xmax[3] = {8.99996224216519, 3.999985633637197, 1.9999992996211267};
+    double ymin = -298.99997021704286;
+    double ymax = 300.35167346230116;
 
     X[0]=(X[0]-xmin[0])/xmax[0];
     X[1]=(X[1]-xmin[1])/xmax[1];

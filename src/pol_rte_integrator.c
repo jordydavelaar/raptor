@@ -13,9 +13,9 @@
 #include "model_global_vars.h"
 #include "math.h"
 
-double sqrt(double _Complex in){
-	return sqrt(creal(in));
-}
+//double sqrt(double _Complex in){
+//	return sqrt(creal(in));
+//}
 
 // FUNCTIONS
 ////////////
