@@ -93,11 +93,11 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                 evaluate_coeffs_user(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
                                      &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
 #else
-//              evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
-  //                                   &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
+              evaluate_coeffs_single(&jI, &jQ, &jU, &jV, &rQ, &rU, &rV, &aI,
+                                     &aQ, &aU, &aV, nu_p, modvar, pitch_ang);
 
-		aI=anu_ml(nu_p,modvar,pitch_ang)*nu_p; 
-		jI=jnu_ml(nu_p,modvar,pitch_ang)/(nu_p*nu_p);
+//		aI=anu_ml(nu_p,modvar,pitch_ang)*nu_p; 
+//		jI=jnu_ml(nu_p,modvar,pitch_ang)/(nu_p*nu_p);
 
 //	  comb_ml(nu_p,modvar,pitch_ang,&jI,&aI);
 //	  jI/=(nu_p*nu_p);

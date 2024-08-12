@@ -43,6 +43,9 @@
 #define FREQS (FREQLOG)
 
 #define EMISUSER (0)
+#define ML (0)
+#define FIT (1)
+#define COEF (ML)
 
 #define UNIF (1)
 

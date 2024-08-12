@@ -352,12 +352,10 @@ int find_pixel(double x[2], struct Camera *intensityfield, int block);
 // MLODY
 ////////
 
-double jnu_ml(double nu_p,struct GRMHD  modvar, double pitch_ang);
+void init_ml_model();
 
-double anu_ml(double nu_p,struct GRMHD  modvar, double pitch_ang);
-
-void int_jnu_ml();
-
-void comb_ml(double nu_p,struct GRMHD  modvar, double pitch_ang, double *jI, double *aI);
+void comb_ml(double nu_p,struct GRMHD  modvar, double pitch_ang, 
+             double *jI, double *aI, double *jQ, double *aQ, double *rQ, 
+             double *jV, double *aV, double *rV);
 
 #endif // FUNCTIONS_H

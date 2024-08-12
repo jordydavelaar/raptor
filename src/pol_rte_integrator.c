@@ -13,9 +13,9 @@
 #include "model_global_vars.h"
 #include "math.h"
 
-//double sqrt(double _Complex in){
-//	return sqrt(creal(in));
-//}
+double sqrt(double _Complex in){
+	return sqrt(creal(in));
+}
 
 // FUNCTIONS
 ////////////
@@ -315,20 +315,24 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
                             double *rQ, double *rU, double *rV, double *aI,
                             double *aQ, double *aU, double *aV, double nu_p,
                             struct GRMHD modvar, double pitch_ang) {
-
+#if(COEF==ML)
+     comb_ml( nu_p, modvar, pitch_ang, jI,aI, jQ, aQ,rQ,jV,aV,rV);
+#else
     *jI = j_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
     *jQ = j_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    *jU = 0.;
     *jV = j_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
     *rQ = rho_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
-    *rU = 0.;
     *rV = rho_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang);
 
     *aI = a_I(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jI);
     *aQ = a_Q(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jQ);
-    *aU = 0;
     *aV = a_V(modvar.theta_e, modvar.n_e, nu_p, modvar.B, pitch_ang, *jV);
+#endif
+
+    *jU = 0.;
+    *rU = 0.;
+    *aU = 0;
 
     // Transform to invariant forms
     *jI /= (nu_p * nu_p);
@@ -340,7 +344,7 @@ void evaluate_coeffs_single(double *jI, double *jQ, double *jU, double *jV,
     *aV *= nu_p;
 
     *rQ *= nu_p;
-    *rV *= nu_p;
+    *rV *=  nu_p;
 
     // somtimes in very specific cells issue with Ipol>S_I, numerical round off
     // issues

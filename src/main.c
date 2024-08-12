@@ -86,6 +86,9 @@ int main(int argc, char *argv[]) {
     // Note: this sets the black hole spin 'a'
     init_model();
 
+#if(COEF==ML)
+    init_ml_model();
+#endif
     // Set constants such as R_ISCO, JANSKY_FACTOR
     // These depend on the black hole spin
     set_constants();
