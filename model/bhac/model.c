@@ -603,6 +603,11 @@ void init_grmhd_data(char *fname) {
     }
 
     a = neqpar[NSPIN];
+    if(fabs(a)>1){
+	fprintf(stderr,"Spin unphysical probably wrong NSPIN parameter, change in model_definitions.h!\n");
+	exit(1);
+    }
+
     if (metric != MKSN)
         Q = 0.0;
     Q = 0.0;
