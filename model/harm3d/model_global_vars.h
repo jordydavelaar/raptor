@@ -20,6 +20,8 @@ extern int N1, N2, N3;
 extern double R_HIGH, R_LOW, gam;
 
 extern double R0, Rin, Rout, a, hslope;
+extern double mks_smooth, poly_xt, poly_alpha, poly_norm;
+
 extern double startx[NDIM], stopx[NDIM], dx[NDIM];
 
 extern double L_unit, T_unit;
