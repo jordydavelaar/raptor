@@ -77,7 +77,8 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
     double dA;
 
     file_id = H5Fcreate(hdf5_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    double buffer[tot_blocks][tot_pixels];
+    double(*buffer)[tot_pixels] =
+        malloc(sizeof(double[tot_blocks][tot_pixels]));
 
     dims[1] = tot_pixels;
     dims[0] = tot_blocks;
@@ -311,7 +312,8 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
     status = H5Sclose(dataspace_id);
 
     {
-        int ibuffer[tot_blocks][tot_pixels];
+        int(*ibuffer)[tot_pixels] =
+            malloc(sizeof(int[tot_blocks][tot_pixels]));
 
         dataspace_id = H5Screate_simple(2, dims, NULL);
 
@@ -330,9 +332,11 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         status = H5Dclose(dataset_id);
 
         status = H5Sclose(dataspace_id);
+        free(ibuffer);
     }
 
     status = H5Fclose(file_id);
+    free(buffer);
 }
 
 void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
