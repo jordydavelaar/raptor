@@ -11,6 +11,7 @@
 #include "model_definitions.h"
 #include "model_functions.h"
 #include "model_global_vars.h"
+#include <gsl/gsl_sf_ellint.h>
 
 // FUNCTIONS
 ////////////
@@ -424,4 +425,138 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
         *steps = *steps + 1;
     }
+}
+
+// Winding number n = Delta_phi / (2*pi) accumulated along the geodesic.
+// phi (lightpath index 3 within each 9-entry step) is stored unwrapped by
+// integrate_geodesic, so the total signed sweep is just the difference
+// between the last and first stored phi values.
+double compute_photon_order(double *lightpath, int steps) {
+    if (steps < 1)
+        return 0.;
+    double dphi_total = lightpath[(steps - 1) * 9 + 3] - lightpath[0 * 9 + 3];
+    return dphi_total / (2. * M_PI);
+}
+
+// Complete elliptic integral of the first kind, K(m), parameter convention
+// m = k^2 (matches Python/scipy's ellipk(m)), valid for m<1 including
+// negative m via the imaginary-modulus transform K(m) = K(m/(m-1))/sqrt(1-m)
+// (verified numerically against scipy.special.ellipk). GSL's
+// gsl_sf_ellint_Kcomp takes the modulus k, not m, hence the sqrt()s below.
+static double ellipK_param(double m) {
+    if (m >= 1.)
+        m = 1. - 1e-12;
+    if (m < 0.) {
+        double mt = m / (m - 1.);
+        return gsl_sf_ellint_Kcomp(sqrt(mt), GSL_PREC_DOUBLE) / sqrt(1. - m);
+    }
+    return gsl_sf_ellint_Kcomp(sqrt(m), GSL_PREC_DOUBLE);
+}
+
+// Two additional photon-subring diagnostics computed from the already
+// integrated geodesic:
+//
+// *n_eq_crossings: number of times the ray crosses the equatorial plane
+// (theta = pi/2). Simple integer order label used e.g. by Gralla, Lupsasca &
+// Marrone 2020 (PRD 102, 124004) and by adaptive-ray-tracing lensing-band
+// definitions (m=0 direct image, m=1 first indirect, ...).
+//
+// *mino_order: continuous half-orbit count following the photon's polar
+// (theta) motion, n = tau_mino * sqrt(-a^2 u_minus) / (2*K(u_plus/u_minus)),
+// where tau_mino = integral d(affine parameter)/Sigma is the elapsed Mino
+// time and u_plus/u_minus follow Gralla & Lupsasca 2020 (arXiv:1910.12873,
+// hereafter GL20), Eq. 11.
+//
+// IMPORTANT: the "2*K" here is NOT the "4*K" that appears in GL20 Eq. 36
+// itself (also implemented as kgeo's n_poloidal_orbits). GL20 Eq. 36 defines
+// n_GL36 = tau_mino*sqrt(-a^2 u_minus)/(4*K), the number of FULL poloidal
+// orbits (one full theta_min -> theta_max -> theta_min cycle increments it
+// by 1). What this function returns is 2*n_GL36, i.e. the number of HALF
+// orbits, because that is the quantity conventionally used to label photon
+// subrings n=1,2,3,... (Delta(mino_order)=1 per turning-point-to-turning-
+// point interval). This bridges two separately-stated facts rather than
+// being read off a single equation: GL20 Eq. 36 for n_GL36 itself, plus
+// Himwich, Johnson, Lupsasca & Strominger 2020 (arXiv:2001.08750), which
+// states in its introduction that "the n-th subring is comprised of photons
+// that circumnavigate the black hole n/2 times" -- i.e. n_subring =
+// 2 * (number of full orbits) = 2 * n_GL36, which is exactly the factor of 2
+// (not 4) used below. To recover the literal GL20 Eq. 36 quantity instead,
+// divide this function's mino_order output by 2.
+//
+// Undefined (sentinel -999) for vortical geodesics (eta<=0), which never
+// cross the equatorial plane and have no polar libration to count fractions
+// of -- this includes every ray for a camera placed exactly edge-on
+// (inclination 90 deg) at zero impact parameter beta.
+//
+// lambda, eta reuse the exact (E=1) conserved-quantity expressions from
+// initialize_photon() in metric.c, for self-consistency with whatever
+// geodesic RAPTOR actually integrates for this pixel.
+void compute_photon_order_extra(double *lightpath, int steps, double alpha,
+                                double beta, double *mino_order,
+                                int *n_eq_crossings) {
+    *n_eq_crossings = 0;
+    *mino_order = -999.;
+
+    if (steps < 2)
+        return;
+
+#if (metric == MKSBHAC || metric == MKSHARM)
+    double eq_ref = 0.5; // X2 = 0.5 <=> theta = pi/2 for this coordinate map
+#else
+    double eq_ref = M_PI / 2.;
+#endif
+
+    double tau_mino = 0.;
+    double prev = lightpath[0 * 9 + 2] - eq_ref;
+    int crossings = 0;
+    for (int q = 0; q < steps - 1; q++) {
+        double r_q = logscale ? exp(lightpath[q * 9 + 1]) : lightpath[q * 9 + 1];
+        double th2_q = lightpath[q * 9 + 2];
+#if (metric == MKSBHAC || metric == MKSHARM)
+        double theta_q =
+            M_PI * th2_q + 0.5 * (1. - hslope) * sin(2. * M_PI * th2_q);
+#else
+        double theta_q = th2_q;
+#endif
+        double sigma_q = r_q * r_q + a * a * cos(theta_q) * cos(theta_q);
+        double dlambda_q = lightpath[q * 9 + 8];
+        tau_mino += dlambda_q / sigma_q;
+
+        double cur = lightpath[(q + 1) * 9 + 2] - eq_ref;
+        if (prev * cur < 0.)
+            crossings++;
+        prev = cur;
+    }
+    *n_eq_crossings = crossings;
+
+    double mu0 = cos(INCLINATION / 180. * M_PI);
+    double lam = -alpha * sqrt(1. - mu0 * mu0);
+    double eta = beta * beta + mu0 * mu0 * (alpha * alpha - 1.);
+
+    if (eta <= 0.)
+        return; // vortical geodesic: no polar libration to normalize by
+
+    double u_plus, u_minus, a2u_minus;
+    if (fabs(a) < 1e-6) {
+        u_plus = eta / (eta + lam * lam);
+        u_minus = u_plus;
+        a2u_minus = -(eta + lam * lam);
+    } else {
+        double a2 = a * a;
+        double Delta_theta = 0.5 * (1. - (eta + lam * lam) / a2);
+        double disc = Delta_theta * Delta_theta + eta / a2;
+        disc = disc > 0. ? sqrt(disc) : 0.;
+        u_plus = Delta_theta + disc;
+        u_minus = Delta_theta - disc;
+        a2u_minus = a2 * u_minus;
+    }
+
+    if (a2u_minus >= 0. || u_minus == 0.)
+        return; // degenerate: no polar libration to normalize by
+
+    double uratio = u_plus / u_minus;
+    double K = ellipK_param(uratio);
+    double half_period = 2. * K / sqrt(-a2u_minus);
+
+    *mino_order = tau_mino / half_period;
 }

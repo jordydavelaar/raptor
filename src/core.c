@@ -127,6 +127,13 @@ void calculate_image_block(struct Camera *intensityfield,
         integrate_geodesic((*intensityfield).alpha[pixel],
                            (*intensityfield).beta[pixel], lightpath2, &steps,
                            CUTOFF_INNER);
+
+        (*intensityfield).norder[pixel] = compute_photon_order(lightpath2, steps);
+        compute_photon_order_extra(lightpath2, steps,
+                                   (*intensityfield).alpha[pixel],
+                                   (*intensityfield).beta[pixel],
+                                   &(*intensityfield).norder_mino[pixel],
+                                   &(*intensityfield).ncross[pixel]);
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
 #if (POL)
         for (int f = 0; f < num_frequencies; f++) {

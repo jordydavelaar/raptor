@@ -103,6 +103,14 @@ void f_geodesic(double *y, double *fvector);
 void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner);
 
+// Winding number n = Delta_phi / (2*pi) accumulated along lightpath
+double compute_photon_order(double *lightpath, int steps);
+
+// Equatorial-crossing count and Mino-time-based half-orbit count
+void compute_photon_order_extra(double *lightpath, int steps, double alpha,
+                                double beta, double *mino_order,
+                                int *n_eq_crossings);
+
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
                                   double *p, int PRINT_POLAR, double *IQUV,

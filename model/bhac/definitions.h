@@ -61,6 +61,9 @@ typedef struct Camera {
     double tauF[tot_pixels][num_frequencies];    // intensity
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
+    double norder[tot_pixels]; // winding number n = Delta_phi / (2*pi)
+    double norder_mino[tot_pixels]; // Mino-time half-orbit count (GL20/Himwich)
+    int ncross[tot_pixels];         // number of equatorial-plane crossings
     double lcorner[2];                           // lower left corner of a block
     double dx[2];                                // pixel spacing of block
     int level;

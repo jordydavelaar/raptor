@@ -274,6 +274,64 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
     status = H5Sclose(dataspace_id);
 
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].norder[pixel];
+        }
+    }
+    sprintf(dataset, "norder");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    status = H5Dclose(dataset_id);
+
+    status = H5Sclose(dataspace_id);
+
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].norder_mino[pixel];
+        }
+    }
+    sprintf(dataset, "norder_mino");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    status = H5Dclose(dataset_id);
+
+    status = H5Sclose(dataspace_id);
+
+    {
+        int ibuffer[tot_blocks][tot_pixels];
+
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        for (int block = 0; block < tot_blocks; block++) {
+            for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                ibuffer[block][pixel] = data[block].ncross[pixel];
+            }
+        }
+        sprintf(dataset, "ncross");
+        dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_INT, dataspace_id,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 ibuffer);
+
+        status = H5Dclose(dataset_id);
+
+        status = H5Sclose(dataspace_id);
+    }
+
     status = H5Fclose(file_id);
 }
 
