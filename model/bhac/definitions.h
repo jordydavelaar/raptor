@@ -64,6 +64,9 @@ typedef struct Camera {
     double norder[tot_pixels]; // winding number n = Delta_phi / (2*pi)
     double norder_mino[tot_pixels]; // Mino-time half-orbit count (GL20/Himwich)
     int ncross[tot_pixels];         // number of equatorial-plane crossings
+    double kappa1[tot_pixels];      // Walker-Penrose constant at camera (Re)
+    double kappa2[tot_pixels];      // Walker-Penrose constant at camera (Im)
+    double dchi_grav[tot_pixels];   // EVPA rotation, source at infinity -> camera
     double lcorner[2];                           // lower left corner of a block
     double dx[2];                                // pixel spacing of block
     int level;

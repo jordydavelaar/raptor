@@ -22,6 +22,9 @@ void read_model(char *argv[]);
 
 double get_r(double X_u[4]);
 
+// BL/KS polar angle theta at position X_u (undoes MKS theta stretching)
+double get_theta(double X_u[4]);
+
 // Lowers the index of the contravariant vector V_u, storing the results in
 // a covariant one (V_d), based on the metric at position X_u
 void lower_index(double X_u[4], double V_u[4], double V_d[4]);
@@ -79,6 +82,9 @@ double pitch_angle(double *X_u, double *k_u, double *B_u, double *Uplasma_u);
 
 // void construct_U_vector( double X_u[], double U_u[]);
 
+// Four-velocity of the static observer at X_u (outside the ergosphere)
+void construct_U_vector(double X_u[], double U_u[]);
+
 // INTEGRATOR.C
 ///////////////
 
@@ -110,6 +116,15 @@ double compute_photon_order(double *lightpath, int steps);
 void compute_photon_order_extra(double *lightpath, int steps, double alpha,
                                 double beta, double *mino_order,
                                 int *n_eq_crossings);
+
+// Walker-Penrose constant of the ray, evaluated at the camera for a
+// polarization vector along the camera tetrad's screen-x axis
+void compute_walker_penrose(double *lightpath, int steps, double *kappa1,
+                            double *kappa2);
+
+// Gravitational EVPA rotation (from the sky-projected spin axis) between a
+// source at infinity and the camera; NaN for rays that do not escape
+void compute_dchi_grav(double *lightpath, int steps, double *dchi_grav);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,

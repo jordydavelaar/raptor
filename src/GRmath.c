@@ -33,6 +33,20 @@ double get_r(double X_u[4]) {
 #endif
 }
 
+// Boyer-Lindquist/Kerr-Schild polar angle theta at position X_u (identical
+// in BL and KS), undoing the MKS theta stretching where applicable.
+double get_theta(double X_u[4]) {
+#if (metric == CKS)
+    return acos(X_u[3] / get_r(X_u));
+#elif (metric == MKSBHAC)
+    return X_u[2] + 0.5 * hslope * sin(2. * X_u[2]);
+#elif (metric == MKSHARM)
+    return M_PI * X_u[2] + 0.5 * (1. - hslope) * sin(2. * M_PI * X_u[2]);
+#else
+    return X_u[2];
+#endif
+}
+
 // Lowers the index of the contravariant vector V_u, storing the results in a
 // covariant one (V_d), based on the metric at position X_u
 void lower_index(double X_u[4], double V_u[4], double V_d[4]) {

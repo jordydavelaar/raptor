@@ -130,6 +130,24 @@ def plot_data_ncross(image,fig,ax,halfrange=40,mas=1,label="equatorial crossings
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)
 
+def plot_data_dchi_grav(image,fig,ax,halfrange=40,mas=1,label=r"$\Delta\chi_{\rm grav}$ [deg]",cmap="twilight_shifted",vmin=-90,vmax=90):
+    # EVPA rotation from the sky-projected spin axis between a source at
+    # infinity and the camera (dchi_grav, radians in the file). NaN for rays
+    # that are captured or stopped early; pcolormesh leaves those blank.
+    for i in range(0,len(image['dchi_grav'])):
+        pixels=int(np.sqrt(len(image['dchi_grav'][i])))
+        array=np.degrees(np.reshape(image['dchi_grav'][i],(pixels,pixels)))
+        alpha=((np.reshape(image['alpha'][i],(pixels,pixels))))*mas
+        beta=((-np.reshape(image['beta'][i],(pixels,pixels))))*mas
+        ax.set_aspect('equal')
+
+        figure=ax.pcolormesh(alpha,beta,array,vmin=vmin,vmax=vmax,cmap=cmap,shading='auto')
+
+    fig.colorbar(figure,label=label,ax=ax)
+
+    ax.set_xlim(-halfrange*mas,halfrange*mas)
+    ax.set_ylim(-halfrange*mas,halfrange*mas)
+
 def overlay_norder_contours(image,ax,levels=(0.75,1.25,2.0,3.0),mas=1):
 
     for i in range(0,len(image['norder'])):

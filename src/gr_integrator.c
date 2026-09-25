@@ -500,29 +500,17 @@ void compute_photon_order_extra(double *lightpath, int steps, double alpha,
     if (steps < 2)
         return;
 
-#if (metric == MKSBHAC || metric == MKSHARM)
-    double eq_ref = 0.5; // X2 = 0.5 <=> theta = pi/2 for this coordinate map
-#else
-    double eq_ref = M_PI / 2.;
-#endif
-
     double tau_mino = 0.;
-    double prev = lightpath[0 * 9 + 2] - eq_ref;
+    double prev = get_theta(&lightpath[0 * 9]) - M_PI / 2.;
     int crossings = 0;
     for (int q = 0; q < steps - 1; q++) {
-        double r_q = logscale ? exp(lightpath[q * 9 + 1]) : lightpath[q * 9 + 1];
-        double th2_q = lightpath[q * 9 + 2];
-#if (metric == MKSBHAC || metric == MKSHARM)
-        double theta_q =
-            M_PI * th2_q + 0.5 * (1. - hslope) * sin(2. * M_PI * th2_q);
-#else
-        double theta_q = th2_q;
-#endif
+        double r_q = get_r(&lightpath[q * 9]);
+        double theta_q = get_theta(&lightpath[q * 9]);
         double sigma_q = r_q * r_q + a * a * cos(theta_q) * cos(theta_q);
         double dlambda_q = lightpath[q * 9 + 8];
         tau_mino += dlambda_q / sigma_q;
 
-        double cur = lightpath[(q + 1) * 9 + 2] - eq_ref;
+        double cur = get_theta(&lightpath[(q + 1) * 9]) - M_PI / 2.;
         if (prev * cur < 0.)
             crossings++;
         prev = cur;
@@ -559,4 +547,195 @@ void compute_photon_order_extra(double *lightpath, int steps, double alpha,
     double half_period = 2. * K / sqrt(-a2u_minus);
 
     *mino_order = tau_mino / half_period;
+}
+
+// Components (t, r, theta, phi) of the contravariant vector V_u at X_u in
+// unmodified Kerr-Schild coordinates (Boyer-Lindquist for BL/MBL metrics).
+static void wp_spherical_components(double X_u[4], double V_u[4],
+                                    double V_s[4]) {
+    double r = get_r(X_u);
+#if (metric == CKS)
+    // Invert the Jacobian d(x,y,z)/d(r,theta,phi) of the KS -> CKS map
+    double th = get_theta(X_u);
+    double X_KS[4];
+    CKS_to_KS(X_u, X_KS);
+    double ph = X_KS[3];
+    double sth = sin(th), cth = cos(th), sph = sin(ph), cph = cos(ph);
+    double J[3][3] = {
+        {cph * sth, (r * cph + a * sph) * cth, (-r * sph + a * cph) * sth},
+        {sph * sth, (r * sph - a * cph) * cth, (r * cph + a * sph) * sth},
+        {cth, -r * sth, 0.}};
+    double det = J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
+                 J[0][1] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
+                 J[0][2] * (J[1][0] * J[2][1] - J[1][1] * J[2][0]);
+    double b[3] = {V_u[1], V_u[2], V_u[3]};
+    for (int c = 0; c < 3; c++) {
+        double M[3][3];
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                M[i][j] = (j == c) ? b[i] : J[i][j];
+        V_s[c + 1] = (M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) -
+                      M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) +
+                      M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0])) /
+                     det;
+    }
+    V_s[0] = V_u[0];
+#else
+    double rfactor = logscale ? r : 1.;
+#if (metric == MKSBHAC)
+    double thfactor = 1. + hslope * cos(2. * X_u[2]);
+#elif (metric == MKSHARM)
+    double thfactor = M_PI * (1. + (1. - hslope) * cos(2. * M_PI * X_u[2]));
+#else
+    double thfactor = 1.;
+#endif
+    V_s[0] = V_u[0];
+    V_s[1] = V_u[1] * rfactor;
+    V_s[2] = V_u[2] * thfactor;
+    V_s[3] = V_u[3];
+#endif
+}
+
+// Walker-Penrose constant kappa = kappa1 + i kappa2 = (A - iB)(r - i a cos th)
+// of the (real) polarization vector f_u for a photon with wave vector k_u
+// (Walker & Penrose 1970; Chandrasekhar 1983; notation of Himwich et al.
+// 2020, arXiv:2001.08750):
+//   A = (k^t f^r - k^r f^t) + a sin^2 th (k^r f^phi - k^phi f^r)
+//   B = [(r^2+a^2)(k^phi f^th - k^th f^phi) - a (k^t f^th - k^th f^t)] sin th
+// with Boyer-Lindquist components. For ingoing Kerr-Schild components
+// (dt_BL = dt_KS - 2r/Delta dr, dphi_BL = dphi_KS - a/Delta dr) the 1/Delta
+// terms cancel identically except for an extra -a sin th (k^r f^th -
+// k^th f^r) in B, so the expression below is regular across the horizon.
+static void walker_penrose(double X_u[4], double k_u[4], double f_u[4],
+                           double *kappa1, double *kappa2) {
+    double k[4], f[4];
+    wp_spherical_components(X_u, k_u, k);
+    wp_spherical_components(X_u, f_u, f);
+
+    double r = get_r(X_u);
+    double th = get_theta(X_u);
+    double sth = sin(th), cth = cos(th);
+
+    double A = (k[0] * f[1] - k[1] * f[0]) +
+               a * sth * sth * (k[1] * f[3] - k[3] * f[1]);
+    double B = ((r * r + a * a) * (k[3] * f[2] - k[2] * f[3]) -
+                a * (k[0] * f[2] - k[2] * f[0])) *
+               sth;
+#if !(metric == BL || metric == MBL)
+    B -= a * sth * (k[1] * f[2] - k[2] * f[1]);
+#endif
+
+    *kappa1 = r * A - a * cth * B;
+    *kappa2 = -(r * B + a * cth * A);
+}
+
+// Walker-Penrose constant kappa = kappa1 + i kappa2 of the ray, evaluated at
+// the camera for a unit polarization vector along the screen-x axis of the
+// camera tetrad used by radiative_transfer_polarized (EVPA = 0). kappa is
+// linear in f, so for f = f1 e1 + f2 e2 it is kappa * (f1 - i f2). Up to
+// O(1/rcam) corrections kappa = beta - i (alpha + a sin i).
+void compute_walker_penrose(double *lightpath, int steps, double *kappa1,
+                            double *kappa2) {
+    *kappa1 = 0.;
+    *kappa2 = 0.;
+
+    if (steps < 1)
+        return;
+
+    double X_u[4], k_u[4], f_u[4];
+    LOOP_i {
+        X_u[i] = lightpath[i];
+        k_u[i] = lightpath[4 + i];
+    }
+
+    double cam_up_u[4] = {0., 0., 0., -1.};
+    double U_obs_u[4] = {0., 0., 0., 0.};
+    double obs_tetrad_u[4][4];
+    LOOP_ij obs_tetrad_u[i][j] = 0.;
+    construct_U_vector(X_u, U_obs_u);
+    create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
+    LOOP_i f_u[i] = obs_tetrad_u[i][1];
+
+    walker_penrose(X_u, k_u, f_u, kappa1, kappa2);
+}
+
+// Contravariant components, in the code's coordinates, of the flat-space
+// unit vector along the spin axis, z_hat = cos th d_r - sin th / r d_th.
+// Only used far from the hole, where O(a/r, 1/r) corrections are negligible.
+static void wp_zhat(double X_u[4], double z_u[4]) {
+    z_u[0] = 0.;
+#if (metric == CKS)
+    z_u[1] = 0.;
+    z_u[2] = 0.;
+    z_u[3] = 1.;
+#else
+    double r = get_r(X_u);
+    double th = get_theta(X_u);
+    double rfactor = logscale ? r : 1.;
+#if (metric == MKSBHAC)
+    double thfactor = 1. + hslope * cos(2. * X_u[2]);
+#elif (metric == MKSHARM)
+    double thfactor = M_PI * (1. + (1. - hslope) * cos(2. * M_PI * X_u[2]));
+#else
+    double thfactor = 1.;
+#endif
+    z_u[1] = cos(th) / rfactor;
+    z_u[2] = -sin(th) / r / thfactor;
+    z_u[3] = 0.;
+#endif
+}
+
+// Walker-Penrose constant of the polarization vector along the sky-projected
+// spin axis z_perp, as seen by the static observer at X_u: z_hat projected
+// orthogonal to the observer four-velocity U and to the photon direction
+// n = k/omega - U.
+static void wp_kappa_zperp(double X_u[4], double k_u[4], double *kappa1,
+                           double *kappa2) {
+    double U_u[4] = {0., 0., 0., 0.};
+    double z_u[4], n_u[4], f_u[4];
+    construct_U_vector(X_u, U_u);
+    wp_zhat(X_u, z_u);
+
+    double omega = -inner_product(X_u, k_u, U_u);
+    LOOP_i n_u[i] = k_u[i] / omega - U_u[i];
+
+    double zU = inner_product(X_u, z_u, U_u);
+    LOOP_i f_u[i] = z_u[i] + zU * U_u[i];
+    double fn = inner_product(X_u, f_u, n_u);
+    LOOP_i f_u[i] -= fn * n_u[i];
+
+    walker_penrose(X_u, k_u, f_u, kappa1, kappa2);
+}
+
+// Gravitational EVPA rotation for a source at infinity. For a ray that
+// escapes to r ~ cutoff_outer at its far end, both ends lie in the
+// asymptotically flat region, and a polarization at angle psi from z_perp at
+// the far end is received at angle chi from z_perp at the camera, with
+//   dchi_grav = chi - psi = arg kappa_cam(z_perp) - arg kappa_far(z_perp),
+// since kappa(f at angle psi) = kappa(z_perp) exp(-i psi) at either end
+// (angles counted in the same sense as RAPTOR's EVPA, 0.5 atan2(U, Q)).
+// Wrapped to (-pi/2, pi/2]. Includes the purely geometric rotation of z_perp
+// caused by the bending of the ray, so it vanishes only in flat space. NaN
+// for rays captured by the hole or stopped early (max_steps, max_order).
+void compute_dchi_grav(double *lightpath, int steps, double *dchi_grav) {
+    *dchi_grav = NAN;
+
+    if (steps < 2)
+        return;
+
+    double *far = &lightpath[(steps - 1) * 9];
+    if (get_r(far) < 0.9 * cutoff_outer)
+        return;
+
+    double k1_cam, k2_cam, k1_far, k2_far;
+    wp_kappa_zperp(&lightpath[0], &lightpath[4], &k1_cam, &k2_cam);
+    wp_kappa_zperp(far, far + 4, &k1_far, &k2_far);
+
+    double dchi = atan2(k2_cam, k1_cam) - atan2(k2_far, k1_far);
+    dchi = fmod(dchi, M_PI);
+    if (dchi > 0.5 * M_PI)
+        dchi -= M_PI;
+    if (dchi <= -0.5 * M_PI)
+        dchi += M_PI;
+    *dchi_grav = dchi;
 }

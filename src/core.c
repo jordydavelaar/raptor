@@ -134,6 +134,11 @@ void calculate_image_block(struct Camera *intensityfield,
                                    (*intensityfield).beta[pixel],
                                    &(*intensityfield).norder_mino[pixel],
                                    &(*intensityfield).ncross[pixel]);
+        compute_walker_penrose(lightpath2, steps,
+                               &(*intensityfield).kappa1[pixel],
+                               &(*intensityfield).kappa2[pixel]);
+        compute_dchi_grav(lightpath2, steps,
+                          &(*intensityfield).dchi_grav[pixel]);
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
 #if (POL)
         for (int f = 0; f < num_frequencies; f++) {

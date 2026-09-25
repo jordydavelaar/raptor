@@ -133,61 +133,17 @@ void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
             Unorm / (2. * f_tetrad_u[1]) - I * Vnorm / (2. * f_tetrad_u[1]);
 }
 
-// NOTE: works only in Kerr metric
-// Ziri's suggestion: construct U vecs
+// Four-velocity of the static observer at X_u, U = d_t / sqrt(-g_tt) (d_t is
+// the same Killing vector in BL, KS, MKS and CKS coordinates). Valid outside
+// the ergosphere, i.e. at the camera. (This used to be an observer with
+// u_t = -1, which moves azimuthally at v ~ sqrt(2/r) relative to the static
+// frame and so rotated the camera's Stokes frame by ~0.01 rad at r ~ 1e4.)
 void construct_U_vector(double X_u[], double U_u[]) {
-// Obtain relevant metric terms:
-#if (metric == CKS)
-    double U_KS[4];
-    double X_KS[4];
+    double g_dd[4][4];
+    metric_dd(X_u, g_dd);
 
-    CKS_to_KS(X_u, X_KS);
-
-    double g_uu[4][4];
-    metric_KS_uu(X_KS, g_uu);
-    double g_uu00 = g_uu[0][0];
-    double g_uu03 = g_uu[0][3];
-    double g_uu33 = g_uu[3][3];
-
-#else
-    double g_uu[4][4];
-    metric_uu(X_u, g_uu);
-    double g_uu00 = g_uu[0][0];
-    double g_uu03 = g_uu[0][3];
-    double g_uu33 = g_uu[3][3];
-#endif
-    // Observer/plasma wave vector:
-    double U_d[4] = {-1., 0., 0., 0.};
-    double B__ = -g_uu03 * U_d[0] / g_uu33;
-    double C__ = -(1. + g_uu00 * U_d[0] * U_d[0]) / g_uu33;
-
-    // Properly normalize U_u:
-    U_d[3] = B__ + sqrt(B__ * B__ + C__);
-
-#if (metric == CKS)
-    LOOP_i {
-        U_KS[i] = 0.;
-        U_u[i] = 0;
-    }
-    raise_index_KS(X_KS, U_d, U_KS);
-
-    double coordKS[8];
-    double coordCKS[8];
-
-    LOOP_i {
-        coordKS[i] = X_KS[i];
-        coordKS[i + 4] = U_KS[i];
-    }
-
-    KS_to_CKS_u(coordKS, coordCKS);
-
-    LOOP_i U_u[i] = coordCKS[i + 4];
-
-#else
     LOOP_i U_u[i] = 0.;
-    raise_index(X_u, U_d, U_u);
-
-#endif
+    U_u[0] = 1. / sqrt(-g_dd[0][0]);
 }
 
 // NEW FUNCTIONS JUNE 2021

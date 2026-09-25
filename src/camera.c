@@ -78,6 +78,9 @@ void get_impact_params(struct Camera **intensityfield, int block) {
         (*intensityfield)[block].norder[pixel] = 0.;
         (*intensityfield)[block].norder_mino[pixel] = 0.;
         (*intensityfield)[block].ncross[pixel] = 0;
+        (*intensityfield)[block].kappa1[pixel] = 0.;
+        (*intensityfield)[block].kappa2[pixel] = 0.;
+        (*intensityfield)[block].dchi_grav[pixel] = 0.;
 
         for (int f = 0; f < num_frequencies; f++) {
             for (int s = 0; s < 4; s++) {

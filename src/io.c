@@ -311,6 +311,60 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
     status = H5Sclose(dataspace_id);
 
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].kappa1[pixel];
+        }
+    }
+    sprintf(dataset, "kappa1");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    status = H5Dclose(dataset_id);
+
+    status = H5Sclose(dataspace_id);
+
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].kappa2[pixel];
+        }
+    }
+    sprintf(dataset, "kappa2");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    status = H5Dclose(dataset_id);
+
+    status = H5Sclose(dataspace_id);
+
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+
+    for (int block = 0; block < tot_blocks; block++) {
+        for (int pixel = 0; pixel < tot_pixels; pixel++) {
+            buffer[block][pixel] = data[block].dchi_grav[pixel];
+        }
+    }
+    sprintf(dataset, "dchi_grav");
+    dataset_id = H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             buffer);
+
+    status = H5Dclose(dataset_id);
+
+    status = H5Sclose(dataspace_id);
+
     {
         int(*ibuffer)[tot_pixels] =
             malloc(sizeof(int[tot_blocks][tot_pixels]));
