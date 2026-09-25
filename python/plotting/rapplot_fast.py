@@ -186,6 +186,16 @@ def plot_data_ncross(image, fig, ax, halfrange=40, mas=1, label="equatorial cros
     _show(image, _field(image, 'ncross'), fig, ax, halfrange, mas, label, cmap, vmin, vmax)
 
 
+def plot_data_dchi_grav(image, fig, ax, halfrange=40, mas=1, label=r"$\Delta\chi_{\rm grav}$ [deg]",
+                        cmap="twilight_shifted", vmin=-90, vmax=90):
+    # EVPA rotation from the sky-projected spin axis, source at infinity ->
+    # camera (radians in the file, plotted in degrees; cyclic colormap since
+    # it is defined mod 180 deg). NaN (captured / truncated rays) is
+    # transparent.
+    _show(image, np.degrees(_field(image, 'dchi_grav')), fig, ax, halfrange, mas, label,
+          cmap, vmin, vmax)
+
+
 def _contour(image, values, ax, levels, mas, halfrange, **kw):
     g = _grid(image, halfrange)
     x, y = g.centers(mas)
