@@ -235,6 +235,43 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
         status = H5Sclose(dataspace_id);
     }
+
+    // Transverse-norm diagnostics of the polarization vector f (see
+    // f_tetrad_to_stokes): max |fnorm - 1| along the ray, theta where it
+    // occurred, and fnorm at the camera; and the Walker-Penrose check of the
+    // last transport leg (wp_check_camera): EVPA error and Poincare-sphere
+    // angle (deg)
+    for (int freq = 0; freq < num_frequencies; freq++) {
+        const char *names[5] = {"fnorm_dev", "fnorm_th", "fnorm_cam",
+                                "wp_dchi", "wp_dpsi"};
+        for (int q = 0; q < 5; q++) {
+            char dataset[200];
+            for (int block = 0; block < tot_blocks; block++) {
+                for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                    buffer[block][pixel] =
+                        q == 0   ? data[block].fnorm_dev[pixel][freq]
+                        : q == 1 ? data[block].fnorm_th[pixel][freq]
+                        : q == 2 ? data[block].fnorm_cam[pixel][freq]
+                        : q == 3 ? data[block].wp_dchi[pixel][freq]
+                                 : data[block].wp_dpsi[pixel][freq];
+                }
+            }
+
+            dataspace_id = H5Screate_simple(2, dims, NULL);
+
+            sprintf(dataset, "%s%e", names[q], frequencies[freq]);
+            dataset_id =
+                H5Dcreate2(file_id, dataset, H5T_NATIVE_DOUBLE, dataspace_id,
+                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+            H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+                     H5P_DEFAULT, buffer);
+
+            status = H5Dclose(dataset_id);
+
+            status = H5Sclose(dataspace_id);
+        }
+    }
 #endif
 
     char dataset[200];
@@ -364,6 +401,29 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
     status = H5Dclose(dataset_id);
 
     status = H5Sclose(dataspace_id);
+
+    // Geodesic conservation check (compute_geodesic_check)
+    {
+        const char *names[3] = {"geo_dlam", "geo_deta", "geo_thpole"};
+        for (int q = 0; q < 3; q++) {
+            for (int block = 0; block < tot_blocks; block++) {
+                for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                    buffer[block][pixel] =
+                        q == 0   ? data[block].geo_dlam[pixel]
+                        : q == 1 ? data[block].geo_deta[pixel]
+                                 : data[block].geo_thpole[pixel];
+                }
+            }
+            dataspace_id = H5Screate_simple(2, dims, NULL);
+            dataset_id =
+                H5Dcreate2(file_id, names[q], H5T_NATIVE_DOUBLE, dataspace_id,
+                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+                     H5P_DEFAULT, buffer);
+            status = H5Dclose(dataset_id);
+            status = H5Sclose(dataspace_id);
+        }
+    }
 
     {
         int(*ibuffer)[tot_pixels] =

@@ -59,6 +59,11 @@ typedef struct Camera {
     double IQUV[tot_pixels][num_frequencies][4]; // intensity
     double tau[tot_pixels][num_frequencies];     // intensity
     double tauF[tot_pixels][num_frequencies];    // intensity
+    double fnorm_dev[tot_pixels][num_frequencies]; // max |f_perp|^2 - 1 on ray
+    double fnorm_th[tot_pixels][num_frequencies];  // theta at that max
+    double fnorm_cam[tot_pixels][num_frequencies]; // |f_perp|^2 at camera
+    double wp_dchi[tot_pixels][num_frequencies]; // Walker-Penrose EVPA error (deg)
+    double wp_dpsi[tot_pixels][num_frequencies]; // Poincare-sphere error (deg)
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
     double norder[tot_pixels]; // winding number n = Delta_phi / (2*pi)
@@ -67,6 +72,9 @@ typedef struct Camera {
     double kappa1[tot_pixels];      // Walker-Penrose constant at camera (Re)
     double kappa2[tot_pixels];      // Walker-Penrose constant at camera (Im)
     double dchi_grav[tot_pixels];   // EVPA rotation, source at infinity -> camera
+    double geo_dlam[tot_pixels];   // max |lambda - lambda_cam| along ray
+    double geo_deta[tot_pixels];   // max |eta - eta_cam| along ray
+    double geo_thpole[tot_pixels]; // closest approach to polar axis (rad)
     double lcorner[2];                           // lower left corner of a block
     double dx[2];                                // pixel spacing of block
     int level;
@@ -133,7 +141,7 @@ typedef struct Camera {
 #define RT_OUTER_CUTOFF (50.) // Stop polarized integration beyond this radius
 
 #define delta_num (1.e-4) // Used for numerical derivatives
-#define max_steps (1e4)   // Maximum number of integration steps
+#define max_steps (1e5)   // Maximum number of integration steps
 
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
 #define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]

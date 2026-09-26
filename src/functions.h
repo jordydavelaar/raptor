@@ -119,6 +119,15 @@ void compute_photon_order_extra(double *lightpath, int steps, double alpha,
 
 // Walker-Penrose constant of the ray, evaluated at the camera for a
 // polarization vector along the camera tetrad's screen-x axis
+// Geodesic conservation check: max |d lambda|, max |d eta| along the path and
+// closest approach to the polar axis (see gr_integrator.c)
+void compute_geodesic_check(double *lightpath, int steps, double *dlambda,
+                            double *deta, double *thpole);
+
+// Walker-Penrose constant of an arbitrary real vector f_u (see gr_integrator.c)
+void walker_penrose_f(double X_u[4], double k_u[4], double f_u[4],
+                      double *kappa1, double *kappa2);
+
 void compute_walker_penrose(double *lightpath, int steps, double *kappa1,
                             double *kappa2);
 
@@ -129,7 +138,9 @@ void compute_dchi_grav(double *lightpath, int steps, double *dchi_grav);
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
                                   double *p, int PRINT_POLAR, double *IQUV,
-                                  double *tau, double *tauF);
+                                  double *tau, double *tauF, double *fnorm_dev,
+                                  double *fnorm_th, double *fnorm_cam,
+                                  double *wp_dchi, double *wp_dpsi);
 
 double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,

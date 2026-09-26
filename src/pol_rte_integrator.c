@@ -100,8 +100,13 @@ void rk4_step_f(double y[], double complex f_u[], double dt) {
     }
 }
 
-void f_tetrad_to_stokes(double Iinv, double Iinv_pol,
-                        double complex f_tetrad_u[], double complex S_A[]) {
+// Stokes vector from the screen components (1,2) of f in a tetrad whose e_3
+// lies along the spatial photon direction. Returns the transverse norm
+// fnorm = |f_1|^2 + |f_2|^2 as a diagnostic: parallel transport conserves it
+// exactly (= 1 after stokes_to_f), and any drift scales the polarized
+// intensity directly.
+double f_tetrad_to_stokes(double Iinv, double Iinv_pol,
+                          double complex f_tetrad_u[], double complex S_A[]) {
     S_A[0] = Iinv;
     S_A[1] = Iinv_pol * (cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) -
                          cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2]));
@@ -109,6 +114,8 @@ void f_tetrad_to_stokes(double Iinv, double Iinv_pol,
                          f_tetrad_u[1] * conj(f_tetrad_u[2]));
     S_A[3] = Iinv_pol * (I * (conj(f_tetrad_u[1]) * f_tetrad_u[2] -
                               f_tetrad_u[1] * conj(f_tetrad_u[2])));
+    return cabs(f_tetrad_u[1]) * cabs(f_tetrad_u[1]) +
+           cabs(f_tetrad_u[2]) * cabs(f_tetrad_u[2]);
 }
 
 void stokes_to_f_tetrad(double complex S_A[], double *Iinv, double *Iinv_pol,
@@ -499,13 +506,14 @@ void pol_rte_trapezoid_step(double jI, double jQ, double jU, double jV,
     S_A[3] = x4;
 }
 
-void f_to_stokes(double complex f_u[], double complex f_tetrad_u[],
-                 double tetrad_d[][4], double complex S_A[], double Iinv,
-                 double Iinv_pol) {
+// Returns the transverse norm of f (see f_tetrad_to_stokes)
+double f_to_stokes(double complex f_u[], double complex f_tetrad_u[],
+                   double tetrad_d[][4], double complex S_A[], double Iinv,
+                   double Iinv_pol) {
     f_to_f_tetrad(f_tetrad_u, tetrad_d, f_u);
 
     // Get Stokes params from f_tetrad_u
-    f_tetrad_to_stokes(Iinv, Iinv_pol, f_tetrad_u, S_A);
+    return f_tetrad_to_stokes(Iinv, Iinv_pol, f_tetrad_u, S_A);
 }
 
 void stokes_to_f(double complex f_u[], double complex f_tetrad_u[],
@@ -516,7 +524,9 @@ void stokes_to_f(double complex f_u[], double complex f_tetrad_u[],
     f_tetrad_to_f(f_u, tetrad_u, f_tetrad_u);
 }
 
-void pol_integration_step(struct GRMHD modvar, double frequency,
+// Returns the transverse norm of the incoming f (see f_tetrad_to_stokes), or
+// -1 if f was not read (no emission, or polarization not yet active).
+double pol_integration_step(struct GRMHD modvar, double frequency,
                           double *dl_current, double C, double X_u[],
                           double k_u[], double k_d[], int *POLARIZATION_ACTIVE,
                           double complex f_u[], double complex f_tetrad_u[],
@@ -541,7 +551,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 
     // perfect field alignment, no emission
     if (fmod(pitch_ang, M_PI) == 0)
-        return;
+        return -1.;
 
     // CGS UNITS USED FROM HERE ON OUT
     //////////////////////////////////
@@ -577,8 +587,9 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // If (POLARIZATION_ACTIVE), get Stokes params from f_u and p.
     // (Otherwise, never been in volume before; we simply use
     // S_I_current)
+    double fnorm = -1.;
     if (*POLARIZATION_ACTIVE) {
-        f_to_stokes(f_u, f_tetrad_u, tetrad_d, S_A, *Iinv, *Iinv_pol);
+        fnorm = f_to_stokes(f_u, f_tetrad_u, tetrad_d, S_A, *Iinv, *Iinv_pol);
     }
     // Given Stokes params and plasma coeffs, compute NEW Stokes params
     // after plasma step.
@@ -654,6 +665,76 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
         S_A[2] = 0.;
         S_A[3] = 0.;
     }
+    return fnorm;
+}
+
+// Walker-Penrose constants of the real and imaginary parts of f_u, which are
+// parallel transported independently.
+static void wp_kappa_f(double X_u[4], double k_u[4], double complex f_u[4],
+                       double complex *kappa_re, double complex *kappa_im) {
+    double f_re[4], f_im[4], k1, k2;
+    LOOP_i {
+        f_re[i] = creal(f_u[i]);
+        f_im[i] = cimag(f_u[i]);
+    }
+    walker_penrose_f(X_u, k_u, f_re, &k1, &k2);
+    *kappa_re = k1 + I * k2;
+    walker_penrose_f(X_u, k_u, f_im, &k1, &k2);
+    *kappa_im = k1 + I * k2;
+}
+
+// Walker-Penrose check of the transport of f from the last point where the
+// plasma step set it (constants kappa_re, kappa_im) to the camera. kappa is
+// linear in f, invariant under f -> f + c k and conserved by exact parallel
+// transport, so it fixes the screen components (f_1, f_2) at the camera:
+// kappa = f_1 kappa(e_1) + f_2 kappa(e_2), solved exactly as a real 2x2
+// system. Returns the EVPA difference actual - predicted (deg, in (-90, 90])
+// and the angle between the actual and predicted normalized Stokes vectors
+// on the Poincare sphere (deg; 2 |dchi| for purely linear polarization).
+static void wp_check_camera(double X_u[4], double k_u[4],
+                            double complex f_obs_tetrad_u[4],
+                            double complex kappa_re, double complex kappa_im,
+                            double *dchi, double *dpsi) {
+    double cam_up_u[4] = {0., 0., 0., -1.};
+    double U_obs_u[4] = {0., 0., 0., 0.};
+    double obs_tetrad_u[4][4];
+    LOOP_ij obs_tetrad_u[i][j] = 0.;
+    construct_U_vector(X_u, U_obs_u);
+    create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
+
+    double e1[4], e2[4], k1, k2;
+    LOOP_i {
+        e1[i] = obs_tetrad_u[i][1];
+        e2[i] = obs_tetrad_u[i][2];
+    }
+    walker_penrose_f(X_u, k_u, e1, &k1, &k2);
+    double complex p = k1 + I * k2;
+    walker_penrose_f(X_u, k_u, e2, &k1, &k2);
+    double complex q = k1 + I * k2;
+    double det = creal(p) * cimag(q) - creal(q) * cimag(p);
+
+    double complex kap[2] = {kappa_re, kappa_im};
+    double sol[2][2];
+    for (int n = 0; n < 2; n++) {
+        sol[n][0] = (creal(kap[n]) * cimag(q) - creal(q) * cimag(kap[n])) / det;
+        sol[n][1] = (creal(p) * cimag(kap[n]) - cimag(p) * creal(kap[n])) / det;
+    }
+    double complex F1 = sol[0][0] + I * sol[1][0];
+    double complex F2 = sol[0][1] + I * sol[1][1];
+    double complex G1 = f_obs_tetrad_u[1], G2 = f_obs_tetrad_u[2];
+
+    // Stokes (Q, U, V) up to normalization, as in f_tetrad_to_stokes
+    double sp[3] = {cabs(F1) * cabs(F1) - cabs(F2) * cabs(F2),
+                    2. * creal(conj(F1) * F2), -2. * cimag(conj(F1) * F2)};
+    double sa[3] = {cabs(G1) * cabs(G1) - cabs(G2) * cabs(G2),
+                    2. * creal(conj(G1) * G2), -2. * cimag(conj(G1) * G2)};
+
+    *dchi = 0.5 * carg((sa[0] + I * sa[1]) * conj(sp[0] + I * sp[1])) * 180. /
+            M_PI;
+    double np = sqrt(sp[0] * sp[0] + sp[1] * sp[1] + sp[2] * sp[2]);
+    double na = sqrt(sa[0] * sa[0] + sa[1] * sa[1] + sa[2] * sa[2]);
+    double c = (sp[0] * sa[0] + sp[1] * sa[1] + sp[2] * sa[2]) / (np * na);
+    *dpsi = acos(fmax(-1., fmin(1., c))) * 180. / M_PI;
 }
 
 void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
@@ -677,8 +758,23 @@ void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
                                   double *p, int PRINT_POLAR, double *IQUV,
-                                  double *tau, double *tauF) {
+                                  double *tau, double *tauF, double *fnorm_dev,
+                                  double *fnorm_th, double *fnorm_cam,
+                                  double *wp_dchi, double *wp_dpsi) {
     int path_counter;
+
+    // Diagnostics of the transverse norm of f (see f_tetrad_to_stokes):
+    // largest |fnorm - 1| where f is read (plasma steps and camera), theta at
+    // which it occurred, and fnorm at the camera (0 if never polarized).
+    *fnorm_dev = 0.;
+    *fnorm_th = -1.;
+    *fnorm_cam = 0.;
+
+    // Walker-Penrose check (see wp_check_camera): kappa of f where it was
+    // last set by the plasma step. NaN if the ray never became polarized.
+    double complex wp_kappa_re = 0., wp_kappa_im = 0.;
+    *wp_dchi = NAN;
+    *wp_dpsi = NAN;
     double dl_current;
 
     double X_u[4], k_u[4], k_d[4];
@@ -728,10 +824,19 @@ void radiative_transfer_polarized(double *lightpath, int steps,
 
         // Check whether the ray is currently in the GRMHD simulation volume
         if (get_fluid_params(X_u, &modvar) && r_current < RT_OUTER_CUTOFF) {
-            pol_integration_step(modvar, frequency, &dl_current, C_CONST, X_u,
-                                 k_u, k_d, &POLARIZATION_ACTIVE, f_u,
-                                 f_tetrad_u, tetrad_d, tetrad_u, S_A, &Iinv,
-                                 &Iinv_pol, tau, tauF);
+            double fnorm = pol_integration_step(
+                modvar, frequency, &dl_current, C_CONST, X_u, k_u, k_d,
+                &POLARIZATION_ACTIVE, f_u, f_tetrad_u, tetrad_d, tetrad_u,
+                S_A, &Iinv, &Iinv_pol, tau, tauF);
+            if (fnorm >= 0. && fabs(fnorm - 1.) > *fnorm_dev) {
+                *fnorm_dev = fabs(fnorm - 1.);
+                *fnorm_th = get_theta(X_u);
+            }
+            // k_u was rescaled in place by the plasma step; use the
+            // geometric-unit wave vector from the light path, as at the camera
+            if (POLARIZATION_ACTIVE)
+                wp_kappa_f(X_u, &lightpath[path_counter * 9 + 4], f_u,
+                           &wp_kappa_re, &wp_kappa_im);
         } // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP
@@ -771,7 +876,13 @@ void radiative_transfer_polarized(double *lightpath, int steps,
     LOOP_i IQUV[i] = 0.;
 
     if (POLARIZATION_ACTIVE) {
-        f_tetrad_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);
+        *fnorm_cam = f_tetrad_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);
+        if (fabs(*fnorm_cam - 1.) > *fnorm_dev) {
+            *fnorm_dev = fabs(*fnorm_cam - 1.);
+            *fnorm_th = get_theta(X_u);
+        }
+        wp_check_camera(X_u, k_u, f_obs_tetrad_u, wp_kappa_re, wp_kappa_im,
+                        wp_dchi, wp_dpsi);
 
         // Construct final (NON-INVARIANT) Stokes params.
         LOOP_i IQUV[i] = S_A[i] * pow(frequency, 3.);

@@ -137,6 +137,10 @@ void calculate_image_block(struct Camera *intensityfield,
         compute_walker_penrose(lightpath2, steps,
                                &(*intensityfield).kappa1[pixel],
                                &(*intensityfield).kappa2[pixel]);
+        compute_geodesic_check(lightpath2, steps,
+                               &(*intensityfield).geo_dlam[pixel],
+                               &(*intensityfield).geo_deta[pixel],
+                               &(*intensityfield).geo_thpole[pixel]);
         compute_dchi_grav(lightpath2, steps,
                           &(*intensityfield).dchi_grav[pixel]);
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
@@ -147,7 +151,12 @@ void calculate_image_block(struct Camera *intensityfield,
                                          &f_x, &f_y, &p, 0,
                                          (*intensityfield).IQUV[pixel][f],
                                          &(*intensityfield).tau[pixel][f],
-                                         &(*intensityfield).tauF[pixel][f]);
+                                         &(*intensityfield).tauF[pixel][f],
+                                         &(*intensityfield).fnorm_dev[pixel][f],
+                                         &(*intensityfield).fnorm_th[pixel][f],
+                                         &(*intensityfield).fnorm_cam[pixel][f],
+                                         &(*intensityfield).wp_dchi[pixel][f],
+                                         &(*intensityfield).wp_dpsi[pixel][f]);
         }
 
 #else

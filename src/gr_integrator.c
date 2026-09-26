@@ -633,6 +633,67 @@ static void walker_penrose(double X_u[4], double k_u[4], double f_u[4],
     *kappa2 = -(r * B + a * cth * A);
 }
 
+// Constants of motion of the geodesic at a light-path point (E = -k_t = 1
+// normalization): lambda = k_phi / E and eta = Q / E^2 =
+// (k_theta^2 / E^2) - a^2 cos^2 th + lambda^2 cot^2 th, with covariant BL
+// components (k_t, k_th, k_phi are the same in BL and KS; MKS k_{x2} is
+// converted with dth/dx2).
+static void geodesic_constants(double X_u[4], double k_u[4], double *lambda,
+                               double *eta) {
+    double k_d[4];
+    lower_index(X_u, k_u, k_d);
+#if (metric == MKSBHAC)
+    double thfactor = 1. + hslope * cos(2. * X_u[2]);
+#elif (metric == MKSHARM)
+    double thfactor = M_PI * (1. + (1. - hslope) * cos(2. * M_PI * X_u[2]));
+#else
+    double thfactor = 1.;
+#endif
+    double E = -k_d[0];
+    double kth = k_d[2] / thfactor / E;
+    double th = get_theta(X_u);
+    double cth = cos(th), sth = sin(th);
+    *lambda = k_d[3] / E;
+    *eta = kth * kth - a * a * cth * cth +
+           (*lambda) * (*lambda) * cth * cth / (sth * sth);
+}
+
+// Conservation check of the integrated geodesic: largest deviation of lambda
+// and eta from their camera values along the whole light path, and the
+// closest approach to the polar axis, min(th, pi - th). NaN for CKS (not
+// implemented).
+void compute_geodesic_check(double *lightpath, int steps, double *dlambda,
+                            double *deta, double *thpole) {
+    *dlambda = 0.;
+    *deta = 0.;
+    *thpole = M_PI / 2.;
+#if (metric == CKS)
+    *dlambda = NAN;
+    *deta = NAN;
+    *thpole = NAN;
+#else
+    if (steps < 1)
+        return;
+    double lam0, eta0;
+    geodesic_constants(&lightpath[0], &lightpath[4], &lam0, &eta0);
+    for (int q = 0; q < steps; q++) {
+        double lam, eta;
+        geodesic_constants(&lightpath[q * 9], &lightpath[q * 9 + 4], &lam,
+                           &eta);
+        *dlambda = fmax(*dlambda, fabs(lam - lam0));
+        *deta = fmax(*deta, fabs(eta - eta0));
+        double th = get_theta(&lightpath[q * 9]);
+        *thpole = fmin(*thpole, fmin(th, M_PI - th));
+    }
+#endif
+}
+
+// Public access to walker_penrose for an arbitrary real vector f_u
+void walker_penrose_f(double X_u[4], double k_u[4], double f_u[4],
+                      double *kappa1, double *kappa2) {
+    walker_penrose(X_u, k_u, f_u, kappa1, kappa2);
+}
+
 // Walker-Penrose constant kappa = kappa1 + i kappa2 of the ray, evaluated at
 // the camera for a unit polarization vector along the screen-x axis of the
 // camera tetrad used by radiative_transfer_polarized (EVPA = 0). kappa is
