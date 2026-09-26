@@ -53,40 +53,71 @@ void init_model() {
     init_grmhd_data(GRMHD_FILE);
 }
 
-int find_igrid(double x[4], struct block *block_info, double ***Xc) {
-    double small = 1e-9;
-
+// Grid-lookup coordinates of the position x_in (not modified): phi wrapped
+// to [0, 2 pi), x2 shifted by -1e-6 to stay inside the grid and, if that
+// makes it negative, mirrored across the polar axis (x2 -> -x2,
+// phi -> phi + pi, rewrapped). Returns 1 if the point was mirrored.
+int grid_coords(const double x_in[4], double x[4]) {
+    int mirrored = 0;
+    x[0] = x_in[0];
+    x[1] = x_in[1];
+    x[2] = x_in[2];
+    x[3] = x_in[3];
 #if (metric == MKSBHAC || metric == MKSN)
     x[3] = fmod(x[3], 2 * M_PI);
-    x[2] = fmod(x[2], M_PI) - 1e-6;
     if (x[3] < 0.)
-        x[3] = 2. * M_PI + x[3];
+        x[3] += 2. * M_PI;
+    x[2] = fmod(x[2], M_PI) - 1e-6;
     if (x[2] < 0.) {
         x[2] = -x[2];
-        x[3] = M_PI + x[3];
+        x[3] += M_PI;
+        mirrored = 1;
     }
+    // fmod of a tiny negative phi plus 2 pi, or the mirror, can reach 2 pi
+    if (x[3] >= 2. * M_PI)
+        x[3] -= 2. * M_PI;
 #endif
+    return mirrored;
+}
+
+// Leaf block containing the grid-lookup coordinates x (from grid_coords),
+// or -1. The tie-breaking offset small is applied periodically in phi, so
+// points within 1e-9 of phi = 0 or 2 pi are found as well.
+int find_igrid_coords(const double x[4], struct block *block_info) {
+    double small = 1e-9;
 
     if (x[2] > M_PI / 2.)
         small = -small;
 
+    double x1 = x[1] + small, x2 = x[2] + small, x3 = x[3] + small;
+#if (metric == MKSBHAC || metric == MKSN)
+    if (x3 < 0.)
+        x3 += 2. * M_PI;
+    if (x3 >= 2. * M_PI)
+        x3 -= 2. * M_PI;
+#endif
+
     for (int igrid = 0; igrid < nleafs; igrid++) {
-        if (x[1] + small >= block_info[igrid].lb[0] &&
-            x[1] + small <
-                block_info[igrid].lb[0] + (block_info[igrid].size[0]) *
-                                              block_info[igrid].dxc_block[0] &&
-            x[2] + small >= block_info[igrid].lb[1] &&
-            x[2] + small <
-                block_info[igrid].lb[1] + (block_info[igrid].size[1]) *
-                                              block_info[igrid].dxc_block[1] &&
-            x[3] + small >= block_info[igrid].lb[2] &&
-            x[3] + small <
-                block_info[igrid].lb[2] + (block_info[igrid].size[2]) *
-                                              block_info[igrid].dxc_block[2]) {
+        if (x1 >= block_info[igrid].lb[0] &&
+            x1 < block_info[igrid].lb[0] + (block_info[igrid].size[0]) *
+                                               block_info[igrid].dxc_block[0] &&
+            x2 >= block_info[igrid].lb[1] &&
+            x2 < block_info[igrid].lb[1] + (block_info[igrid].size[1]) *
+                                               block_info[igrid].dxc_block[1] &&
+            x3 >= block_info[igrid].lb[2] &&
+            x3 < block_info[igrid].lb[2] + (block_info[igrid].size[2]) *
+                                               block_info[igrid].dxc_block[2]) {
             return igrid;
         }
     }
     return -1;
+}
+
+// Leaf block containing the position x (not modified), or -1
+int find_igrid(double x[4], struct block *block_info, double ***Xc) {
+    double y[4];
+    grid_coords(x, y);
+    return find_igrid_coords(y, block_info);
 }
 
 int find_cell(double x[4], struct block *block_info, int igrid, double ***Xc) {
@@ -1000,17 +1031,17 @@ double interp_scalar(double **var, int c, double coeff[4]) {
 }
 
 // Get the fluid parameters in the local co-moving plasma frame.
-// X_in is not modified. The grid lookup uses a copy X with phi wrapped to
-// [0, 2 pi) and x2 shifted by -1e-6 (and mirrored across the axis if needed)
-// to stay inside the grid; the metric, and hence the normalization of U and
-// B, is evaluated at the caller's point X_in, where k and the tetrad live.
+// X_in is not modified. The grid lookup uses its grid_coords X (phi wrapped
+// to [0, 2 pi), x2 shifted by -1e-6 and mirrored across the axis if needed);
+// the metric, and hence the normalization of U and B, is evaluated at the
+// caller's point X_in, where k and the tetrad live.
 // (Modifying the caller's position shifted it by 1e-6 in x2 on every call,
 // so near the polar axis k was far from null in the metric at the shifted
 // point, the plasma tetrad lost orthonormality and the polarization vector
 // f blew up.)
 int get_fluid_params(double X_in[NDIM], struct GRMHD *modvar) {
-    double X[NDIM] = {X_in[0], X_in[1], X_in[2], X_in[3]};
-    int mirrored = 0; // lookup point mirrored across the polar axis
+    double X[NDIM];
+    int mirrored = grid_coords(X_in, X); // lookup point mirrored across axis
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
@@ -1019,18 +1050,6 @@ int get_fluid_params(double X_in[NDIM], struct GRMHD *modvar) {
     double rho, uu;
     double Bp[NDIM], V_u[NDIM];
     double gV_u[NDIM], gVdotgV;
-
-#if (metric == MKSBHAC || metric == MKSN)
-    X[3] = fmod(X[3], 2 * M_PI);
-    X[2] = fmod(X[2], M_PI) - 1e-6;
-    if (X[3] < 0.)
-        X[3] = 2. * M_PI + X[3];
-    if (X[2] < 0.) {
-        X[2] = -X[2];
-        X[3] = M_PI + X[3];
-        mirrored = 1;
-    }
-#endif
 
     double r = get_r(X);
 
@@ -1057,7 +1076,7 @@ int get_fluid_params(double X_in[NDIM], struct GRMHD *modvar) {
         X[3] + small >
             block_info[igrid].lb[2] +
                 (block_info[igrid].size[2]) * block_info[igrid].dxc_block[2]) {
-        (*modvar).igrid_c = find_igrid(X, block_info, Xgrid);
+        (*modvar).igrid_c = find_igrid_coords(X, block_info);
         igrid = (*modvar).igrid_c;
     }
 

@@ -280,6 +280,8 @@ double stepsize(double X_u[4], double U_u[4]) {
        double step_grid =1e100;
        if(exp(X_u[1])<RT_OUTER_CUTOFF){
            int igrid = find_igrid(X_u, block_info, Xgrid);
+           // no leaf block (off the grid): no grid-based step limit
+           if (igrid >= 0) {
 	   double step1 = block_info[igrid].dxc_block[0]/(fabs(U_u[1]) + SMALL * SMALL);
            double step2 = block_info[igrid].dxc_block[1]/(fabs(U_u[2]) + SMALL * SMALL);
            double step3 = block_info[igrid].dxc_block[2]/(fabs(U_u[3]) + SMALL * SMALL);
@@ -289,6 +291,7 @@ double stepsize(double X_u[4], double U_u[4]) {
            double minstep = 1/(istep1+istep2+istep3);
 
            step_grid =  minstep/4.;
+           }
         }
         double step = fmin(1/ (idlx1 + idlx2 + idlx3), step_grid);
         return -step;
@@ -415,6 +418,19 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
 
         lightpath[*steps * 9 + 8] = fabs(dlambda_adaptive);
+
+        // Stop a stalled ray: a non-finite step, or one too small to change
+        // the position, would repeat the same point up to max_steps
+        if (!isfinite(dlambda_adaptive) ||
+            (photon_u[1] == X_u[1] && photon_u[2] == X_u[2] &&
+             photon_u[3] == X_u[3])) {
+            fprintf(stderr,
+                    "integrate_geodesic: ray (alpha, beta) = (%g, %g) stalled "
+                    "at step %d, x = (%g, %g, %g), dlambda = %g; stopping\n",
+                    alpha, beta, *steps, X_u[1], X_u[2], X_u[3],
+                    dlambda_adaptive);
+            TERMINATE = 1;
+        }
 
         LOOP_i X_u[i] = photon_u[i];
         LOOP_i k_u[i] = photon_u[i + 4];
