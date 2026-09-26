@@ -137,16 +137,19 @@ void calculate_image_block(struct Camera *intensityfield,
         compute_walker_penrose(lightpath2, steps,
                                &(*intensityfield).kappa1[pixel],
                                &(*intensityfield).kappa2[pixel]);
+#if (POL_DIAGNOSTICS)
         compute_geodesic_check(lightpath2, steps,
                                &(*intensityfield).geo_dlam[pixel],
                                &(*intensityfield).geo_deta[pixel],
                                &(*intensityfield).geo_thpole[pixel]);
+#endif
         compute_dchi_grav(lightpath2, steps,
                           &(*intensityfield).dchi_grav[pixel]);
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
 #if (POL)
         for (int f = 0; f < num_frequencies; f++) {
 
+#if (POL_DIAGNOSTICS)
             radiative_transfer_polarized(lightpath2, steps, frequencies[f],
                                          &f_x, &f_y, &p, 0,
                                          (*intensityfield).IQUV[pixel][f],
@@ -157,6 +160,14 @@ void calculate_image_block(struct Camera *intensityfield,
                                          &(*intensityfield).fnorm_cam[pixel][f],
                                          &(*intensityfield).wp_dchi[pixel][f],
                                          &(*intensityfield).wp_dpsi[pixel][f]);
+#else
+            radiative_transfer_polarized(
+                lightpath2, steps, frequencies[f], &f_x, &f_y, &p, 0,
+                (*intensityfield).IQUV[pixel][f],
+                &(*intensityfield).tau[pixel][f],
+                &(*intensityfield).tauF[pixel][f], NULL, NULL, NULL, NULL,
+                NULL);
+#endif
         }
 
 #else

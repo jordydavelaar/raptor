@@ -668,6 +668,7 @@ double pol_integration_step(struct GRMHD modvar, double frequency,
     return fnorm;
 }
 
+#if (POL_DIAGNOSTICS)
 // Walker-Penrose constants of the real and imaginary parts of f_u, which are
 // parallel transported independently.
 static void wp_kappa_f(double X_u[4], double k_u[4], double complex f_u[4],
@@ -736,6 +737,7 @@ static void wp_check_camera(double X_u[4], double k_u[4],
     double c = (sp[0] * sa[0] + sp[1] * sa[1] + sp[2] * sa[2]) / (np * na);
     *dpsi = acos(fmax(-1., fmin(1., c))) * 180. / M_PI;
 }
+#endif
 
 void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
                               double complex *f_obs_tetrad_u) {
@@ -763,9 +765,11 @@ void radiative_transfer_polarized(double *lightpath, int steps,
                                   double *wp_dchi, double *wp_dpsi) {
     int path_counter;
 
+#if (POL_DIAGNOSTICS)
     // Diagnostics of the transverse norm of f (see f_tetrad_to_stokes):
     // largest |fnorm - 1| where f is read (plasma steps and camera), theta at
     // which it occurred, and fnorm at the camera (0 if never polarized).
+    // With POL_DIAGNOSTICS off the five output pointers may be NULL.
     *fnorm_dev = 0.;
     *fnorm_th = -1.;
     *fnorm_cam = 0.;
@@ -775,6 +779,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
     double complex wp_kappa_re = 0., wp_kappa_im = 0.;
     *wp_dchi = NAN;
     *wp_dpsi = NAN;
+#endif
     double dl_current;
 
     double X_u[4], k_u[4], k_d[4];
@@ -828,6 +833,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
                 modvar, frequency, &dl_current, C_CONST, X_u, k_u, k_d,
                 &POLARIZATION_ACTIVE, f_u, f_tetrad_u, tetrad_d, tetrad_u,
                 S_A, &Iinv, &Iinv_pol, tau, tauF);
+#if (POL_DIAGNOSTICS)
             if (fnorm >= 0. && fabs(fnorm - 1.) > *fnorm_dev) {
                 *fnorm_dev = fabs(fnorm - 1.);
                 *fnorm_th = get_theta(X_u);
@@ -837,6 +843,9 @@ void radiative_transfer_polarized(double *lightpath, int steps,
             if (POLARIZATION_ACTIVE)
                 wp_kappa_f(X_u, &lightpath[path_counter * 9 + 4], f_u,
                            &wp_kappa_re, &wp_kappa_im);
+#else
+            (void)fnorm;
+#endif
         } // End of if(IN_VOLUME)
 
         // SPACETIME-INTEGRATION STEP
@@ -876,6 +885,7 @@ void radiative_transfer_polarized(double *lightpath, int steps,
     LOOP_i IQUV[i] = 0.;
 
     if (POLARIZATION_ACTIVE) {
+#if (POL_DIAGNOSTICS)
         *fnorm_cam = f_tetrad_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);
         if (fabs(*fnorm_cam - 1.) > *fnorm_dev) {
             *fnorm_dev = fabs(*fnorm_cam - 1.);
@@ -883,6 +893,9 @@ void radiative_transfer_polarized(double *lightpath, int steps,
         }
         wp_check_camera(X_u, k_u, f_obs_tetrad_u, wp_kappa_re, wp_kappa_im,
                         wp_dchi, wp_dpsi);
+#else
+        f_tetrad_to_stokes(Iinv, Iinv_pol, f_obs_tetrad_u, S_A);
+#endif
 
         // Construct final (NON-INVARIANT) Stokes params.
         LOOP_i IQUV[i] = S_A[i] * pow(frequency, 3.);

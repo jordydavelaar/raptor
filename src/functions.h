@@ -9,6 +9,13 @@
 #include "definitions.h"
 #include "model_definitions.h"
 
+// Polarized-transport and geodesic accuracy diagnostics (fnorm_*, wp_*,
+// geo_* in the image file); enable with #define POL_DIAGNOSTICS (1) in
+// definitions.h, which then also needs the matching Camera fields.
+#ifndef POL_DIAGNOSTICS
+#define POL_DIAGNOSTICS (0)
+#endif
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 

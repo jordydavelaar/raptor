@@ -92,9 +92,11 @@ void get_impact_params(struct Camera **intensityfield, int block) {
         (*intensityfield)[block].kappa1[pixel] = 0.;
         (*intensityfield)[block].kappa2[pixel] = 0.;
         (*intensityfield)[block].dchi_grav[pixel] = 0.;
+#if (POL_DIAGNOSTICS)
         (*intensityfield)[block].geo_dlam[pixel] = 0.;
         (*intensityfield)[block].geo_deta[pixel] = 0.;
         (*intensityfield)[block].geo_thpole[pixel] = 0.;
+#endif
 
         for (int f = 0; f < num_frequencies; f++) {
             for (int s = 0; s < 4; s++) {
@@ -102,11 +104,13 @@ void get_impact_params(struct Camera **intensityfield, int block) {
             }
             (*intensityfield)[block].tau[pixel][f] = 0;
             (*intensityfield)[block].tauF[pixel][f] = 0;
+#if (POL_DIAGNOSTICS)
             (*intensityfield)[block].fnorm_dev[pixel][f] = 0;
             (*intensityfield)[block].fnorm_th[pixel][f] = 0;
             (*intensityfield)[block].fnorm_cam[pixel][f] = 0;
             (*intensityfield)[block].wp_dchi[pixel][f] = 0;
             (*intensityfield)[block].wp_dpsi[pixel][f] = 0;
+#endif
         }
     }
 }

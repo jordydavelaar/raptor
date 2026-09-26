@@ -35,6 +35,10 @@
 #define RAD_TRANS (1)
 #define POL (1)
 
+// Polarized-transport and geodesic accuracy diagnostics in the image file
+// (fnorm_*, wp_*, geo_*): 1 to enable (adds the Camera fields below)
+#define POL_DIAGNOSTICS (0)
+
 #define num_frequencies 1
 
 #define FREQFILE (0)
@@ -59,11 +63,13 @@ typedef struct Camera {
     double IQUV[tot_pixels][num_frequencies][4]; // intensity
     double tau[tot_pixels][num_frequencies];     // intensity
     double tauF[tot_pixels][num_frequencies];    // intensity
+#if (POL_DIAGNOSTICS)
     double fnorm_dev[tot_pixels][num_frequencies]; // max |f_perp|^2 - 1 on ray
     double fnorm_th[tot_pixels][num_frequencies];  // theta at that max
     double fnorm_cam[tot_pixels][num_frequencies]; // |f_perp|^2 at camera
     double wp_dchi[tot_pixels][num_frequencies]; // Walker-Penrose EVPA error (deg)
     double wp_dpsi[tot_pixels][num_frequencies]; // Poincare-sphere error (deg)
+#endif
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
     double norder[tot_pixels]; // winding number n = Delta_phi / (2*pi)
@@ -72,9 +78,11 @@ typedef struct Camera {
     double kappa1[tot_pixels];      // Walker-Penrose constant at camera (Re)
     double kappa2[tot_pixels];      // Walker-Penrose constant at camera (Im)
     double dchi_grav[tot_pixels];   // EVPA rotation, source at infinity -> camera
+#if (POL_DIAGNOSTICS)
     double geo_dlam[tot_pixels];   // max |lambda - lambda_cam| along ray
     double geo_deta[tot_pixels];   // max |eta - eta_cam| along ray
     double geo_thpole[tot_pixels]; // closest approach to polar axis (rad)
+#endif
     double lcorner[2];                           // lower left corner of a block
     double dx[2];                                // pixel spacing of block
     int level;

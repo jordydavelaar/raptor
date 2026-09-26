@@ -236,6 +236,7 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
         status = H5Sclose(dataspace_id);
     }
 
+#if (POL_DIAGNOSTICS)
     // Transverse-norm diagnostics of the polarization vector f (see
     // f_tetrad_to_stokes): max |fnorm - 1| along the ray, theta where it
     // occurred, and fnorm at the camera; and the Walker-Penrose check of the
@@ -272,6 +273,7 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
             status = H5Sclose(dataspace_id);
         }
     }
+#endif
 #endif
 
     char dataset[200];
@@ -402,6 +404,7 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
     status = H5Sclose(dataspace_id);
 
+#if (POL_DIAGNOSTICS)
     // Geodesic conservation check (compute_geodesic_check)
     {
         const char *names[3] = {"geo_dlam", "geo_deta", "geo_thpole"};
@@ -424,6 +427,7 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
             status = H5Sclose(dataspace_id);
         }
     }
+#endif
 
     {
         int(*ibuffer)[tot_pixels] =
