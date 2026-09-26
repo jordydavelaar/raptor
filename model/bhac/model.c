@@ -81,8 +81,10 @@ int grid_coords(const double x_in[4], double x[4]) {
 }
 
 // Leaf block containing the grid-lookup coordinates x (from grid_coords),
-// or -1. The tie-breaking offset small is applied periodically in phi, so
-// points within 1e-9 of phi = 0 or 2 pi are found as well.
+// or -1. The tie-breaking offset small is dropped in phi where it would
+// leave [0, 2 pi): wrapping it instead returned the block at the other end
+// of the phi range, and find_cell, which uses the unshifted x, then got a
+// cell index far outside that block (segfault in interp_scalar).
 int find_igrid_coords(const double x[4], struct block *block_info) {
     double small = 1e-9;
 
@@ -91,10 +93,8 @@ int find_igrid_coords(const double x[4], struct block *block_info) {
 
     double x1 = x[1] + small, x2 = x[2] + small, x3 = x[3] + small;
 #if (metric == MKSBHAC || metric == MKSN)
-    if (x3 < 0.)
-        x3 += 2. * M_PI;
-    if (x3 >= 2. * M_PI)
-        x3 -= 2. * M_PI;
+    if (x3 < 0. || x3 >= 2. * M_PI)
+        x3 = x[3];
 #endif
 
     for (int igrid = 0; igrid < nleafs; igrid++) {
