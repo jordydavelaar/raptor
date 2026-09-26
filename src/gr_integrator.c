@@ -488,9 +488,13 @@ static double ellipK_param(double m) {
 // of -- this includes every ray for a camera placed exactly edge-on
 // (inclination 90 deg) at zero impact parameter beta.
 //
-// lambda, eta reuse the exact (E=1) conserved-quantity expressions from
-// initialize_photon() in metric.c, for self-consistency with whatever
-// geodesic RAPTOR actually integrates for this pixel.
+// lambda is the same (E=1) expression as in initialize_photon() in metric.c.
+// eta is the Carter constant of the geodesic RAPTOR integrates for this
+// pixel, eta = p_theta^2 - a^2 cos^2 i + lambda^2 cot^2 i with p_theta = beta
+// at the camera (Cunningham & Bardeen 1973). Not the "qq" of
+// initialize_photon(), which has 1 in place of a^2; that is compensated
+// there by E^2 cos^2 in place of a^2 E^2 cos^2 in k_theta, so the
+// geodesic itself is correct, but qq is not eta unless a = 1.
 void compute_photon_order_extra(double *lightpath, int steps, double alpha,
                                 double beta, double *mino_order,
                                 int *n_eq_crossings) {
@@ -519,7 +523,7 @@ void compute_photon_order_extra(double *lightpath, int steps, double alpha,
 
     double mu0 = cos(INCLINATION / 180. * M_PI);
     double lam = -alpha * sqrt(1. - mu0 * mu0);
-    double eta = beta * beta + mu0 * mu0 * (alpha * alpha - 1.);
+    double eta = beta * beta + mu0 * mu0 * (alpha * alpha - a * a);
 
     if (eta <= 0.)
         return; // vortical geodesic: no polar libration to normalize by
