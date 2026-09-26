@@ -317,6 +317,58 @@ def overlay_norder_mino_contours(image, ax, levels=(1, 2, 3, 4, 5), mas=1, color
         ax.clabel(cs, levels, inline=True, fontsize=7, fmt='n=%d')
 
 
+def _critical_curve_param(a, inc_deg):
+    """Analytic parameterisation of the critical curve by photon-orbit radius.
+
+    Returns (point, r1, r2): point(r, sgn) gives camera coordinates
+    (alpha, beta) of the curve at photon-shell radius r in [r1, r2], on the
+    upper (sgn=+1) or lower (sgn=-1) half. Returns (None, R, R) when the curve
+    is a circle of radius R centred on the origin (a = 0, or a face-on
+    observer, who only sees the lambda = 0 orbit).
+    """
+    th = np.radians(inc_deg)
+    s = np.sign(a) if a != 0 else 1.
+    a = abs(a)
+
+    def lam_eta(r):
+        D = r * r - 2. * r + a * a
+        return (a + r / a * (r - 2. * D / (r - 1.)),
+                r ** 3 / a ** 2 * (4. * D / (r - 1.) ** 2 - r))
+
+    if a < 1e-6:                       # Schwarzschild: circle of radius sqrt(27)
+        return None, np.sqrt(27.), np.sqrt(27.)
+    if np.sin(th) < 1e-6:              # face-on: lambda = 0 orbit, radius sqrt(eta + a^2)
+        lo, hi = 1., 4.                # lambda(r) decreases through 0
+        for _ in range(100):
+            mid = 0.5 * (lo + hi)
+            lo, hi = (mid, hi) if lam_eta(mid)[0] > 0. else (lo, mid)
+        R = np.sqrt(lam_eta(0.5 * (lo + hi))[1] + a * a)
+        return None, R, R
+
+    def b2(r):
+        lam, eta = lam_eta(r)
+        return eta + a * a * np.cos(th) ** 2 - lam ** 2 / np.tan(th) ** 2
+
+    # beta^2 >= 0 on [r1, r2], inside the photon shell [r_pro, r_retro];
+    # beta^2 is single-humped there, so bisect for the two roots.
+    rpro = 2. * (1. + np.cos(2. / 3. * np.arccos(-a)))
+    rret = 2. * (1. + np.cos(2. / 3. * np.arccos(a)))
+    rs = np.linspace(rpro, rret, 2001)
+    rpk = rs[np.argmax(b2(rs))]
+    ends = []
+    for lo, hi in ((rpro, rpk), (rret, rpk)):      # lo: b2 < 0 side, hi: b2 > 0
+        for _ in range(60):
+            mid = 0.5 * (lo + hi)
+            lo, hi = (mid, hi) if b2(mid) < 0. else (lo, mid)
+        ends.append(hi)
+
+    def point(r, sgn=1.):
+        return (-s * lam_eta(r)[0] / np.sin(th),
+                sgn * np.sqrt(np.clip(b2(r), 0., None)))
+
+    return point, ends[0], ends[1]
+
+
 def critical_curve(a, inc_deg, n=4000):
     """Kerr critical curve (photon-shell image) in RAPTOR camera coordinates.
 
@@ -329,38 +381,71 @@ def critical_curve(a, inc_deg, n=4000):
     so plot it as (alpha, -beta) like the image, although it is up-down
     symmetric anyway. a < 0 is handled by mirroring alpha.
     """
-    th = np.radians(inc_deg)
-    s = np.sign(a) if a != 0 else 1.
-    a = abs(a)
-    if a < 1e-6:                       # Schwarzschild: circle of radius sqrt(27)
+    point, r1, r2 = _critical_curve_param(a, inc_deg)
+    if point is None:                  # circle
         phi = np.linspace(0., 2. * np.pi, n)
-        return np.sqrt(27.) * np.cos(phi), np.sqrt(27.) * np.sin(phi)
-    def lam_b2(r):
-        D = r * r - 2. * r + a * a
-        lam = a + r / a * (r - 2. * D / (r - 1.))
-        eta = r ** 3 / a ** 2 * (4. * D / (r - 1.) ** 2 - r)
-        return lam, eta + a * a * np.cos(th) ** 2 - lam ** 2 / np.tan(th) ** 2
-
-    # beta^2 >= 0 on [r1, r2], inside the photon shell [r_pro, r_retro];
-    # beta^2 is single-humped there, so bisect for the two roots.
-    rpro = 2. * (1. + np.cos(2. / 3. * np.arccos(-a)))
-    rret = 2. * (1. + np.cos(2. / 3. * np.arccos(a)))
-    rs = np.linspace(rpro, rret, 2001)
-    rpk = rs[np.argmax(lam_b2(rs)[1])]
-    ends = []
-    for lo, hi in ((rpro, rpk), (rret, rpk)):      # lo: b2 < 0 side, hi: b2 > 0
-        for _ in range(60):
-            mid = 0.5 * (lo + hi)
-            lo, hi = (mid, hi) if lam_b2(mid)[1] < 0. else (lo, mid)
-        ends.append(hi)
+        return r1 * np.cos(phi), r1 * np.sin(phi)
     # cosine spacing clusters samples at the roots, where beta ~ sqrt(r - r_root)
-    r = ends[0] + (ends[1] - ends[0]) * 0.5 * (1. - np.cos(np.linspace(0., np.pi, n)))
-    lam, b2 = lam_b2(r)
-    alpha = -s * lam / np.sin(th)
-    beta = np.sqrt(np.clip(b2, 0., None))
+    r = r1 + (r2 - r1) * 0.5 * (1. - np.cos(np.linspace(0., np.pi, n)))
+    alpha, beta = point(r)
     # upper half r_min -> r_max, lower half back, closed
     return (np.concatenate([alpha, alpha[::-1], alpha[:1]]),
             np.concatenate([beta, -beta[::-1], beta[:1]]))
+
+
+def critical_curve_distance(alpha, beta, a, inc_deg, n=4000):
+    """Signed perpendicular distance (rg) of camera points from the critical curve.
+
+    The distance d of Himwich et al. 2020 (arXiv:2001.08750), n ~ -log|d|/gamma:
+    negative inside the curve (captured side), positive outside. The nearest
+    vertex of a polyline is refined by golden-section search on the analytic
+    parameterisation, so d is accurate far below the polyline spacing (to
+    ~1e-10 rg). Returns (d, r_tilde): r_tilde is the photon-shell radius of the
+    nearest curve point (NaN for a circular curve).
+    """
+    alpha = np.asarray(alpha, float).ravel()
+    beta = np.asarray(beta, float).ravel()
+    point, r1, r2 = _critical_curve_param(a, inc_deg)
+    if point is None:
+        return np.hypot(alpha, beta) - r1, np.full(alpha.shape, np.nan)
+
+    r = r1 + (r2 - r1) * 0.5 * (1. - np.cos(np.linspace(0., np.pi, n)))
+    vx, vy = point(r)
+    V = np.concatenate([np.c_[vx, vy], np.c_[vx, -vy]])
+    Vr = np.concatenate([r, r])
+    Vs = np.concatenate([np.ones(n), -np.ones(n)])
+    k = np.empty(alpha.size, int)
+    for i in range(0, alpha.size, 5000):
+        d2 = (alpha[i:i + 5000, None] - V[None, :, 0]) ** 2 + (beta[i:i + 5000, None] - V[None, :, 1]) ** 2
+        k[i:i + 5000] = d2.argmin(1)
+    j = k % n                                     # index along r on that half
+    lo = r[np.maximum(j - 1, 0)]
+    hi = r[np.minimum(j + 1, n - 1)]
+    sg = Vs[k]
+
+    def dist2(rr):
+        px, py = point(rr, sg)
+        return (alpha - px) ** 2 + (beta - py) ** 2
+
+    g = 0.5 * (np.sqrt(5.) - 1.)                  # golden-section search in r
+    c, dd = hi - g * (hi - lo), lo + g * (hi - lo)
+    fc, fd = dist2(c), dist2(dd)
+    for _ in range(80):
+        left = fc < fd
+        hi = np.where(left, dd, hi)
+        lo = np.where(left, lo, c)
+        c_new = hi - g * (hi - lo)
+        d_new = lo + g * (hi - lo)
+        c, dd = np.where(left, c_new, dd), np.where(left, c, d_new)
+        # left: new d = old c (reuse fc); right: new c = old d (reuse fd)
+        fc, fd = np.where(left, dist2(c), fd), np.where(left, fc, dist2(dd))
+    rt = 0.5 * (lo + hi)
+    px, py = point(rt, sg)
+    d = np.hypot(alpha - px, beta - py)
+    # sign: outward if (P - C) points away from the curve's centroid
+    cx, cy = V[:, 0].mean(), V[:, 1].mean()
+    out = (alpha - px) * (px - cx) + (beta - py) * (py - cy) > 0
+    return np.where(out, d, -d), rt
 
 
 def overlay_critical_curve(ax, a, inc_deg, mas=1, color='w', lw=0.6, ls='--', alpha=0.9,
