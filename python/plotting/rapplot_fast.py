@@ -217,6 +217,59 @@ def overlay_norder_mino_contours(image, ax, levels=(1, 2, 3, 4, 5), mas=1, color
         ax.clabel(cs, levels, inline=True, fontsize=7, fmt='n=%d')
 
 
+def critical_curve(a, inc_deg, n=4000):
+    """Kerr critical curve (photon-shell image) in RAPTOR camera coordinates.
+
+    Returns closed arrays (alpha, beta) in rg for a distant observer at
+    inclination inc_deg (Bardeen 1973; Gralla & Lupsasca 2020, Eqs. 38-40):
+      lambda = a + r/a (r - 2 Delta/(r-1)),  eta = r^3/a^2 (4 Delta/(r-1)^2 - r)
+      alpha = -lambda/sin(i),  beta = +-sqrt(eta + a^2 cos^2 i - lambda^2 cot^2 i)
+    over the photon-shell radii r where beta^2 >= 0. Same convention as
+    initialize_photon() in metric.c (lambda = -alpha sin i, p_theta = beta),
+    so plot it as (alpha, -beta) like the image, although it is up-down
+    symmetric anyway. a < 0 is handled by mirroring alpha.
+    """
+    th = np.radians(inc_deg)
+    s = np.sign(a) if a != 0 else 1.
+    a = abs(a)
+    if a < 1e-6:                       # Schwarzschild: circle of radius sqrt(27)
+        phi = np.linspace(0., 2. * np.pi, n)
+        return np.sqrt(27.) * np.cos(phi), np.sqrt(27.) * np.sin(phi)
+    def lam_b2(r):
+        D = r * r - 2. * r + a * a
+        lam = a + r / a * (r - 2. * D / (r - 1.))
+        eta = r ** 3 / a ** 2 * (4. * D / (r - 1.) ** 2 - r)
+        return lam, eta + a * a * np.cos(th) ** 2 - lam ** 2 / np.tan(th) ** 2
+
+    # beta^2 >= 0 on [r1, r2], inside the photon shell [r_pro, r_retro];
+    # beta^2 is single-humped there, so bisect for the two roots.
+    rpro = 2. * (1. + np.cos(2. / 3. * np.arccos(-a)))
+    rret = 2. * (1. + np.cos(2. / 3. * np.arccos(a)))
+    rs = np.linspace(rpro, rret, 2001)
+    rpk = rs[np.argmax(lam_b2(rs)[1])]
+    ends = []
+    for lo, hi in ((rpro, rpk), (rret, rpk)):      # lo: b2 < 0 side, hi: b2 > 0
+        for _ in range(60):
+            mid = 0.5 * (lo + hi)
+            lo, hi = (mid, hi) if lam_b2(mid)[1] < 0. else (lo, mid)
+        ends.append(hi)
+    # cosine spacing clusters samples at the roots, where beta ~ sqrt(r - r_root)
+    r = ends[0] + (ends[1] - ends[0]) * 0.5 * (1. - np.cos(np.linspace(0., np.pi, n)))
+    lam, b2 = lam_b2(r)
+    alpha = -s * lam / np.sin(th)
+    beta = np.sqrt(np.clip(b2, 0., None))
+    # upper half r_min -> r_max, lower half back, closed
+    return (np.concatenate([alpha, alpha[::-1], alpha[:1]]),
+            np.concatenate([beta, -beta[::-1], beta[:1]]))
+
+
+def overlay_critical_curve(ax, a, inc_deg, mas=1, color='w', lw=0.6, ls='--', alpha=0.9,
+                           **kw):
+    """Draw the critical curve on ax in plotted coordinates (x=alpha, y=-beta)."""
+    xa, yb = critical_curve(a, inc_deg)
+    return ax.plot(xa * mas, -yb * mas, color=color, lw=lw, ls=ls, alpha=alpha, **kw)
+
+
 def plot_data_polfrac(image, max, data_id, fig, ax, halfrange=10, mas=1, label="|m|", cmap="afmhot"):
     I = _field(image, data_id[0])
     Q = _field(image, data_id[1])
