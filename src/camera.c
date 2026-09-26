@@ -18,6 +18,17 @@ int num_blocks, tot_blocks;
 double BLOCK_SIZE_X, BLOCK_SIZE_Y;
 int max_level;
 
+// SMR on the critical curve (off unless definitions.h enables it)
+#ifndef SMR_CRITCURVE
+#define SMR_CRITCURVE 0
+#endif
+#ifndef SMR_MAX_LEVEL
+#define SMR_MAX_LEVEL max_level // may exceed max_level, the AMR limit
+#endif
+#ifndef SMR_BUFFER
+#define SMR_BUFFER 1.0 // refinement band half-width, in block widths
+#endif
+
 // FUNCTIONS
 ////////////
 
@@ -98,34 +109,38 @@ void new_cindex(int child, int *new_i, int *new_j, int ip, int jp) {
     *new_j = 2 * (jp) + child / 2;
 }
 
-// Shift array so that there is space for the new block
-void shift_camera_array(struct Camera **intensityfield, int current_block) {
-    for (int block = tot_blocks - 1; block > current_block + 3; block--) {
-        (*intensityfield)[block] = (*intensityfield)[block - 3];
-    }
-}
-
-// Splits the original block in a new set of four blocks in the camera struct
+// Splits the original block in a new set of four blocks in the camera struct.
+// The first child takes the parent's slot (so the caller re-processes it at
+// the same index) and the other three are appended at the end of the array,
+// where the main loop reaches them later. This is O(1) per split; inserting
+// all four in place meant shifting every later block (O(N^2) overall, hours
+// of memmove at ~1e5 blocks). Block order is irrelevant for the output:
+// every block carries its own impact parameters.
 void add_block(struct Camera **intensityfield, int current_block) {
     int cind_i, cind_j;
 
     int ind_i = (*intensityfield)[current_block].ind[0];
     int ind_j = (*intensityfield)[current_block].ind[1];
+    int new_level = (*intensityfield)[current_block].level + 1;
+    int first_new = tot_blocks;
     tot_blocks += 3;
 
     (*intensityfield) =
         realloc((*intensityfield), (tot_blocks) * sizeof(struct Camera));
+    if ((*intensityfield) == NULL) {
+        fprintf(stderr, "add_block: cannot allocate %d blocks\n", tot_blocks);
+        exit(1);
+    }
 
-    shift_camera_array(intensityfield, current_block);
     // compute new indices
-    int new_level = (*intensityfield)[current_block].level + 1;
     for (int i = 0; i < 4; i++) {
+        int b = (i == 0) ? current_block : first_new + i - 1;
         new_cindex(i, &cind_i, &cind_j, ind_i, ind_j);
-        (*intensityfield)[current_block + i].ind[0] = cind_i;
-        (*intensityfield)[current_block + i].ind[1] = cind_j;
-        (*intensityfield)[current_block + i].level = new_level;
+        (*intensityfield)[b].ind[0] = cind_i;
+        (*intensityfield)[b].ind[1] = cind_j;
+        (*intensityfield)[b].level = new_level;
 
-        get_impact_params(intensityfield, current_block + i);
+        get_impact_params(intensityfield, b);
     }
 }
 
@@ -163,24 +178,157 @@ int refine_block(struct Camera intensity) {
         return 0;
 }
 
+#if (SMR_CRITCURVE)
+// Critical curve (image of the unstable spherical photon orbits for a distant
+// observer; Bardeen 1973, Gralla & Lupsasca 2020) as a closed polyline in
+// camera coordinates (alpha, beta), with the conventions of
+// initialize_photon() in metric.c (lambda = -alpha sin i, p_theta = beta).
+#define CC_NHALF 4096
+static double cc_x[2 * CC_NHALF + 1], cc_y[2 * CC_NHALF + 1];
+static double cc_box[4]; // xmin, xmax, ymin, ymax
+
+// lambda(r) and beta^2(r) of the spherical photon orbit at radius r, a > 0
+static double cc_lam_b2(double r, double aa, double th, double *b2) {
+    double Del = r * r - 2. * r + aa * aa;
+    double lam = aa + r / aa * (r - 2. * Del / (r - 1.));
+    double eta = r * r * r / (aa * aa) * (4. * Del / ((r - 1.) * (r - 1.)) - r);
+    double cot = cos(th) / sin(th);
+    *b2 = eta + aa * aa * cos(th) * cos(th) - lam * lam * cot * cot;
+    return lam;
+}
+
+static void critical_curve_init(void) {
+    double th = INCLINATION / 180. * M_PI;
+    double s = a < 0. ? -1. : 1.;
+    double aa = fabs(a);
+    int n = 2 * CC_NHALF + 1;
+
+    if (aa < 1e-6 || sin(th) < 1e-6) {
+        // Circle: Schwarzschild (radius sqrt 27), or face-on observer, where
+        // only the orbit with lambda = 0 is seen, at radius sqrt(eta + a^2)
+        double rad = sqrt(27.);
+        if (aa >= 1e-6) {
+            double lo = 1., hi = 4., b2; // lambda(r) decreases through 0
+            for (int k = 0; k < 100; k++) {
+                double mid = 0.5 * (lo + hi);
+                double Del = mid * mid - 2. * mid + aa * aa;
+                if (aa + mid / aa * (mid - 2. * Del / (mid - 1.)) < 0.)
+                    hi = mid;
+                else
+                    lo = mid;
+            }
+            double r = 0.5 * (lo + hi), Del = r * r - 2. * r + aa * aa;
+            b2 = r * r * r / (aa * aa) * (4. * Del / ((r - 1.) * (r - 1.)) - r);
+            rad = sqrt(b2 + aa * aa);
+        }
+        for (int k = 0; k < n; k++) {
+            double phi = 2. * M_PI * k / (n - 1);
+            cc_x[k] = rad * cos(phi);
+            cc_y[k] = rad * sin(phi);
+        }
+    } else {
+        // beta^2 >= 0 on [r1, r2] inside the photon shell [r_pro, r_retro];
+        // single-humped there, so bisect for both roots from the peak
+        double rpro = 2. * (1. + cos(2. / 3. * acos(-aa)));
+        double rret = 2. * (1. + cos(2. / 3. * acos(aa)));
+        double b2, b2max = -1e100, rpk = rpro;
+        for (int k = 0; k <= 2000; k++) {
+            double r = rpro + (rret - rpro) * k / 2000.;
+            cc_lam_b2(r, aa, th, &b2);
+            if (b2 > b2max) {
+                b2max = b2;
+                rpk = r;
+            }
+        }
+        double ends[2], outer[2] = {rpro, rret};
+        for (int e = 0; e < 2; e++) {
+            double lo = outer[e], hi = rpk; // b2(lo) < 0 <= b2(hi)
+            for (int k = 0; k < 100; k++) {
+                double mid = 0.5 * (lo + hi);
+                cc_lam_b2(mid, aa, th, &b2);
+                if (b2 < 0.)
+                    lo = mid;
+                else
+                    hi = mid;
+            }
+            ends[e] = hi;
+        }
+        // cosine spacing clusters points at the roots, where beta ~ sqrt
+        for (int k = 0; k < CC_NHALF; k++) {
+            double r = ends[0] + (ends[1] - ends[0]) * 0.5 *
+                                     (1. - cos(M_PI * k / (CC_NHALF - 1.)));
+            double lam = cc_lam_b2(r, aa, th, &b2);
+            double beta = sqrt(fmax(b2, 0.));
+            cc_x[k] = cc_x[2 * CC_NHALF - 1 - k] = -s * lam / sin(th);
+            cc_y[k] = beta;
+            cc_y[2 * CC_NHALF - 1 - k] = -beta;
+        }
+        cc_x[n - 1] = cc_x[0];
+        cc_y[n - 1] = cc_y[0];
+    }
+
+    cc_box[0] = cc_box[2] = 1e100;
+    cc_box[1] = cc_box[3] = -1e100;
+    for (int k = 0; k < n; k++) {
+        cc_box[0] = fmin(cc_box[0], cc_x[k]);
+        cc_box[1] = fmax(cc_box[1], cc_x[k]);
+        cc_box[2] = fmin(cc_box[2], cc_y[k]);
+        cc_box[3] = fmax(cc_box[3], cc_y[k]);
+    }
+    fprintf(stderr,
+            "SMR: critical curve for a = %g, i = %g deg: alpha in [%g, %g], "
+            "beta in [%g, %g]\n",
+            a, INCLINATION, cc_box[0], cc_box[1], cc_box[2], cc_box[3]);
+}
+
+// 1 if the point (x, y) lies within distance d of the critical curve
+static int near_critical_curve(double x, double y, double d) {
+    double bx = fmax(fmax(cc_box[0] - x, x - cc_box[1]), 0.);
+    double by = fmax(fmax(cc_box[2] - y, y - cc_box[3]), 0.);
+    if (bx * bx + by * by >= d * d)
+        return 0;
+    for (int k = 0; k < 2 * CC_NHALF; k++) {
+        double sx = cc_x[k + 1] - cc_x[k], sy = cc_y[k + 1] - cc_y[k];
+        double px = x - cc_x[k], py = y - cc_y[k];
+        double l2 = sx * sx + sy * sy;
+        double t = l2 > 0. ? fmin(fmax((px * sx + py * sy) / l2, 0.), 1.) : 0.;
+        double dx = px - t * sx, dy = py - t * sy;
+        if (dx * dx + dy * dy < d * d)
+            return 1;
+    }
+    return 0;
+}
+#endif
+
 // Static Camera Grid, checks if a block should be refined before ray tracing
 // begins
 int refine_init_block(struct Camera intensity) {
 
+    double block_size_x =
+        CAM_SIZE_X / (pow(2, intensity.level - 1) * (double)(num_blocks));
+    double block_size_y =
+        CAM_SIZE_Y / (pow(2, intensity.level - 1) * (double)(num_blocks));
+
+#if (SMR_CRITCURVE)
+    // Refine every block whose centre lies within SMR_BUFFER block widths
+    // (plus the half diagonal) of the critical curve. Subrings approach the
+    // curve geometrically, so this makes the pixel size proportional to the
+    // distance from the curve down to level SMR_MAX_LEVEL.
+    double b = fmax(block_size_x, block_size_y);
+    double xc = intensity.lcorner[0] + 0.5 * block_size_x;
+    double yc = intensity.lcorner[1] + 0.5 * block_size_y;
+    return intensity.level < SMR_MAX_LEVEL &&
+           near_critical_curve(xc, yc, (SMR_BUFFER + 0.5 * sqrt(2.)) * b);
+#else
     double radius_5 = 20;
     double radius_4 = 30;
     double radius_3 = 40;
     double radius_2 = 60;
 
-    BLOCK_SIZE_X =
-        CAM_SIZE_X / (pow(2, intensity.level - 1) * (double)(num_blocks));
-    BLOCK_SIZE_Y =
-        CAM_SIZE_Y / (pow(2, intensity.level - 1) * (double)(num_blocks));
-
     double lcorner_x = intensity.lcorner[0];
     double lcorner_y = intensity.lcorner[1];
-    double ucorner_x = intensity.lcorner[0] + BLOCK_SIZE_X;
-    double ucorner_y = intensity.lcorner[1] + BLOCK_SIZE_Y;
+    double ucorner_x = intensity.lcorner[0] + block_size_x;
+    double ucorner_y = intensity.lcorner[1] + block_size_y;
 
     double rl = sqrt(lcorner_x * lcorner_x + lcorner_y * lcorner_y);
     double ru = sqrt(ucorner_x * ucorner_x + ucorner_y * ucorner_y);
@@ -202,18 +350,61 @@ int refine_init_block(struct Camera intensity) {
         return 1;
     else
         return 0;
+#endif
 }
 
-// Goes over all blocks before ray tracing and adds new block if refinement
-// criterion is met
+// Goes over all blocks before ray tracing and splits every block that meets
+// the refinement criterion, one level per pass. Children replace their parent
+// in place (same block order as add_block), but each pass copies the array
+// once instead of shifting it per split, so this is O(N) per level rather
+// than O(N^2).
 void prerun_refine(struct Camera **intensityfield) {
-    int block = 0;
-    while (block < tot_blocks) {
-        if (refine_init_block((*intensityfield)[block])) {
-            add_block((intensityfield), block);
-        } else {
-            block++;
+#if (SMR_CRITCURVE)
+    critical_curve_init();
+#endif
+    for (;;) {
+        int *flag = malloc(tot_blocks * sizeof(int));
+        int nref = 0;
+#pragma omp parallel for schedule(dynamic, 64) reduction(+ : nref)
+        for (int block = 0; block < tot_blocks; block++) {
+            flag[block] = refine_init_block((*intensityfield)[block]);
+            nref += flag[block];
         }
+        if (nref == 0) {
+            free(flag);
+            break;
+        }
+
+        int new_tot = tot_blocks + 3 * nref;
+        struct Camera *refined = malloc(new_tot * sizeof(struct Camera));
+        if (refined == NULL) {
+            fprintf(stderr, "prerun_refine: cannot allocate %d blocks\n",
+                    new_tot);
+            exit(1);
+        }
+        int j = 0, cind_i, cind_j;
+        for (int block = 0; block < tot_blocks; block++) {
+            if (!flag[block]) {
+                refined[j++] = (*intensityfield)[block];
+                continue;
+            }
+            int ind_i = (*intensityfield)[block].ind[0];
+            int ind_j = (*intensityfield)[block].ind[1];
+            int new_level = (*intensityfield)[block].level + 1;
+            for (int i = 0; i < 4; i++, j++) {
+                new_cindex(i, &cind_i, &cind_j, ind_i, ind_j);
+                refined[j].ind[0] = cind_i;
+                refined[j].ind[1] = cind_j;
+                refined[j].level = new_level;
+                get_impact_params(&refined, j);
+            }
+        }
+        free(flag);
+        free(*intensityfield);
+        *intensityfield = refined;
+        tot_blocks = new_tot;
+        fprintf(stderr, "SMR: split %d blocks, now %d blocks\n", nref,
+                tot_blocks);
     }
 }
 
