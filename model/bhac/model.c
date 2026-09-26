@@ -1000,7 +1000,17 @@ double interp_scalar(double **var, int c, double coeff[4]) {
 }
 
 // Get the fluid parameters in the local co-moving plasma frame.
-int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
+// X_in is not modified. The grid lookup uses a copy X with phi wrapped to
+// [0, 2 pi) and x2 shifted by -1e-6 (and mirrored across the axis if needed)
+// to stay inside the grid; the metric, and hence the normalization of U and
+// B, is evaluated at the caller's point X_in, where k and the tetrad live.
+// (Modifying the caller's position shifted it by 1e-6 in x2 on every call,
+// so near the polar axis k was far from null in the metric at the shifted
+// point, the plasma tetrad lost orthonormality and the polarization vector
+// f blew up.)
+int get_fluid_params(double X_in[NDIM], struct GRMHD *modvar) {
+    double X[NDIM] = {X_in[0], X_in[1], X_in[2], X_in[3]};
+    int mirrored = 0; // lookup point mirrored across the polar axis
     double g_dd[NDIM][NDIM];
     double g_uu[NDIM][NDIM];
     int igrid = (*modvar).igrid_c;
@@ -1018,6 +1028,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     if (X[2] < 0.) {
         X[2] = -X[2];
         X[3] = M_PI + X[3];
+        mirrored = 1;
     }
 #endif
 
@@ -1062,9 +1073,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     c = find_cell(X, block_info, igrid, Xgrid);
 
-    metric_uu(X, g_uu);
+    metric_uu(X_in, g_uu);
 
-    metric_dd(X, g_dd);
+    metric_dd(X_in, g_dd);
 
     coefficients(X, block_info, igrid, c, del);
 
@@ -1080,6 +1091,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     gV_u[1] = interp_scalar(p[U1][igrid], c, del);
     gV_u[2] = interp_scalar(p[U2][igrid], c, del);
     gV_u[3] = interp_scalar(p[U3][igrid], c, del);
+
+    // Across the axis e_theta reverses: theta components read at the
+    // mirrored lookup point change sign at the caller's point X_in
+    if (mirrored) {
+        Bp[2] = -Bp[2];
+        gV_u[2] = -gV_u[2];
+    }
 
     double gamma_dd[4][4];
     for (int i = 1; i < 4; i++) {
@@ -1113,7 +1131,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         (*modvar).U_u[i] = V_u[i] * lfac - shift[i] * lfac / alpha;
     }
 
-    lower_index(X, (*modvar).U_u, (*modvar).U_d);
+    lower_index(X_in, (*modvar).U_u, (*modvar).U_d);
 
     //    double UdotU = four_velocity_norm(X,(*modvar).U_u);
     //   LOOP_i (*modvar).U_u[i]/=sqrt(fabs(UdotU));
@@ -1132,7 +1150,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
             (Bp[i] + alpha * (*modvar).B_u[0] * (*modvar).U_u[i]) / lfac;
     }
 
-    lower_index(X, (*modvar).B_u, (*modvar).B_d);
+    lower_index(X_in, (*modvar).B_u, (*modvar).B_d);
 
     // magnetic field
     double Bsq = fabs((*modvar).B_u[0] * (*modvar).B_d[0] +
