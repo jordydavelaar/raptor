@@ -97,6 +97,13 @@ void get_impact_params(struct Camera **intensityfield, int block) {
         (*intensityfield)[block].geo_deta[pixel] = 0.;
         (*intensityfield)[block].geo_thpole[pixel] = 0.;
 #endif
+#if (EQ_DIAGNOSTICS)
+        for (int n = 0; n < EQ_NMAX; n++) {
+            (*intensityfield)[block].chi_eq[pixel][n] = 0.;
+            (*intensityfield)[block].dchi_eq[pixel][n] = 0.;
+            (*intensityfield)[block].r_eq[pixel][n] = 0.;
+        }
+#endif
 
         for (int f = 0; f < num_frequencies; f++) {
             for (int s = 0; s < 4; s++) {

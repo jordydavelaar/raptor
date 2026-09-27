@@ -145,6 +145,12 @@ void calculate_image_block(struct Camera *intensityfield,
 #endif
         compute_dchi_grav(lightpath2, steps,
                           &(*intensityfield).dchi_grav[pixel]);
+#if (EQ_DIAGNOSTICS)
+        compute_eq_emission(lightpath2, steps,
+                            (*intensityfield).chi_eq[pixel],
+                            (*intensityfield).dchi_eq[pixel],
+                            (*intensityfield).r_eq[pixel]);
+#endif
         // PERFORM RADIATIVE TRANSFER AT DESIRED FREQUENCIES, STORE RESULTS
 #if (POL)
         for (int f = 0; f < num_frequencies; f++) {

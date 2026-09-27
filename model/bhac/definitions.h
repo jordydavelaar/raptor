@@ -39,6 +39,11 @@
 // (fnorm_*, wp_*, geo_*): 1 to enable (adds the Camera fields below)
 #define POL_DIAGNOSTICS (0)
 
+// Equatorial-emission EVPA per equatorial crossing in the image file
+// (chi_eq_*, dchi_eq_*, r_eq_*): 1 to enable (adds the Camera fields below)
+#define EQ_DIAGNOSTICS (0)
+#define EQ_NMAX 5 // number of equatorial crossings evaluated
+
 #define num_frequencies 1
 
 #define FREQFILE (0)
@@ -82,6 +87,11 @@ typedef struct Camera {
     double geo_dlam[tot_pixels];   // max |lambda - lambda_cam| along ray
     double geo_deta[tot_pixels];   // max |eta - eta_cam| along ray
     double geo_thpole[tot_pixels]; // closest approach to polar axis (rad)
+#endif
+#if (EQ_DIAGNOSTICS)
+    double chi_eq[tot_pixels][EQ_NMAX];  // screen EVPA, emission at crossing k
+    double dchi_eq[tot_pixels][EQ_NMAX]; // EVPA rotation, crossing k -> camera
+    double r_eq[tot_pixels][EQ_NMAX];    // radius of equatorial crossing k
 #endif
     double lcorner[2];                           // lower left corner of a block
     double dx[2];                                // pixel spacing of block

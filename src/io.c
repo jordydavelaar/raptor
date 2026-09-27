@@ -429,6 +429,35 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
     }
 #endif
 
+#if (EQ_DIAGNOSTICS)
+    // Equatorial-emission EVPA per crossing (compute_eq_emission)
+    {
+        const char *names[3] = {"chi_eq", "dchi_eq", "r_eq"};
+        char name[64];
+        for (int q = 0; q < 3; q++) {
+            for (int n = 0; n < EQ_NMAX; n++) {
+                for (int block = 0; block < tot_blocks; block++) {
+                    for (int pixel = 0; pixel < tot_pixels; pixel++) {
+                        buffer[block][pixel] =
+                            q == 0   ? data[block].chi_eq[pixel][n]
+                            : q == 1 ? data[block].dchi_eq[pixel][n]
+                                     : data[block].r_eq[pixel][n];
+                    }
+                }
+                sprintf(name, "%s_%d", names[q], n + 1); // crossing k = n + 1
+                dataspace_id = H5Screate_simple(2, dims, NULL);
+                dataset_id =
+                    H5Dcreate2(file_id, name, H5T_NATIVE_DOUBLE, dataspace_id,
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+                         H5P_DEFAULT, buffer);
+                status = H5Dclose(dataset_id);
+                status = H5Sclose(dataspace_id);
+            }
+        }
+    }
+#endif
+
     {
         int(*ibuffer)[tot_pixels] =
             malloc(sizeof(int[tot_blocks][tot_pixels]));

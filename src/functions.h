@@ -16,6 +16,17 @@
 #define POL_DIAGNOSTICS (0)
 #endif
 
+// Equatorial-emission EVPA per equatorial crossing (chi_eq_<k>, dchi_eq_<k>,
+// r_eq_<k> in the image file, crossing k = 1 .. EQ_NMAX from the camera; see compute_eq_emission in gr_integrator.c);
+// enable with #define EQ_DIAGNOSTICS (1) in definitions.h, which then also
+// needs the matching Camera fields. EQ_NMAX crossings are evaluated.
+#ifndef EQ_DIAGNOSTICS
+#define EQ_DIAGNOSTICS (0)
+#endif
+#ifndef EQ_NMAX
+#define EQ_NMAX 5
+#endif
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
@@ -141,6 +152,12 @@ void compute_walker_penrose(double *lightpath, int steps, double *kappa1,
 // Gravitational EVPA rotation (from the sky-projected spin axis) between a
 // source at infinity and the camera; NaN for rays that do not escape
 void compute_dchi_grav(double *lightpath, int steps, double *dchi_grav);
+
+// Screen EVPA chi, EVPA rotation dchi (fluid-frame sky -> camera) and radius
+// r_eq of Keplerian/Cunningham equatorial emission with a toroidal field, at
+// each of the first EQ_NMAX equatorial crossings; NaN where none
+void compute_eq_emission(double *lightpath, int steps, double chi[EQ_NMAX],
+                         double dchi[EQ_NMAX], double r_eq[EQ_NMAX]);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,

@@ -715,6 +715,22 @@ void walker_penrose_f(double X_u[4], double k_u[4], double f_u[4],
 // camera tetrad used by radiative_transfer_polarized (EVPA = 0). kappa is
 // linear in f, so for f = f1 e1 + f2 e2 it is kappa * (f1 - i f2). Up to
 // O(1/rcam) corrections kappa = beta - i (alpha + a sin i).
+// Screen basis vectors e1, e2 of the camera tetrad used by
+// radiative_transfer_polarized (RAPTOR's EVPA is measured from e1 towards e2)
+static void camera_screen_basis(double X_u[4], double k_u[4], double e1[4],
+                                double e2[4]) {
+    double cam_up_u[4] = {0., 0., 0., -1.};
+    double U_obs_u[4] = {0., 0., 0., 0.};
+    double obs_tetrad_u[4][4];
+    LOOP_ij obs_tetrad_u[i][j] = 0.;
+    construct_U_vector(X_u, U_obs_u);
+    create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
+    LOOP_i {
+        e1[i] = obs_tetrad_u[i][1];
+        e2[i] = obs_tetrad_u[i][2];
+    }
+}
+
 void compute_walker_penrose(double *lightpath, int steps, double *kappa1,
                             double *kappa2) {
     *kappa1 = 0.;
@@ -723,21 +739,14 @@ void compute_walker_penrose(double *lightpath, int steps, double *kappa1,
     if (steps < 1)
         return;
 
-    double X_u[4], k_u[4], f_u[4];
+    double X_u[4], k_u[4], e1[4], e2[4];
     LOOP_i {
         X_u[i] = lightpath[i];
         k_u[i] = lightpath[4 + i];
     }
 
-    double cam_up_u[4] = {0., 0., 0., -1.};
-    double U_obs_u[4] = {0., 0., 0., 0.};
-    double obs_tetrad_u[4][4];
-    LOOP_ij obs_tetrad_u[i][j] = 0.;
-    construct_U_vector(X_u, U_obs_u);
-    create_observer_tetrad(X_u, k_u, U_obs_u, cam_up_u, obs_tetrad_u);
-    LOOP_i f_u[i] = obs_tetrad_u[i][1];
-
-    walker_penrose(X_u, k_u, f_u, kappa1, kappa2);
+    camera_screen_basis(X_u, k_u, e1, e2);
+    walker_penrose(X_u, k_u, e1, kappa1, kappa2);
 }
 
 // Contravariant components, in the code's coordinates, of the flat-space
@@ -767,14 +776,11 @@ static void wp_zhat(double X_u[4], double z_u[4]) {
 }
 
 // Walker-Penrose constant of the polarization vector along the sky-projected
-// spin axis z_perp, as seen by the static observer at X_u: z_hat projected
-// orthogonal to the observer four-velocity U and to the photon direction
-// n = k/omega - U.
-static void wp_kappa_zperp(double X_u[4], double k_u[4], double *kappa1,
-                           double *kappa2) {
-    double U_u[4] = {0., 0., 0., 0.};
+// spin axis z_perp, as seen by the observer with four-velocity U_u at X_u:
+// z_hat projected orthogonal to U and to the photon direction n = k/omega - U.
+static void wp_kappa_zperp_obs(double X_u[4], double k_u[4], double U_u[4],
+                               double *kappa1, double *kappa2) {
     double z_u[4], n_u[4], f_u[4];
-    construct_U_vector(X_u, U_u);
     wp_zhat(X_u, z_u);
 
     double omega = -inner_product(X_u, k_u, U_u);
@@ -786,6 +792,24 @@ static void wp_kappa_zperp(double X_u[4], double k_u[4], double *kappa1,
     LOOP_i f_u[i] -= fn * n_u[i];
 
     walker_penrose(X_u, k_u, f_u, kappa1, kappa2);
+}
+
+// As wp_kappa_zperp_obs, for the static observer at X_u
+static void wp_kappa_zperp(double X_u[4], double k_u[4], double *kappa1,
+                           double *kappa2) {
+    double U_u[4] = {0., 0., 0., 0.};
+    construct_U_vector(X_u, U_u);
+    wp_kappa_zperp_obs(X_u, k_u, U_u, kappa1, kappa2);
+}
+
+// Angle wrapped to (-pi/2, pi/2] (EVPA-like quantities are defined mod pi)
+static double wrap_half_pi(double x) {
+    x = fmod(x, M_PI);
+    if (x > 0.5 * M_PI)
+        x -= M_PI;
+    if (x <= -0.5 * M_PI)
+        x += M_PI;
+    return x;
 }
 
 // Gravitational EVPA rotation for a source at infinity. For a ray that
@@ -812,11 +836,139 @@ void compute_dchi_grav(double *lightpath, int steps, double *dchi_grav) {
     wp_kappa_zperp(&lightpath[0], &lightpath[4], &k1_cam, &k2_cam);
     wp_kappa_zperp(far, far + 4, &k1_far, &k2_far);
 
-    double dchi = atan2(k2_cam, k1_cam) - atan2(k2_far, k1_far);
-    dchi = fmod(dchi, M_PI);
-    if (dchi > 0.5 * M_PI)
-        dchi -= M_PI;
-    if (dchi <= -0.5 * M_PI)
-        dchi += M_PI;
-    *dchi_grav = dchi;
+    *dchi_grav = wrap_half_pi(atan2(k2_cam, k1_cam) - atan2(k2_far, k1_far));
+}
+
+// Four-velocity (code coordinates) of equatorial disk material at X_u,
+// orbiting in the +phi direction: circular Keplerian orbit,
+// Omega = 1 / (r^3/2 + a), for r >= R_ISCO, and inside the ISCO the
+// Cunningham (1975) plunge, which keeps the specific energy and angular
+// momentum of the ISCO orbit (u_t = -E_ISCO, u_phi = L_ISCO, u_theta = 0,
+// ingoing u^r from the normalization; as in Gelles et al. 2021, kgeo).
+// Returns 0 if no such four-velocity exists at X_u.
+static int eq_disk_velocity(double X_u[4], double U_u[4]) {
+    double r = get_r(X_u);
+
+    if (r >= R_ISCO) {
+        double g_dd[4][4];
+        metric_dd(X_u, g_dd);
+        double Om = 1. / (pow(r, 1.5) + a);
+        double norm =
+            -(g_dd[0][0] + 2. * g_dd[0][3] * Om + g_dd[3][3] * Om * Om);
+        if (!(norm > 0.))
+            return 0;
+        U_u[0] = 1. / sqrt(norm);
+        U_u[1] = 0.;
+        U_u[2] = 0.;
+        U_u[3] = Om * U_u[0];
+        return 1;
+    }
+
+    // Bardeen, Press & Teukolsky (1972) circular-orbit E, L at the ISCO
+    double rs = sqrt(R_ISCO);
+    double den = pow(R_ISCO, 0.75) * sqrt(R_ISCO * rs - 3. * rs + 2. * a);
+    double E = (R_ISCO * rs - 2. * rs + a) / den;
+    double L = (R_ISCO * R_ISCO - 2. * a * rs + a * a) / den;
+
+    // u_1 from g^{mu nu} u_mu u_nu = -1 (no g^{12} terms in (M)KS)
+    double g_uu[4][4];
+    metric_uu(X_u, g_uu);
+    double u_d[4] = {-E, 0., 0., L};
+    double Aq = g_uu[1][1];
+    double Bq = g_uu[1][0] * u_d[0] + g_uu[1][3] * u_d[3];
+    double Cq = g_uu[0][0] * E * E - 2. * g_uu[0][3] * E * L +
+                g_uu[3][3] * L * L + 1.;
+    double Dq = Bq * Bq - Aq * Cq;
+    if (!(Dq >= 0.))
+        return 0;
+    u_d[1] = (-Bq - sqrt(Dq)) / Aq; // u^1 = Bq + Aq u_1 = -sqrt(Dq): ingoing
+    LOOP_i U_u[i] = 0.;
+    LOOP_ij U_u[i] += g_uu[i][j] * u_d[j];
+    return 1;
+}
+
+// Equatorial-emission EVPA for each of the first EQ_NMAX equatorial crossings
+// of the ray, numbered k = 1, 2, ... from the camera as ncross counts them
+// (k = 1: direct image, k = n + 1: order-n image of the disk), stored at
+// array index k - 1 and written as chi_eq_<k> etc. At crossing k the emitter
+// moves with eq_disk_velocity(), the magnetic field is purely toroidal,
+// B = (delta + u u) d_phi, and the emitted polarization is the synchrotron
+// E-vector f ~ k x B in the fluid frame (leg 2 of create_observer_tetrad with
+// b = B). Outputs, NaN where the crossing does not exist:
+//   chi[k-1]   screen EVPA of that emission, in RAPTOR's convention
+//              (0.5 atan2(U, Q)): kappa(f) at the crossing is conserved, and
+//              kappa = f_1 kappa(e_1) + f_2 kappa(e_2) at the camera is
+//              solved exactly for the screen components, as in
+//              wp_check_camera.
+//   dchi[k-1]  EVPA rotation from the fluid-frame sky at the crossing to the
+//              camera, both measured from the sky-projected spin axis:
+//              arg kappa_cam(z_perp) - arg kappa_k(z_perp)
+//              (compute_dchi_grav with the far end replaced by the crossing
+//              and the static observer by the fluid). Independent of B;
+//              includes aberration.
+//   r_eq[k-1]  crossing radius.
+// The crossing point and wave vector are interpolated linearly in the
+// light-path parameter between the two samples bracketing theta = pi/2.
+void compute_eq_emission(double *lightpath, int steps, double chi[EQ_NMAX],
+                         double dchi[EQ_NMAX], double r_eq[EQ_NMAX]) {
+    for (int n = 0; n < EQ_NMAX; n++) {
+        chi[n] = NAN;
+        dchi[n] = NAN;
+        r_eq[n] = NAN;
+    }
+
+    if (steps < 2)
+        return;
+
+    // Camera: screen basis and reference direction
+    double e1[4], e2[4], k1, k2;
+    camera_screen_basis(&lightpath[0], &lightpath[4], e1, e2);
+    walker_penrose(&lightpath[0], &lightpath[4], e1, &k1, &k2);
+    double complex p = k1 + I * k2;
+    walker_penrose(&lightpath[0], &lightpath[4], e2, &k1, &k2);
+    double complex q = k1 + I * k2;
+    double det = creal(p) * cimag(q) - creal(q) * cimag(p);
+    double kz1_cam, kz2_cam;
+    wp_kappa_zperp(&lightpath[0], &lightpath[4], &kz1_cam, &kz2_cam);
+
+    int n = 0;
+    double prev = get_theta(&lightpath[0]) - M_PI / 2.;
+    for (int s = 0; s < steps - 1 && n < EQ_NMAX; s++) {
+        double cur = get_theta(&lightpath[(s + 1) * 9]) - M_PI / 2.;
+        if (prev * cur < 0.) {
+            double t = prev / (prev - cur);
+            double X_u[4], k_u[4], U_u[4];
+            LOOP_i {
+                X_u[i] = (1. - t) * lightpath[s * 9 + i] +
+                         t * lightpath[(s + 1) * 9 + i];
+                k_u[i] = (1. - t) * lightpath[s * 9 + 4 + i] +
+                         t * lightpath[(s + 1) * 9 + 4 + i];
+            }
+            r_eq[n] = get_r(X_u);
+
+            if (eq_disk_velocity(X_u, U_u)) {
+                // Toroidal field orthogonal to u
+                double U_d[4], B_u[4] = {0., 0., 0., 1.};
+                lower_index(X_u, U_u, U_d);
+                LOOP_i B_u[i] += U_d[3] * U_u[i];
+
+                double tetrad_u[4][4], f_u[4];
+                LOOP_ij tetrad_u[i][j] = 0.;
+                create_observer_tetrad(X_u, k_u, U_u, B_u, tetrad_u);
+                LOOP_i f_u[i] = tetrad_u[i][2];
+
+                walker_penrose(X_u, k_u, f_u, &k1, &k2);
+                double f1 = (k1 * cimag(q) - creal(q) * k2) / det;
+                double f2 = (creal(p) * k2 - cimag(p) * k1) / det;
+                chi[n] = wrap_half_pi(atan2(f2, f1));
+
+                double kz1, kz2;
+                wp_kappa_zperp_obs(X_u, k_u, U_u, &kz1, &kz2);
+                dchi[n] =
+                    wrap_half_pi(atan2(kz2_cam, kz1_cam) - atan2(kz2, kz1));
+            }
+            n++;
+        }
+        prev = cur;
+    }
 }
