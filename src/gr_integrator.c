@@ -337,7 +337,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     double t_init = 0.;
     double dlambda_adaptive = -0.1;
     int theta_turns = 0;
-    double thetadot_prev;
+    double thetadot_prev = 0.;
     double X_u[4], k_u[4];
     double photon_u[8];
     // Create initial ray conditions
