@@ -709,7 +709,11 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
                               double complex *f_obs_tetrad_u) {
 
+#if (metric == CKS)
+    double cam_up_u[4] = {0., 0., -1., 0.};
+#else
     double cam_up_u[4] = {0., 0., 0., -1.};
+#endif
     double U_obs_u[4] = {0., 0., 0., 0.};
     double obs_tetrad_u[4][4], obs_tetrad_d[4][4];
     LOOP_ij obs_tetrad_u[i][j] = 0.;
