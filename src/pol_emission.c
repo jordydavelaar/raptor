@@ -56,7 +56,7 @@ double planck_function(double nu, double THETA_e) {
                BOLTZMANN_CONSTANT;
     return 2. * PLANCK_CONSTANT * nu * nu * nu /
            (SPEED_OF_LIGHT * SPEED_OF_LIGHT) * 1. /
-           (exp(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T)) - 1.);
+           expm1(PLANCK_CONSTANT * nu / (BOLTZMANN_CONSTANT * T));
 }
 
 double DeltaJ_5(double X) {
