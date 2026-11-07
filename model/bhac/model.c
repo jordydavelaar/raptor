@@ -91,12 +91,16 @@ int find_igrid(double x[4], struct block *block_info, double ***Xc) {
 
 int find_cell(double x[4], struct block *block_info, int igrid, double ***Xc) {
 
+    // lower of the two cell centres that bracket x (data are cell centred)
     int i = (int)((x[1] - block_info[igrid].lb[0]) /
-                  block_info[igrid].dxc_block[0]);
+                      block_info[igrid].dxc_block[0] -
+                  0.5);
     int j = (int)((x[2] - block_info[igrid].lb[1]) /
-                  block_info[igrid].dxc_block[1]);
+                      block_info[igrid].dxc_block[1] -
+                  0.5);
     int k = (int)((x[3] - block_info[igrid].lb[2]) /
-                  block_info[igrid].dxc_block[2]);
+                      block_info[igrid].dxc_block[2] -
+                  0.5);
 
     if (i >= nx[0])
         i = nx[0] - 1;
@@ -883,15 +887,15 @@ void coefficients(double X[NDIM], struct block *block_info, int igrid, int c,
     int i, j, k;
 
     block_start[0] =
-        block_info[igrid].lb[0] + 0. * block_info[igrid].dxc_block[0];
+        block_info[igrid].lb[0] + 0.5 * block_info[igrid].dxc_block[0];
     block_dx[0] = block_info[igrid].dxc_block[0];
 
     block_start[1] =
-        block_info[igrid].lb[1] + 0. * block_info[igrid].dxc_block[1];
+        block_info[igrid].lb[1] + 0.5 * block_info[igrid].dxc_block[1];
     block_dx[1] = block_info[igrid].dxc_block[1];
 
     block_start[2] =
-        block_info[igrid].lb[2] + 0. * block_info[igrid].dxc_block[2];
+        block_info[igrid].lb[2] + 0.5 * block_info[igrid].dxc_block[2];
     block_dx[2] = block_info[igrid].dxc_block[2];
 
     i = (int)((X[1] - block_start[0]) / block_dx[0] + 1000) - 1000;
