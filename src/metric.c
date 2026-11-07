@@ -459,12 +459,7 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
         }
 
 #if (metric == CKS)
-        double r = get_r(X_u);
-        double fac;
-        if (fabs(X_u[i]) > delta_num * 1e-2)
-            fac = fabs(X_u[i]);
-        else
-            fac = delta_num * 1e-2;
+        double fac = get_r(X_u);
 #else
         double fac = 1.0;
 #endif
