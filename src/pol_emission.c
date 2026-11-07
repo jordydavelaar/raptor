@@ -128,9 +128,11 @@ double rho_Q_thermal(double theta_e, double n_e, double nu, double B,
                                (1.e3 * omega0 / 2. / M_PI / nu));
     double Thetaer = 1. / theta_e;
 
+    double k2 = bessel_appr(2, Thetaer);
+    double k_ratio = (k2 > 0) ? bessel_appr(1, Thetaer) / k2 : 1;
+
     return 2. * M_PI * nu / 2. / SPEED_OF_LIGHT * wp2 * omega0 * omega0 /
-           pow(2. * M_PI * nu, 4.) * f_m(Xe) *
-           (bessel_appr(1, Thetaer) / bessel_appr(2, Thetaer) + 6. * theta_e) *
+           pow(2. * M_PI * nu, 4.) * f_m(Xe) * (k_ratio + 6. * theta_e) *
            sin(theta_B) * sin(theta_B);
 }
 
