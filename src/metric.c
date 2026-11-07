@@ -192,7 +192,7 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
     l[0] = 1;
     l[1] = (r * X_u[1] + a * X_u[2]) * idel;
     l[2] = (r * X_u[2] - a * X_u[1]) * idel;
-    l[3] = (X_u[3]) / (r + 1e-3);
+    l[3] = (X_u[3]) / (r);
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -459,12 +459,7 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
         }
 
 #if (metric == CKS)
-        double r = get_r(X_u);
-        double fac;
-        if (fabs(X_u[i]) > delta_num * 1e-2)
-            fac = fabs(X_u[i]);
-        else
-            fac = delta_num * 1e-2;
+        double fac = get_r(X_u);
 #else
         double fac = 1.0;
 #endif

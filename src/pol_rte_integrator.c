@@ -367,15 +367,15 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
     complex double zplus = (-a2 + sqrt(a2 * a2 - 4. * a0)) / 2.;
     complex double zminus = (-a2 - sqrt(a2 * a2 - 4. * a0)) / 2.;
 
-    complex double l1 = aI + sqrt(zplus);
-    complex double l2 = aI - sqrt(zplus);
-    complex double l3 = aI + sqrt(zminus);
-    complex double l4 = aI - sqrt(zminus);
+    complex double l1 = aI + csqrt(zplus);
+    complex double l2 = aI - csqrt(zplus);
+    complex double l3 = aI + csqrt(zminus);
+    complex double l4 = aI - csqrt(zminus);
 
-    complex double tau1 = dl_current * l1;
-    complex double tau2 = dl_current * l2;
-    complex double tau3 = dl_current * l3;
-    complex double tau4 = dl_current * l4;
+    complex double tau1 = -dl_current * l1;
+    complex double tau2 = -dl_current * l2;
+    complex double tau3 = -dl_current * l3;
+    complex double tau4 = -dl_current * l4;
 
     complex double mag1 = 1. + tau1 + 0.5 * tau1 * tau1 +
                           1. / 6. * tau1 * tau1 * tau1 +
@@ -397,7 +397,7 @@ int check_stiffness(double jI, double jQ, double jU, double jV, double rQ,
 
     int STIFF = 0;
 
-    double STIFFTHRESH = 0.99;
+    double STIFFTHRESH = 1.;
 
     if (res1 > STIFFTHRESH || res2 > STIFFTHRESH || res3 > STIFFTHRESH ||
         res4 > STIFFTHRESH)
@@ -634,7 +634,7 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
     // after plasma step.
 
     int STIFF = check_stiffness(jI, jQ, jU, jV, rQ, rU, rV, aI, aQ, aU, aV,
-                                *dl_current);
+                                *dl_current * C);
 
     // If both rotation coeffs (times dlambda) are smaller than
     // threshold, take an RK4 step; otherwise, implicit Euler.
@@ -709,7 +709,11 @@ void pol_integration_step(struct GRMHD modvar, double frequency,
 void construct_f_obs_tetrad_u(double *X_u, double *k_u, double complex *f_u,
                               double complex *f_obs_tetrad_u) {
 
+#if (metric == CKS)
+    double cam_up_u[4] = {0., 0., -1., 0.};
+#else
     double cam_up_u[4] = {0., 0., 0., -1.};
+#endif
     double U_obs_u[4] = {0., 0., 0., 0.};
     double obs_tetrad_u[4][4], obs_tetrad_d[4][4];
     LOOP_ij obs_tetrad_u[i][j] = 0.;
@@ -825,5 +829,8 @@ void radiative_transfer_polarized(double *lightpath, int steps,
 
         // Construct final (NON-INVARIANT) Stokes params.
         LOOP_i IQUV[i] = S_A[i] * pow(frequency, 3.);
+    } else {
+        // Unpolarized ray: S_A[0] still holds the transported invariant I.
+        IQUV[0] = creal(S_A[0]) * pow(frequency, 3.);
     }
 }

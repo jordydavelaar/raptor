@@ -123,7 +123,7 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                     double Ii = Icurrent;
                     double S = j_inv / K_inv;
                     if (K_inv == 0)
-                        Icurrent = Ii;
+                        Icurrent = Ii + j_inv * dl_current_s * C;
                     else if (dtau < 1.e-5)
                         Icurrent = Ii - (Ii - S) * (0.166666667 * dtau *
                                                     (6. - dtau * (3. - dtau)));
