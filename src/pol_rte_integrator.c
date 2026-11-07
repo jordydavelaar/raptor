@@ -829,5 +829,8 @@ void radiative_transfer_polarized(double *lightpath, int steps,
 
         // Construct final (NON-INVARIANT) Stokes params.
         LOOP_i IQUV[i] = S_A[i] * pow(frequency, 3.);
+    } else {
+        // Unpolarized ray: S_A[0] still holds the transported invariant I.
+        IQUV[0] = creal(S_A[0]) * pow(frequency, 3.);
     }
 }
